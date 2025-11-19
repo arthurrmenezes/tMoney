@@ -5,4 +5,7 @@
     <Project Path="tMoney.Infrastructure/tMoney.Infrastructure.csproj" Id="bd64d635-5de9-428a-a79c-d70379cbbb6a" />
     <Project Path="tMoney.WebApi/tMoney.WebApi.csproj" Id="ca343b69-4017-4197-8c77-f5298ff15b99" />
   </Folder>
+  <Folder Name="/test/">
+    <Project Path="UnitTests/UnitTests.csproj" Id="12253ce7-889a-4ee1-80f9-415652edc898" />
+  </Folder>
 </Solution>
