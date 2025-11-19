@@ -5,13 +5,13 @@ namespace tMoney.Domain.BoundedContexts.AccountContext.Entities;
 public class Account
 {
     public IdValueObject AccountId { get; private set; }
-    public string FirstName { get; private set; }
-    public string LastName { get; private set; }
-    public string Email { get; private set; }
+    public FirstNameValueObject FirstName { get; private set; }
+    public LastNameValueObject LastName { get; private set; }
+    public EmailValueObject Email { get; private set; }
     public decimal Balance { get; private set; }
     public DateTime CreatedAt { get; private set; }
 
-    public Account(string firstName, string lastName, string email, decimal balance)
+    public Account(FirstNameValueObject firstName, LastNameValueObject lastName, EmailValueObject email)
     {
         AccountId = IdValueObject.New();
         FirstName = firstName;

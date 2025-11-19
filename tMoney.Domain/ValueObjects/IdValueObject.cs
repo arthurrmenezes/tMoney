@@ -1,6 +1,8 @@
-﻿namespace tMoney.Domain.ValueObjects;
+﻿using tMoney.Domain.ValueObjects.Base;
 
-public sealed class IdValueObject
+namespace tMoney.Domain.ValueObjects;
+
+public sealed class IdValueObject : ValueObject<IdValueObject>
 {
     public Guid Id { get; private set; }
 
@@ -12,7 +14,7 @@ public sealed class IdValueObject
     public static IdValueObject Factory(Guid id)
     {
         if (id == Guid.Empty)
-            throw new ArgumentException("ID não pode ser nulo ou vazio.", nameof(id));
+            throw new ArgumentException("ID não pode ser nulo ou vazio.");
 
         return new IdValueObject(id);
     }
@@ -24,6 +26,14 @@ public sealed class IdValueObject
 
     public override string ToString() => Id.ToString();
 
-    public static implicit operator Guid(IdValueObject idValueObject) => idValueObject.Id;
-    public static implicit operator IdValueObject(Guid id) => Factory(id);
+    protected override bool EqualsCore(IdValueObject other)
+    {
+        return Id == other.Id;
+    }
+
+    protected override decimal GetHashCodeCore()
+    {
+        decimal hashCode = Id.GetHashCode();
+        return hashCode;
+    }
 }
