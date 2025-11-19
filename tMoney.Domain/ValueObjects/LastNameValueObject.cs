@@ -38,6 +38,9 @@ public sealed class LastNameValueObject : ValueObject<LastNameValueObject>
 
     public override string ToString() => LastName;
 
+    public static implicit operator string(LastNameValueObject lastName) => lastName.LastName;
+    public static implicit operator LastNameValueObject(string lastName) => Factory(lastName);
+
     protected override bool EqualsCore(LastNameValueObject other)
     {
         return LastName == other.LastName;

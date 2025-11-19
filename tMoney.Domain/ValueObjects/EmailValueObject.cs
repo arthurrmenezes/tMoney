@@ -30,6 +30,9 @@ public sealed class EmailValueObject : ValueObject<EmailValueObject>
     }
     public override string ToString() => Email!;
 
+    public static implicit operator string(EmailValueObject email) => email.Email!;
+    public static implicit operator EmailValueObject(string email) => Factory(email);
+
     protected override bool EqualsCore(EmailValueObject other)
     {
         return Email == other.Email;
