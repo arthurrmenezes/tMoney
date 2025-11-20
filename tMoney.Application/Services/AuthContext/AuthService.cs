@@ -6,20 +6,26 @@ using tMoney.Domain.BoundedContexts.AccountContext.Entities;
 using tMoney.Infrastructure.Auth.Entities;
 using tMoney.Infrastructure.Data.Repositories.Interfaces;
 using tMoney.Infrastructure.Data.UnitOfWork.Interfaces;
+using tMoney.Infrastructure.Services.TokenService.Interfaces;
 
 namespace tMoney.Application.Services.AuthContext;
 
 public class AuthService : IAuthService
 {
     private readonly UserManager<User> _userManager;
+    private readonly SignInManager<User> _signInManager;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IAccountRepository _accountRepository;
+    private readonly ITokenService _tokenService;
 
-    public AuthService(UserManager<User> userManager, IUnitOfWork unitOfWork, IAccountRepository accountRepository)
+    public AuthService(UserManager<User> userManager, SignInManager<User> signInManager, IUnitOfWork unitOfWork, 
+        IAccountRepository accountRepository, ITokenService tokenService)
     {
         _userManager = userManager;
+        _signInManager = signInManager;
         _unitOfWork = unitOfWork;
         _accountRepository = accountRepository;
+        _tokenService = tokenService;
     }
 
     public async Task<RegisterAccountServiceOutput> RegisterAccountServiceAsync(RegisterAccountServiceInput input, CancellationToken cancellationToken)
@@ -72,5 +78,27 @@ public class AuthService : IAuthService
             await _unitOfWork.RollbackTransactionAsync(cancellationToken);
             throw;
         }
+    }
+
+    public async Task<LoginServiceOutput> LoginServiceAsync(LoginServiceInput input, CancellationToken cancellationToken)
+    {
+        var user = await _userManager.FindByEmailAsync(input.Email);
+        if (user is null)
+            throw new ArgumentException("Email ou senha incorreta.");
+
+        var verifyCredentials = await _signInManager.PasswordSignInAsync(user, input.Password, false, false);
+        if (!verifyCredentials.Succeeded)
+            throw new ArgumentException("Email ou senha incorreta.");
+
+        var acessToken = _tokenService.GenerateAcessToken(user);
+        var tokenExpirationInHours = _tokenService.GetTokenExpirationInSeconds();
+
+        var output = LoginServiceOutput.Factory(
+            acessToken: acessToken,
+            tokenType: "JWT",
+            expiresInHours: tokenExpirationInHours,
+            refreshToken: "");
+
+        return output;
     }
 }

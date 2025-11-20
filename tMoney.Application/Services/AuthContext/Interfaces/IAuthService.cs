@@ -8,4 +8,8 @@ public interface IAuthService
     public Task<RegisterAccountServiceOutput> RegisterAccountServiceAsync(
         RegisterAccountServiceInput input,
         CancellationToken cancellationToken);
+
+    public Task<LoginServiceOutput> LoginServiceAsync(
+        LoginServiceInput input,
+        CancellationToken cancellationToken);
 }

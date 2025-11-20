@@ -5,10 +5,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 #region Infrastructure Dependency Injection
 
-var databaseConnectionString = builder.Configuration["Database:ConnectionString"];
-
-builder.Services.ApplyInfrastructureDependencyInjection(
-    connectionString: databaseConnectionString!);
+builder.Services.ApplyInfrastructureDependencyInjection(builder.Configuration);
 
 #endregion
 

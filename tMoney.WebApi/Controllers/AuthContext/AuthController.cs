@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Mvc;
 using tMoney.Application.Services.AuthContext.Inputs;
 using tMoney.Application.Services.AuthContext.Interfaces;
-using tMoney.Domain.ValueObjects;
 using tMoney.WebApi.Controllers.AuthContext.Payloads;
 
 namespace tMoney.WebApi.Controllers.AuthContext;
@@ -19,8 +18,8 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost]
-    [AllowAnonymous]
     [Route("register")]
+    [AllowAnonymous]
     public async Task<IActionResult> RegisterAccountAsync([FromBody] RegisterAccountPayload input, CancellationToken cancellationToken)
     {
         if (input.Password != input.RePassword)
@@ -33,9 +32,27 @@ public class AuthController : ControllerBase
                 password: input.Password,
                 rePassword: input.RePassword);
 
-        var response = await _authService.RegisterAccountServiceAsync(
-            input: serviceInput,
-            cancellationToken: cancellationToken);
+        var response = await _authService.RegisterAccountServiceAsync(serviceInput, cancellationToken);
+
+        return Ok(response);
+    }
+
+    [HttpPost]
+    [Route("login")]
+    [AllowAnonymous]
+    public async Task<IActionResult> LoginAsync([FromBody] LoginPayload input, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(input.Email))
+            return BadRequest("O email não pode ser nulo ou vazio.");
+
+        if (string.IsNullOrWhiteSpace(input.Password))
+            return BadRequest("A senha não pode ser nula ou vazia.");
+
+        var serviceInput = LoginServiceInput.Factory(
+            email: input.Email,
+            password: input.Password);
+
+        var response = await _authService.LoginServiceAsync(serviceInput, cancellationToken);
 
         return Ok(response);
     }
