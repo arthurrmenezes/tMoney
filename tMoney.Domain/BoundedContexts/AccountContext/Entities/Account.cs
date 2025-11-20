@@ -11,6 +11,8 @@ public class Account
     public decimal Balance { get; private set; }
     public DateTime CreatedAt { get; private set; }
 
+    protected Account() { }
+
     public Account(FirstNameValueObject firstName, LastNameValueObject lastName, EmailValueObject email)
     {
         AccountId = IdValueObject.New();

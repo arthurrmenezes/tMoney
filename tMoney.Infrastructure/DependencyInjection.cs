@@ -2,6 +2,8 @@
 using Microsoft.Extensions.DependencyInjection;
 using tMoney.Infrastructure.Auth.Entities;
 using tMoney.Infrastructure.Data;
+using tMoney.Infrastructure.Data.Repositories;
+using tMoney.Infrastructure.Data.Repositories.Interfaces;
 using tMoney.Infrastructure.Data.UnitOfWork;
 using tMoney.Infrastructure.Data.UnitOfWork.Interfaces;
 
@@ -28,6 +30,8 @@ public static class DependencyInjection
             .AddEntityFrameworkStores<DataContext>();
 
         serviceCollection.AddScoped<IUnitOfWork, UnitOfWork>();
+
+        serviceCollection.AddScoped<IAccountRepository, AccountRepository>();
 
         return serviceCollection;
     }
