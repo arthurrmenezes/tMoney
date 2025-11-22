@@ -16,6 +16,11 @@ public abstract class BaseRepository<T> : IBaseRepository<T> where T : class
         await _dataContext.Set<T>().AddAsync(entity, cancellationToken);
     }
 
+    public void Update(T entity)
+    {
+        _dataContext.Update(entity);
+    }
+
     public void Delete(T entity)
     {
         _dataContext.Set<T>().Remove(entity);

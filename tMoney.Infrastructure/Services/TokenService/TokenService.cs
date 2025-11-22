@@ -56,31 +56,6 @@ public class TokenService : ITokenService
         return Convert.ToBase64String(randomNumber);
     }
 
-    public ClaimsPrincipal GetPrincipalFromExpiredToken(string token)
-    {
-        var key = Encoding.UTF8.GetBytes(_configuration["JwtSettings:PrivateKey"]! ??
-            throw new InvalidOperationException("Erro: chave não configurada."));
-
-        var tokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(key),
-            ValidateIssuer = true,
-            ValidIssuer = _configuration["JwtSettings:Issuer"],
-            ValidateAudience = true,
-            ValidAudience = _configuration["JwtSettings:Audience"],
-            ValidateLifetime = false
-        };
-
-        var tokenHandler = new JwtSecurityTokenHandler();
-        var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out var securityToken);
-        if (securityToken is not JwtSecurityToken jwtSecurityToken || !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256,
-            StringComparison.InvariantCultureIgnoreCase))
-            throw new SecurityTokenException("Token inválido.");
-
-        return principal;
-    }
-
     public int GetAccessTokenExpiration() => _configuration.GetValue<int>("JwtSettings:AccessTokenExpirationInSeconds");
 
     public int GetRefreshTokenExpiration() => _configuration.GetValue<int>("JwtSettings:RefreshTokenExpirationInDays");

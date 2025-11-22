@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Configuration;
 using tMoney.Application.Services.AuthContext.Inputs;
 using tMoney.Application.Services.AuthContext.Interfaces;
 using tMoney.Application.Services.AuthContext.Outputs;
@@ -118,5 +117,51 @@ public class AuthService : IAuthService
             refreshToken: refreshToken);
 
         return output;
+    }
+
+    public async Task<RefreshTokenServiceOutput> RefreshTokenServiceAsync(RefreshTokenServiceInput input, CancellationToken cancellationToken)
+    {
+        var currentRefreshToken = await _refreshTokenRepository.GetByTokenAsync(input.RefreshToken, cancellationToken);
+        if (currentRefreshToken is null)
+            throw new KeyNotFoundException("Refresh token não encontrado.");
+
+        if (!currentRefreshToken.IsActive())
+            throw new ArgumentException("Refresh token inválido, expirado ou revogado.");
+
+        var user = await _userManager.FindByIdAsync(currentRefreshToken.UserId);
+        if (user is null)
+            throw new InvalidOperationException("Usuário não encontrado.");
+
+        await _unitOfWork.BeginTransactionAsync(cancellationToken);
+
+        try
+        {
+            var newAccessToken = _tokenService.GenerateAccessToken(user);
+            var newRefreshToken = _tokenService.GenerateRefreshToken();
+
+            var newRefreshTokenEntity = new RefreshToken(
+                token: newRefreshToken,
+                userId: user.Id,
+                expiresAt: DateTime.UtcNow.AddDays(_tokenService.GetRefreshTokenExpiration()));
+
+            currentRefreshToken.Revoke(newRefreshToken);
+
+            _refreshTokenRepository.Update(currentRefreshToken);
+
+            await _refreshTokenRepository.AddAsync(newRefreshTokenEntity, cancellationToken);
+
+            await _unitOfWork.CommitTransactionAsync(cancellationToken);
+
+            var output = RefreshTokenServiceOutput.Factory(
+                accessToken: newAccessToken,
+                refreshToken: newRefreshToken);
+
+            return output;
+        }
+        catch (Exception)
+        {
+            await _unitOfWork.RollbackTransactionAsync(cancellationToken);
+            throw;
+        }
     }
 }

@@ -56,4 +56,24 @@ public class AuthController : ControllerBase
 
         return Ok(response);
     }
+
+    [HttpPost]
+    [Route("refresh-token")]
+    [AllowAnonymous]
+    public async Task<IActionResult> RefreshTokenAsync(RefreshTokenPayload input, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(input.AccessToken))
+            return BadRequest("O Access Token não pode ser nulo ou vazio.");
+
+        if (string.IsNullOrWhiteSpace(input.RefreshToken))
+            return BadRequest("O Refresh Token não pode ser nulo ou vazio.");
+
+        var serviceInput = RefreshTokenServiceInput.Factory(
+            accessToken: input.AccessToken,
+            refreshToken: input.RefreshToken);
+
+        var response = await _authService.RefreshTokenServiceAsync(serviceInput, cancellationToken);
+
+        return Ok(response);
+    }
 }

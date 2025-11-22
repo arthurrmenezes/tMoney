@@ -53,15 +53,19 @@ public static class DependencyInjection
         })
             .AddJwtBearer(options =>
             {
-                options.RequireHttpsMetadata = false;
+                options.RequireHttpsMetadata = true;
                 options.SaveToken = true;
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = new SymmetricSecurityKey(key),
                     ValidateIssuer = true,
+                    ValidIssuer = configuration["JwtSettings:Issuer"],
                     ValidateAudience = true,
-                    ValidateLifetime = true
+                    ValidAudience = configuration["JwtSettings:Audience"],
+                    ValidateLifetime = true,
+                    ClockSkew = TimeSpan.Zero,
+                    ValidAlgorithms = new[] { SecurityAlgorithms.HmacSha256 }
                 };
             });
 
