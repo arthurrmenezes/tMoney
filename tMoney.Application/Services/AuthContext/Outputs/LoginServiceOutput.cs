@@ -2,19 +2,19 @@
 
 public sealed class LoginServiceOutput
 {
-    public string AcessToken { get; }
+    public string AccessToken { get; }
     public string TokenType { get; }
-    public int ExpiresInHours { get; }
+    public int ExpiresIn { get; }
     public string RefreshToken { get; }
 
-    private LoginServiceOutput(string acessToken, string tokenType, int expiresInHours, string refreshToken)
+    private LoginServiceOutput(string accessToken, string tokenType, int expiresIn, string refreshToken)
     {
-        AcessToken = acessToken;
+        AccessToken = accessToken;
         TokenType = tokenType;
-        ExpiresInHours = expiresInHours;
+        ExpiresIn = expiresIn;
         RefreshToken = refreshToken;
     }
 
-    public static LoginServiceOutput Factory(string acessToken, string tokenType, int expiresInHours, string refreshToken)
-        => new(acessToken, tokenType, expiresInHours, refreshToken);
+    public static LoginServiceOutput Factory(string accessToken, string tokenType, int expiresIn, string refreshToken)
+        => new(accessToken, tokenType, expiresIn, refreshToken);
 }

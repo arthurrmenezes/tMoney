@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
 using tMoney.Application.Services.AuthContext.Inputs;
 using tMoney.Application.Services.AuthContext.Interfaces;
 using tMoney.Application.Services.AuthContext.Outputs;
@@ -17,21 +18,22 @@ public class AuthService : IAuthService
     private readonly IUnitOfWork _unitOfWork;
     private readonly IAccountRepository _accountRepository;
     private readonly ITokenService _tokenService;
+    private readonly IRefreshTokenRepository _refreshTokenRepository;
 
     public AuthService(UserManager<User> userManager, SignInManager<User> signInManager, IUnitOfWork unitOfWork, 
-        IAccountRepository accountRepository, ITokenService tokenService)
+        IAccountRepository accountRepository, ITokenService tokenService, IRefreshTokenRepository refreshTokenRepository)
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _unitOfWork = unitOfWork;
         _accountRepository = accountRepository;
         _tokenService = tokenService;
+        _refreshTokenRepository = refreshTokenRepository;
     }
 
     public async Task<RegisterAccountServiceOutput> RegisterAccountServiceAsync(RegisterAccountServiceInput input, CancellationToken cancellationToken)
     {
-        var emailString = input.Email.ToString();
-        var emailExists = await _userManager.FindByEmailAsync(emailString);
+        var emailExists = await _userManager.FindByEmailAsync(input.Email);
         if (emailExists is not null)
             throw new ArgumentException("O email já está em uso.");
 
@@ -48,8 +50,8 @@ public class AuthService : IAuthService
 
             var user = new User
             {
-                UserName = emailString,
-                Email = emailString,
+                UserName = input.Email,
+                Email = input.Email,
                 AccountId = account.AccountId
             };
 
@@ -86,18 +88,34 @@ public class AuthService : IAuthService
         if (user is null)
             throw new ArgumentException("Email ou senha incorreta.");
 
-        var verifyCredentials = await _signInManager.PasswordSignInAsync(user, input.Password, false, false);
+        var verifyCredentials = await _signInManager.CheckPasswordSignInAsync(user, input.Password, true);
+
+        if (verifyCredentials.IsLockedOut)
+            throw new ArgumentException("Muitas tentativas falhas. Tente novamente mais tarde.");
+
         if (!verifyCredentials.Succeeded)
             throw new ArgumentException("Email ou senha incorreta.");
 
-        var acessToken = _tokenService.GenerateAcessToken(user);
-        var tokenExpirationInHours = _tokenService.GetTokenExpirationInSeconds();
+        var acessToken = _tokenService.GenerateAccessToken(user);
+        var tokenExpirationInSeconds = _tokenService.GetAccessTokenExpiration();
+
+        var refreshToken = _tokenService.GenerateRefreshToken();
+
+        var refreshTokenExpiration = DateTime.UtcNow.AddDays(_tokenService.GetRefreshTokenExpiration());
+
+        var refreshTokenEntity = new RefreshToken(
+            token: refreshToken,
+            userId: user.Id,
+            expiresAt: refreshTokenExpiration);
+
+        await _refreshTokenRepository.AddAsync(refreshTokenEntity, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         var output = LoginServiceOutput.Factory(
-            acessToken: acessToken,
-            tokenType: "JWT",
-            expiresInHours: tokenExpirationInHours,
-            refreshToken: "");
+            accessToken: acessToken,
+            tokenType: "Bearer",
+            expiresIn: tokenExpirationInSeconds,
+            refreshToken: refreshToken);
 
         return output;
     }
