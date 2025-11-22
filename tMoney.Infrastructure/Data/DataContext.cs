@@ -9,6 +9,7 @@ namespace tMoney.Infrastructure.Data;
 public sealed class DataContext : IdentityDbContext<User>
 {
     public DbSet<Account> Accounts { get; set; }
+    public DbSet<RefreshToken> RefreshTokens { get; set; }
 
     public DataContext(DbContextOptions<DataContext> options) : base(options) { }
 
@@ -16,6 +17,7 @@ public sealed class DataContext : IdentityDbContext<User>
     {
         builder.ApplyConfiguration(new AccountMapping());
         builder.ApplyConfiguration(new UserMapping());
+        builder.ApplyConfiguration(new RefreshTokenMapping());
         base.OnModelCreating(builder);
     }
 }

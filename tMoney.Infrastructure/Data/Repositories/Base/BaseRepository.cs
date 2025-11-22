@@ -4,7 +4,7 @@ namespace tMoney.Infrastructure.Data.Repositories.Base;
 
 public abstract class BaseRepository<T> : IBaseRepository<T> where T : class
 {
-    private readonly DataContext _dataContext;
+    protected readonly DataContext _dataContext;
 
     public BaseRepository(DataContext dataContext)
     {

@@ -59,8 +59,8 @@ public static class DependencyInjection
                 {
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = new SymmetricSecurityKey(key),
-                    ValidateIssuer = false,
-                    ValidateAudience = false,
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
                     ValidateLifetime = true
                 };
             });
@@ -71,6 +71,7 @@ public static class DependencyInjection
         serviceCollection.AddScoped<ITokenService, TokenService>();
 
         serviceCollection.AddScoped<IAccountRepository, AccountRepository>();
+        serviceCollection.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 
         return serviceCollection;
     }
