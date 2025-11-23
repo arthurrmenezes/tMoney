@@ -11,6 +11,8 @@ using tMoney.Infrastructure.Data.Repositories;
 using tMoney.Infrastructure.Data.Repositories.Interfaces;
 using tMoney.Infrastructure.Data.UnitOfWork;
 using tMoney.Infrastructure.Data.UnitOfWork.Interfaces;
+using tMoney.Infrastructure.Services.EmailService;
+using tMoney.Infrastructure.Services.EmailService.Interfaces;
 using tMoney.Infrastructure.Services.TokenService;
 using tMoney.Infrastructure.Services.TokenService.Interfaces;
 
@@ -72,10 +74,17 @@ public static class DependencyInjection
         #endregion
 
         serviceCollection.AddScoped<IUnitOfWork, UnitOfWork>();
+
         serviceCollection.AddScoped<ITokenService, TokenService>();
+
+        serviceCollection.AddHttpClient<IEmailService, EmailService>();
+
+        #region Repositories Configuration
 
         serviceCollection.AddScoped<IAccountRepository, AccountRepository>();
         serviceCollection.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+
+        #endregion
 
         return serviceCollection;
     }
