@@ -79,7 +79,7 @@ public static class EmailTemplates
 
                     <p class=""text"">
                         Qualquer dúvida, estamos aqui para ajudar.<br>
-                        <strong>Equipe tMoney 💚</strong>
+                        <strong>Equipe tMoney</strong>
                     </p>
                 </div>
             </body>
@@ -163,7 +163,7 @@ public static class EmailTemplates
 
                     <p class=""text"">
                         Qualquer dúvida, estamos aqui para ajudar.<br>
-                        <strong>Equipe tMoney 💚</strong>
+                        <strong>Equipe tMoney</strong>
                     </p>
                 </div>
             </body>
