@@ -1,35 +1,20 @@
 ﻿namespace tMoney.Infrastructure.Services.EmailService.Inputs;
 
-
 public sealed class SendEmailServiceInput
 {
-    public SendEmailServiceInputSender Sender { get; }
     public SendEmailServiceInputTo[] To { get; }
-    public string Content { get; }
+    public string HtmlContent { get; }
     public string Subject { get; }
 
-    private SendEmailServiceInput(SendEmailServiceInputSender sender, SendEmailServiceInputTo[] to, string content, string subject)
+    private SendEmailServiceInput(SendEmailServiceInputTo[] to, string htmlContent, string subject)
     {
-        Sender = sender;
         To = to;
-        Content = content;
+        HtmlContent = htmlContent;
         Subject = subject;
     }
 
-    public static SendEmailServiceInput Factory(SendEmailServiceInputSender sender, SendEmailServiceInputTo[] to, string content, string subject)
-        => new(sender, to, content, subject);
-}
-
-public sealed class SendEmailServiceInputSender
-{
-    public string Name { get; }
-    public string Email { get; }
-
-    public SendEmailServiceInputSender(string name, string email)
-    {
-        Name = name;
-        Email = email;
-    }
+    public static SendEmailServiceInput Factory(SendEmailServiceInputTo[] to, string htmlContent, string subject)
+        => new(to, htmlContent, subject);
 }
 
 public sealed class SendEmailServiceInputTo

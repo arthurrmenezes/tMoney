@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.WebUtilities;
+using System.Text;
 using tMoney.Application.Services.AuthContext.Inputs;
 using tMoney.Application.Services.AuthContext.Interfaces;
 using tMoney.Application.Services.AuthContext.Outputs;
@@ -6,6 +8,9 @@ using tMoney.Domain.BoundedContexts.AccountContext.Entities;
 using tMoney.Infrastructure.Auth.Entities;
 using tMoney.Infrastructure.Data.Repositories.Interfaces;
 using tMoney.Infrastructure.Data.UnitOfWork.Interfaces;
+using tMoney.Infrastructure.Services.EmailService.Domain;
+using tMoney.Infrastructure.Services.EmailService.Inputs;
+using tMoney.Infrastructure.Services.EmailService.Interfaces;
 using tMoney.Infrastructure.Services.TokenService.Interfaces;
 
 namespace tMoney.Application.Services.AuthContext;
@@ -18,9 +23,10 @@ public class AuthService : IAuthService
     private readonly IAccountRepository _accountRepository;
     private readonly ITokenService _tokenService;
     private readonly IRefreshTokenRepository _refreshTokenRepository;
+    private readonly IEmailService _emailService;
 
-    public AuthService(UserManager<User> userManager, SignInManager<User> signInManager, IUnitOfWork unitOfWork, 
-        IAccountRepository accountRepository, ITokenService tokenService, IRefreshTokenRepository refreshTokenRepository)
+    public AuthService(UserManager<User> userManager, SignInManager<User> signInManager, IUnitOfWork unitOfWork, IAccountRepository accountRepository, 
+        ITokenService tokenService, IRefreshTokenRepository refreshTokenRepository, IEmailService emailService)
     {
         _userManager = userManager;
         _signInManager = signInManager;
@@ -28,6 +34,7 @@ public class AuthService : IAuthService
         _accountRepository = accountRepository;
         _tokenService = tokenService;
         _refreshTokenRepository = refreshTokenRepository;
+        _emailService = emailService;
     }
 
     public async Task<RegisterAccountServiceOutput> RegisterAccountServiceAsync(RegisterAccountServiceInput input, CancellationToken cancellationToken)
@@ -51,7 +58,8 @@ public class AuthService : IAuthService
             {
                 UserName = input.Email,
                 Email = input.Email,
-                AccountId = account.AccountId
+                AccountId = account.AccountId,
+                EmailConfirmed = false
             };
 
             var result = await _userManager.CreateAsync(user, input.Password);
@@ -63,6 +71,26 @@ public class AuthService : IAuthService
             }
 
             await _unitOfWork.CommitTransactionAsync(cancellationToken);
+
+            var emailConfirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            var emailConfirmationEncodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(emailConfirmationToken));
+            var emailConfirmationLink = $"https://localhost:7159/api/v1/auth/verifyEmail?email={user.Email}&token={emailConfirmationEncodedToken}";
+
+            var emailMessage = EmailTemplates.WelcomeEmailTemplateMessageBody(account.FirstName, emailConfirmationLink);
+            var emailSubject = EmailTemplates.WelcomeEmailTemplateSubject();
+
+            var emailInput = SendEmailServiceInput.Factory(
+                to: [
+                    new SendEmailServiceInputTo(
+                        name: account.FirstName,
+                        email: account.Email),
+                    ],
+                htmlContent: emailMessage,
+                subject: emailSubject);
+
+            await _emailService.SendEmailAsync(
+                input: emailInput,
+                cancellationToken: cancellationToken);
 
             var output = RegisterAccountServiceOutput.Factory(
                 accountId: account.AccountId,
@@ -91,7 +119,7 @@ public class AuthService : IAuthService
 
         if (verifyCredentials.IsLockedOut)
             throw new InvalidOperationException("Muitas tentativas falhas. Tente novamente mais tarde.");
-
+        
         if (!verifyCredentials.Succeeded)
             throw new UnauthorizedAccessException("Email ou senha incorreta.");
 

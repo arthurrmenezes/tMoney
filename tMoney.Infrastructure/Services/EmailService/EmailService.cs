@@ -2,6 +2,7 @@
 using System.Net.Http.Json;
 using tMoney.Infrastructure.Services.EmailService.Inputs;
 using tMoney.Infrastructure.Services.EmailService.Interfaces;
+using tMoney.Infrastructure.Services.EmailService.Payloads;
 
 namespace tMoney.Infrastructure.Services.EmailService;
 
@@ -18,16 +19,16 @@ public class EmailService : IEmailService
 
     public async Task SendEmailAsync(SendEmailServiceInput input, CancellationToken cancellationToken)
     {
-        var toList = input.To.Select(t => new SendEmailServiceInputTo(
+        var toList = input.To.Select(t => new SendEmailBrevoPayloadTo(
             name: t.Name,
             email: t.Email)).ToArray();
 
-        var payload = SendEmailServiceInput.Factory(
-            sender: new SendEmailServiceInputSender(
+        var payload = SendEmailBrevoPayload.Factory(
+            sender: new SendEmailBrevoPayloadSender(
                 name: _configuration["SMTP:SenderName"]!,
                 email: _configuration["SMTP:SenderEmail"]!),
             to: toList,
-            content: input.Content,
+            htmlContent: input.HtmlContent,
             subject: input.Subject);
 
         var request = new HttpRequestMessage(HttpMethod.Post, _configuration["SMTP:BaseUrl"]!);

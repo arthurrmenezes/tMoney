@@ -37,6 +37,7 @@ public static class DependencyInjection
         serviceCollection
             .AddIdentity<User, IdentityRole>(options =>
             {
+                options.SignIn.RequireConfirmedEmail = true;
                 options.User.RequireUniqueEmail = true;
                 options.Password.RequireDigit = true;
                 options.Password.RequireNonAlphanumeric = true;
@@ -46,6 +47,11 @@ public static class DependencyInjection
             })
             .AddEntityFrameworkStores<DataContext>()
             .AddDefaultTokenProviders();
+
+        serviceCollection.Configure<DataProtectionTokenProviderOptions>(options =>
+        {
+            options.TokenLifespan = TimeSpan.FromHours(24);
+        });
 
         var key = Encoding.ASCII.GetBytes(configuration.GetValue<string>("JwtSettings:PrivateKey")!);
         serviceCollection.AddAuthentication(options =>
