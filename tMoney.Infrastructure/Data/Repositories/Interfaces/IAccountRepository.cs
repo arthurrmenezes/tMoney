@@ -5,4 +5,5 @@ namespace tMoney.Infrastructure.Data.Repositories.Interfaces;
 
 public interface IAccountRepository : IBaseRepository<Account>
 {
+    public Task<Account?> GetAccountByIdAsync(string id, CancellationToken cancellationToken);
 }

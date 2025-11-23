@@ -212,4 +212,38 @@ public class AuthService : IAuthService
         if (!result.Succeeded)
             throw new InvalidOperationException($"Não foi possível confirmar o email. O token pode ter expirado ou estar inválido.");
     }
+
+    public async Task ResendConfirmationEmailServiceAsync(string email, CancellationToken cancellationToken)
+    {
+        var user = await _userManager.FindByEmailAsync(email);
+        if (user is null)
+            throw new KeyNotFoundException("Email inválido.");
+
+        if (user.EmailConfirmed)
+            throw new InvalidOperationException("O email já foi confirmado!");
+
+        var emailConfirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+        var emailConfirmationEncodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(emailConfirmationToken));
+        var emailConfirmationLink = $"https://localhost:7159/api/v1/auth/confirm-email?email={user.Email}&token={emailConfirmationEncodedToken}";
+
+        var account = await _accountRepository.GetAccountByIdAsync(user.AccountId.ToString(), cancellationToken);
+        if (account is null)
+            throw new KeyNotFoundException("Conta não encontrada.");
+
+        var emailMessage = EmailTemplates.ResendConfirmationEmailTemplateMessageBody(account.FirstName, emailConfirmationLink);
+        var emailSubject = EmailTemplates.ResendConfirmationEmailTemplateSubject();
+
+        var emailInput = SendEmailServiceInput.Factory(
+            to: [
+                new SendEmailServiceInputTo(
+                        name: account.FirstName,
+                        email: account.Email),
+                ],
+            htmlContent: emailMessage,
+            subject: emailSubject);
+
+        await _emailService.SendEmailAsync(
+            input: emailInput,
+            cancellationToken: cancellationToken);
+    }
 }

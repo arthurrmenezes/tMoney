@@ -24,4 +24,8 @@ public interface IAuthService
     public Task ConfirmEmailServiceAsync(
         string email,
         string emailToken);
+
+    public Task ResendConfirmationEmailServiceAsync(
+        string email,
+        CancellationToken cancellationToken);
 }

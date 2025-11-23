@@ -109,4 +109,17 @@ public class AuthController : ControllerBase
 
         return NoContent();
     }
+
+    [HttpPost]
+    [Route("resend-confirmation-email")]
+    [AllowAnonymous]
+    public async Task<IActionResult> ResendConfirmationEmailAsync([FromBody] ResendConfirmationEmailPayload input, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrEmpty(input.Email))
+            return BadRequest("O email não pode ser nulo ou vazio.");
+
+        await _authService.ResendConfirmationEmailServiceAsync(input.Email, cancellationToken);
+
+        return NoContent();
+    }
 }
