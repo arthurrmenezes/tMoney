@@ -122,4 +122,31 @@ public class AuthController : ControllerBase
 
         return NoContent();
     }
+
+    [HttpPost]
+    [Route("change-password")]
+    [Authorize]
+    public async Task<IActionResult> ChangePasswordAsync([FromBody] ChangePasswordPayload input, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrEmpty(input.CurrentPassword) || 
+            string.IsNullOrEmpty(input.NewPassword) || 
+            string.IsNullOrEmpty(input.ConfirmNewPassword))
+            return BadRequest("Todos os campos são obrigatórios.");
+
+        if (input.NewPassword != input.ConfirmNewPassword)
+            throw new ArgumentException("A nova senha e a confirmação não são iguais.");
+
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (userId is null)
+            throw new KeyNotFoundException("Usuário não encontrado.");
+
+        await _authService.ChangePasswordServiceAsync(
+            input: ChangePasswordServiceInput.Factory(
+                userId: userId,
+                currentPassword: input.CurrentPassword,
+                newPassword: input.NewPassword),
+            cancellationToken: cancellationToken);
+
+        return NoContent();
+    }
 }

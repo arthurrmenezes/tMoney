@@ -249,4 +249,54 @@ public class AuthService : IAuthService
             input: emailInput,
             cancellationToken: cancellationToken);
     }
+
+    public async Task ChangePasswordServiceAsync(ChangePasswordServiceInput input, CancellationToken cancellationToken)
+    {
+        var user = await _userManager.FindByIdAsync(input.UserId);
+        if (user is null)
+            throw new KeyNotFoundException("Usuário não encontrado.");
+
+        await _unitOfWork.BeginTransactionAsync(cancellationToken);
+
+        try
+        {
+            var result = await _userManager.ChangePasswordAsync(user, input.CurrentPassword, input.NewPassword);
+            if (!result.Succeeded)
+            {
+                var error = string.Join(", ", result.Errors.Select(e => e.Description));
+                throw new ArgumentException($"Erro ao trocar a senha: {error}");
+            }
+
+            var passwordChangeAt = DateTime.UtcNow;
+
+            await _refreshTokenRepository.RevokeAllByUserIdAsync(user.Id, cancellationToken);
+
+            await _unitOfWork.CommitTransactionAsync(cancellationToken);
+
+            var account = await _accountRepository.GetAccountByIdAsync(user.AccountId.ToString(), cancellationToken);
+            if (account is null)
+                throw new KeyNotFoundException("Conta não encontrada.");
+
+            var emailMessage = EmailTemplates.ChangePasswordTemplateMessageBody(account.FirstName, passwordChangeAt);
+            var emailSubject = EmailTemplates.ChangePasswordTemplateSubject();
+
+            var emailInput = SendEmailServiceInput.Factory(
+                to: [
+                    new SendEmailServiceInputTo(
+                    name: account.FirstName,
+                    email: account.Email),
+                    ],
+                htmlContent: emailMessage,
+                subject: emailSubject);
+
+            await _emailService.SendEmailAsync(
+                input: emailInput,
+                cancellationToken: cancellationToken);
+        }
+        catch (Exception)
+        {
+            await _unitOfWork.RollbackTransactionAsync(cancellationToken);
+            throw;
+        }
+    }
 }

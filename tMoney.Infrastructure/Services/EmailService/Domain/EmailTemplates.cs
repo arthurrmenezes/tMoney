@@ -135,12 +135,6 @@ public static class EmailTemplates
                         border-radius: 6px;
                         font-weight: bold;
                     }}
-                    .footer {{
-                        margin-top: 30px;
-                        font-size: 14px;
-                        color: #777777;
-                        text-align: center;
-                    }}
                 </style>
             </head>
             <body>
@@ -173,5 +167,92 @@ public static class EmailTemplates
     public static string ResendConfirmationEmailTemplateSubject()
     {
         return $"Confirme seu e-mail - tMoney 💵";
+    }
+
+    public static string ChangePasswordTemplateMessageBody(string firstName, DateTime dateTime)
+    {
+        var formattedDate = dateTime.ToString("dd/MM/yyyy");
+        var formattedTime = dateTime.ToString("HH:mm");
+
+        return $@"
+            <!DOCTYPE html>
+            <html lang=""pt-br"">
+            <head>
+                <meta charset=""UTF-8"">
+                <meta name=""viewport"" content=""width=device-width, initial-scale=1.0"">
+                <style>
+                    body {{
+                        font-family: Arial, Helvetica, sans-serif;
+                        background-color: #f4f4f7;
+                        margin: 0;
+                        padding: 0;
+                    }}
+                    .container {{
+                        max-width: 600px;
+                        margin: 20px auto;
+                        background: #ffffff;
+                        padding: 30px;
+                        border-radius: 8px;
+                        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                    }}
+                    .title {{
+                        font-size: 24px;
+                        font-weight: bold;
+                        color: #333333;
+                        margin-bottom: 10px;
+                    }}
+                    .text {{
+                        font-size: 16px;
+                        color: #555555;
+                        line-height: 1.6;
+                    }}
+                    .footer {{
+                        margin-top: 30px;
+                        font-size: 14px;
+                        color: #777777;
+                        text-align: center;
+                    }}
+                </style>
+            </head>
+            <body>
+                <div class=""container"">
+                    <p class=""title"">Olá, {FirstNameValueObject.Factory(firstName)}!</p>
+
+                    <p class=""text"">
+                        Informamos que a senha da sua conta tMoney foi alterada com sucesso.<br>
+                    </p>
+
+                    <div class=""alert-box"">
+                        <strong>Detalhes da alteração:</strong><br>
+                        📅 Data: {formattedDate} às {formattedTime}<br>
+                    </div>
+
+                    <p class=""text"">
+                        Se foi você quem realizou esta alteração, pode ignorar este e-mail.<br>
+                        É apenas um aviso de segurança.
+                    </p>
+                    
+                    <hr style=""border: 0; border-top: 1px solid #eee; margin: 20px 0;"">
+
+                    <p class=""text"">
+                        ❗ Mas se você <strong>não reconhece esta alteração</strong>, sua conta pode estar em risco!<br>
+                        Recomendamos que:<br>
+                        1. <a href=""https://app.tmoney.com.br/recuperar-senha"">Redefina sua senha</a> imediatamente.<br>
+                        2. Entre em contato com nosso suporte.
+                    </p>
+
+                    <p class=""text"">
+                        A segurança da sua conta é nossa prioridade.<br>
+                        Qualquer dúvida, estamos aqui para ajudar.<br>
+                        <strong>Equipe tMoney</strong>
+                    </p>
+                </div>
+            </body>
+        </html>";
+    }
+
+    public static string ChangePasswordTemplateSubject()
+    {
+        return $"Alteração de senha confirmada - tMoney 💵";
     }
 }

@@ -28,4 +28,8 @@ public interface IAuthService
     public Task ResendConfirmationEmailServiceAsync(
         string email,
         CancellationToken cancellationToken);
+
+    public Task ChangePasswordServiceAsync(
+        ChangePasswordServiceInput input,
+        CancellationToken cancellationToken);
 }
