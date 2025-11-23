@@ -93,4 +93,20 @@ public class AuthController : ControllerBase
 
         return NoContent();
     }
+
+    [HttpGet]
+    [Route("confirm-email")]
+    [AllowAnonymous]
+    public async Task<IActionResult> ConfirmEmailAsync([FromQuery] string email, [FromQuery] string token)
+    {
+        if (string.IsNullOrEmpty(email))
+            return BadRequest("O email não pode ser nulo ou vazio.");
+
+        if (string.IsNullOrEmpty(token))
+            return BadRequest("O token não pode ser nulo ou vazio.");
+
+        await _authService.ConfirmEmailServiceAsync(email, token);
+
+        return NoContent();
+    }
 }

@@ -41,7 +41,7 @@ public class AuthService : IAuthService
     {
         var emailExists = await _userManager.FindByEmailAsync(input.Email);
         if (emailExists is not null)
-            throw new InvalidOperationException("O email já está em uso.");
+            throw new ArgumentException("O email já está em uso.");
 
         await _unitOfWork.BeginTransactionAsync(cancellationToken);
 
@@ -67,14 +67,14 @@ public class AuthService : IAuthService
             if (!result.Succeeded)
             {
                 var error = string.Join(", ", result.Errors.Select(e => e.Description));
-                throw new InvalidOperationException($"Falha ao criar conta: {error}");
+                throw new ArgumentException($"Falha ao criar conta: {error}");
             }
 
             await _unitOfWork.CommitTransactionAsync(cancellationToken);
 
             var emailConfirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             var emailConfirmationEncodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(emailConfirmationToken));
-            var emailConfirmationLink = $"https://localhost:7159/api/v1/auth/verifyEmail?email={user.Email}&token={emailConfirmationEncodedToken}";
+            var emailConfirmationLink = $"https://localhost:7159/api/v1/auth/confirm-email?email={user.Email}&token={emailConfirmationEncodedToken}";
 
             var emailMessage = EmailTemplates.WelcomeEmailTemplateMessageBody(account.FirstName, emailConfirmationLink);
             var emailSubject = EmailTemplates.WelcomeEmailTemplateSubject();
@@ -198,5 +198,18 @@ public class AuthService : IAuthService
         await _refreshTokenRepository.RevokeAllByUserIdAsync(userId, cancellationToken);
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task ConfirmEmailServiceAsync(string email, string emailToken)
+    {
+        var user = await _userManager.FindByEmailAsync(email);
+        if (user is null)
+            throw new KeyNotFoundException("Email inválido.");
+
+        var decodedToken = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(emailToken));
+
+        var result = await _userManager.ConfirmEmailAsync(user, decodedToken);
+        if (!result.Succeeded)
+            throw new InvalidOperationException($"Não foi possível confirmar o email. O token pode ter expirado ou estar inválido.");
     }
 }

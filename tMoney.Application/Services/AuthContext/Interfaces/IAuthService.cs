@@ -20,4 +20,8 @@ public interface IAuthService
     public Task LogoutServiceAsync(
         string userId,
         CancellationToken cancellationToken);
+
+    public Task ConfirmEmailServiceAsync(
+        string email,
+        string emailToken);
 }
