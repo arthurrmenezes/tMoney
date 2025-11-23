@@ -17,7 +17,11 @@ public sealed class RefreshTokenRepository : BaseRepository<RefreshToken>, IRefr
 
     public async Task RevokeAllByUserIdAsync(string userId, CancellationToken cancellationToken)
     {
-        await _dataContext.RefreshTokens.Where(u => u.UserId == userId && u.IsActive())
+        await _dataContext.RefreshTokens.Where(u => 
+                u.UserId == userId && 
+                u.RevokedAt == null &&
+                DateTime.UtcNow < u.ExpiresAt &&
+                u.ReplacedByToken == null)
             .ExecuteUpdateAsync(calls => calls.SetProperty(r => r.RevokedAt, DateTime.UtcNow), cancellationToken);
     }
 }

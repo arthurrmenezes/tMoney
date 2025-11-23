@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using tMoney.Application.Services.AuthContext.Inputs;
 using tMoney.Application.Services.AuthContext.Interfaces;
 using tMoney.WebApi.Controllers.AuthContext.Payloads;
@@ -75,5 +76,21 @@ public class AuthController : ControllerBase
         var response = await _authService.RefreshTokenServiceAsync(serviceInput, cancellationToken);
 
         return Ok(response);
+    }
+
+    [HttpPost]
+    [Route("logout")]
+    [Authorize]
+    public async Task<IActionResult> LogoutAsync(CancellationToken cancellationToken)
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userId))
+            return Unauthorized();
+
+        await _authService.LogoutServiceAsync(
+            userId: userId,
+            cancellationToken: cancellationToken);
+
+        return NoContent();
     }
 }

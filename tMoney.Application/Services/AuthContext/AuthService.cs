@@ -164,4 +164,11 @@ public class AuthService : IAuthService
             throw;
         }
     }
+
+    public async Task LogoutServiceAsync(string userId, CancellationToken cancellationToken)
+    {
+        await _refreshTokenRepository.RevokeAllByUserIdAsync(userId, cancellationToken);
+
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+    }
 }
