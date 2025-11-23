@@ -34,7 +34,7 @@ public class AuthService : IAuthService
     {
         var emailExists = await _userManager.FindByEmailAsync(input.Email);
         if (emailExists is not null)
-            throw new ArgumentException("O email já está em uso.");
+            throw new InvalidOperationException("O email já está em uso.");
 
         await _unitOfWork.BeginTransactionAsync(cancellationToken);
 
@@ -59,7 +59,7 @@ public class AuthService : IAuthService
             if (!result.Succeeded)
             {
                 var error = string.Join(", ", result.Errors.Select(e => e.Description));
-                throw new ArgumentException($"Falha ao criar conta: {error}");
+                throw new InvalidOperationException($"Falha ao criar conta: {error}");
             }
 
             await _unitOfWork.CommitTransactionAsync(cancellationToken);
@@ -85,15 +85,15 @@ public class AuthService : IAuthService
     {
         var user = await _userManager.FindByEmailAsync(input.Email);
         if (user is null)
-            throw new ArgumentException("Email ou senha incorreta.");
+            throw new UnauthorizedAccessException("Email ou senha incorreta.");
 
         var verifyCredentials = await _signInManager.CheckPasswordSignInAsync(user, input.Password, true);
 
         if (verifyCredentials.IsLockedOut)
-            throw new ArgumentException("Muitas tentativas falhas. Tente novamente mais tarde.");
+            throw new InvalidOperationException("Muitas tentativas falhas. Tente novamente mais tarde.");
 
         if (!verifyCredentials.Succeeded)
-            throw new ArgumentException("Email ou senha incorreta.");
+            throw new UnauthorizedAccessException("Email ou senha incorreta.");
 
         var acessToken = _tokenService.GenerateAccessToken(user);
         var tokenExpirationInSeconds = _tokenService.GetAccessTokenExpiration();
@@ -126,11 +126,11 @@ public class AuthService : IAuthService
             throw new KeyNotFoundException("Refresh token não encontrado.");
 
         if (!currentRefreshToken.IsActive())
-            throw new ArgumentException("Refresh token inválido, expirado ou revogado.");
+            throw new InvalidOperationException("Refresh token inválido, expirado ou revogado.");
 
         var user = await _userManager.FindByIdAsync(currentRefreshToken.UserId);
         if (user is null)
-            throw new InvalidOperationException("Usuário não encontrado.");
+            throw new InvalidOperationException("Usuário associado ao refresh token não encontrado.");
 
         await _unitOfWork.BeginTransactionAsync(cancellationToken);
 
