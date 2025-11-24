@@ -6,6 +6,6 @@
     <Project Path="tMoney.WebApi/tMoney.WebApi.csproj" Id="ca343b69-4017-4197-8c77-f5298ff15b99" />
   </Folder>
   <Folder Name="/test/">
-    <Project Path="UnitTests/UnitTests.csproj" Id="12253ce7-889a-4ee1-80f9-415652edc898" />
+    <Project Path="tMoney.UnitTests/tMoney.UnitTests.csproj" />
   </Folder>
 </Solution>
