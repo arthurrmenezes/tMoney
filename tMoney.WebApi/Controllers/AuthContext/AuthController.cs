@@ -149,4 +149,47 @@ public class AuthController : ControllerBase
 
         return NoContent();
     }
+
+    [HttpPost]
+    [Route("forgot-password")]
+    [AllowAnonymous]
+    public async Task<IActionResult> ForgotPasswordAsync([FromBody] ForgotPasswordPayload input, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrEmpty(input.Email))
+            return BadRequest("O email é obrigatório.");
+
+        await _authService.ForgotPasswordServiceAsync(
+            email: input.Email,
+            cancellationToken: cancellationToken);
+
+        return NoContent();
+    }
+
+    [HttpPost]
+    [Route("reset-password")]
+    [AllowAnonymous]
+    public async Task<IActionResult> ResetPasswordAsync([FromQuery] string email, [FromQuery] string token, 
+        [FromBody] ResetPasswordPayload input, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrEmpty(email))
+            return BadRequest("O email não pode ser nulo ou vazio.");
+
+        if (string.IsNullOrEmpty(token))
+            return BadRequest("O token não pode ser nulo ou vazio.");
+
+        if (string.IsNullOrEmpty(input.NewPassword) || string.IsNullOrEmpty(input.ConfirmNewPassword))
+            return BadRequest("Todos os campos são obrigatórios.");
+
+        if (input.NewPassword != input.ConfirmNewPassword)
+            return BadRequest("A nova senha e a confirmação não são iguais.");
+
+        await _authService.ResetPasswordServiceAsync(
+            input: ResetPasswordServiceInput.Factory(
+                email: email,
+                emailToken: token,
+                newPassword: input.NewPassword),
+            cancellationToken: cancellationToken);
+
+        return NoContent();
+    }
 }

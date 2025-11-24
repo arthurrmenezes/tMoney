@@ -32,4 +32,12 @@ public interface IAuthService
     public Task ChangePasswordServiceAsync(
         ChangePasswordServiceInput input,
         CancellationToken cancellationToken);
+
+    public Task ForgotPasswordServiceAsync(
+        string email,
+        CancellationToken cancellationToken);
+
+    public Task ResetPasswordServiceAsync(
+        ResetPasswordServiceInput input,
+        CancellationToken cancellationToken);
 }

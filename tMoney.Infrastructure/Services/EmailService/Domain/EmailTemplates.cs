@@ -219,7 +219,7 @@ public static class EmailTemplates
                     <p class=""title"">Olá, {FirstNameValueObject.Factory(firstName)}!</p>
 
                     <p class=""text"">
-                        Informamos que a senha da sua conta tMoney foi alterada com sucesso.<br>
+                        Informamos que a senha da sua conta foi alterada com sucesso.<br>
                     </p>
 
                     <div class=""alert-box"">
@@ -254,5 +254,88 @@ public static class EmailTemplates
     public static string ChangePasswordTemplateSubject()
     {
         return $"Alteração de senha confirmada - tMoney 💵";
+    }
+
+    public static string ForgotPasswordTemplateMessageBody(string firstName, string resetPasswordLink)
+    {
+        return $@"
+            <!DOCTYPE html>
+            <html lang=""pt-br"">
+            <head>
+                <meta charset=""UTF-8"">
+                <meta name=""viewport"" content=""width=device-width, initial-scale=1.0"">
+                <style>
+                    body {{
+                        font-family: Arial, Helvetica, sans-serif;
+                        background-color: #f4f4f7;
+                        margin: 0;
+                        padding: 0;
+                    }}
+                    .container {{
+                        max-width: 600px;
+                        margin: 20px auto;
+                        background: #ffffff;
+                        padding: 30px;
+                        border-radius: 8px;
+                        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                    }}
+                    .title {{
+                        font-size: 24px;
+                        font-weight: bold;
+                        color: #333333;
+                        margin-bottom: 10px;
+                    }}
+                    .text {{
+                        font-size: 16px;
+                        color: #555555;
+                        line-height: 1.6;
+                    }}
+                    .button {{
+                        display: inline-block;
+                        margin-top: 20px;
+                        padding: 14px 24px;
+                        background-color: #007bff;
+                        color: #ffffff !important;
+                        text-decoration: none;
+                        border-radius: 6px;
+                        font-weight: bold;
+                    }}
+                    .footer {{
+                        margin-top: 30px;
+                        font-size: 14px;
+                        color: #777777;
+                        text-align: center;
+                    }}
+                </style>
+            </head>
+            <body>
+                <div class=""container"">
+                    <p class=""title"">Olá, {FirstNameValueObject.Factory(firstName)}!</p>
+
+                    <p class=""text"">
+                        Recebemos uma solicitação para redefinir a senha da sua conta.<br>
+                        Para continuar, clique no link abaixo e cadastre uma nova senha:
+                    </p>
+
+                    <p style=""text-align:center;"">
+                        <a href=""{resetPasswordLink}"" class=""button"">Redefinir senha</a>
+                    </p>
+
+                    <p class=""text"">
+                        ⚠️ Este link é válido por <strong>30 minutos</strong>.
+                    </p>
+
+                    <p class=""text"">
+                        Qualquer dúvida, estamos aqui para ajudar.<br>
+                        <strong>Equipe tMoney</strong>
+                    </p>
+                </div>
+            </body>
+        </html>";
+    }
+
+    public static string ForgotPasswordTemplateSubject()
+    {
+        return $"Recuperação de senha - tMoney 💵";
     }
 }

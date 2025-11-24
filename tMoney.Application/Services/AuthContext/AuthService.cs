@@ -25,6 +25,8 @@ public class AuthService : IAuthService
     private readonly IRefreshTokenRepository _refreshTokenRepository;
     private readonly IEmailService _emailService;
 
+    private readonly string _baseUrl = $"https://localhost:7159";
+
     public AuthService(UserManager<User> userManager, SignInManager<User> signInManager, IUnitOfWork unitOfWork, IAccountRepository accountRepository, 
         ITokenService tokenService, IRefreshTokenRepository refreshTokenRepository, IEmailService emailService)
     {
@@ -74,7 +76,7 @@ public class AuthService : IAuthService
 
             var emailConfirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             var emailConfirmationEncodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(emailConfirmationToken));
-            var emailConfirmationLink = $"https://localhost:7159/api/v1/auth/confirm-email?email={user.Email}&token={emailConfirmationEncodedToken}";
+            var emailConfirmationLink = $"{_baseUrl}/api/v1/auth/confirm-email?token={emailConfirmationEncodedToken}&email={user.Email}";
 
             var emailMessage = EmailTemplates.WelcomeEmailTemplateMessageBody(account.FirstName, emailConfirmationLink);
             var emailSubject = EmailTemplates.WelcomeEmailTemplateSubject();
@@ -227,7 +229,7 @@ public class AuthService : IAuthService
 
         var emailConfirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
         var emailConfirmationEncodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(emailConfirmationToken));
-        var emailConfirmationLink = $"https://localhost:7159/api/v1/auth/confirm-email?email={user.Email}&token={emailConfirmationEncodedToken}";
+        var emailConfirmationLink = $"{_baseUrl}/api/v1/auth/confirm-email?token={emailConfirmationEncodedToken}&email={user.Email}";
 
         var account = await _accountRepository.GetAccountByIdAsync(user.AccountId.ToString(), cancellationToken);
         if (account is null)
@@ -292,6 +294,70 @@ public class AuthService : IAuthService
             await _emailService.SendEmailAsync(
                 input: emailInput,
                 cancellationToken: cancellationToken);
+        }
+        catch (Exception)
+        {
+            await _unitOfWork.RollbackTransactionAsync(cancellationToken);
+            throw;
+        }
+    }
+
+    public async Task ForgotPasswordServiceAsync(string email, CancellationToken cancellationToken)
+    {
+        var user = await _userManager.FindByEmailAsync(email);
+        if (user is null)
+            throw new KeyNotFoundException("E-mail inválido.");
+
+        if (!await _userManager.IsEmailConfirmedAsync(user))
+            throw new InvalidOperationException("O e-mail ainda não foi confirmado.");
+
+        var passwordResetToken = await _userManager.GeneratePasswordResetTokenAsync(user);
+        var passwordResetEncodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(passwordResetToken));
+        var emailLink = $"{_baseUrl}/api/v1/auth/reset-password?token={passwordResetEncodedToken}&email={user.Email}";
+
+        var account = await _accountRepository.GetAccountByIdAsync(user.AccountId.ToString(), cancellationToken);
+        if (account is null)
+            throw new KeyNotFoundException("Conta não encontrada.");
+
+        var emailMessage = EmailTemplates.ForgotPasswordTemplateMessageBody(account.FirstName, emailLink);
+        var emailSubject = EmailTemplates.ForgotPasswordTemplateSubject();
+
+        var emailInput = SendEmailServiceInput.Factory(
+            to: [
+                new SendEmailServiceInputTo(
+                        name: account.FirstName,
+                        email: account.Email),
+                ],
+            htmlContent: emailMessage,
+            subject: emailSubject);
+
+        await _emailService.SendEmailAsync(
+            input: emailInput,
+            cancellationToken: cancellationToken);
+    }
+
+    public async Task ResetPasswordServiceAsync(ResetPasswordServiceInput input, CancellationToken cancellationToken)
+    {
+        var user = await _userManager.FindByEmailAsync(input.Email);
+        if (user is null)
+            throw new KeyNotFoundException("E-mail inválido.");
+
+        var decodedToken = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(input.EmailToken));
+
+        await _unitOfWork.BeginTransactionAsync(cancellationToken);
+
+        try
+        {
+            var result = await _userManager.ResetPasswordAsync(user, decodedToken, input.NewPassword);
+            if (!result.Succeeded)
+            {
+                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                throw new InvalidOperationException($"Não foi possível redefinir a senha: {errors}");
+            }
+
+            await _refreshTokenRepository.RevokeAllByUserIdAsync(user.Id, cancellationToken);
+
+            await _unitOfWork.CommitTransactionAsync(cancellationToken);
         }
         catch (Exception)
         {
