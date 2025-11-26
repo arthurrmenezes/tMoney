@@ -1,11 +1,11 @@
 <Solution>
   <Folder Name="/src/">
-    <Project Path="tMoney.Application/tMoney.Application.csproj" Id="753208f0-ce1e-4ebf-8970-cca10c116270" />
-    <Project Path="tMoney.Domain/tMoney.Domain.csproj" Id="e214d47b-f5b6-4ee2-9ecc-ff2543924d57" />
-    <Project Path="tMoney.Infrastructure/tMoney.Infrastructure.csproj" Id="bd64d635-5de9-428a-a79c-d70379cbbb6a" />
-    <Project Path="tMoney.WebApi/tMoney.WebApi.csproj" Id="ca343b69-4017-4197-8c77-f5298ff15b99" />
+    <Project Path="backend/tMoney.Application/tMoney.Application.csproj" />
+    <Project Path="backend/tMoney.Domain/tMoney.Domain.csproj" />
+    <Project Path="backend/tMoney.Infrastructure/tMoney.Infrastructure.csproj" />
+    <Project Path="backend/tMoney.WebApi/tMoney.WebApi.csproj" />
   </Folder>
   <Folder Name="/test/">
-    <Project Path="tMoney.UnitTests/tMoney.UnitTests.csproj" />
+    <Project Path="backend/tMoney.UnitTests/tMoney.UnitTests.csproj" />
   </Folder>
 </Solution>
