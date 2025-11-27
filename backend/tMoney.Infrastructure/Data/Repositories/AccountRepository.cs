@@ -10,12 +10,9 @@ public class AccountRepository : BaseRepository<Account>, IAccountRepository
 {
     public AccountRepository(DataContext dataContext) : base(dataContext) { }
 
-    public async Task<Account?> GetAccountByIdAsync(string id, CancellationToken cancellationToken)
+    public async Task<Account?> GetAccountByIdAsync(Guid id, CancellationToken cancellationToken)
     {
-        if (!Guid.TryParse(id, out Guid accountIdGuid))
-            return null;
-
-        var voAccountId = IdValueObject.Factory(accountIdGuid);
+        var voAccountId = IdValueObject.Factory(id);
 
         return await _dataContext.Accounts.FirstOrDefaultAsync(a => a.AccountId == voAccountId, cancellationToken);
     }

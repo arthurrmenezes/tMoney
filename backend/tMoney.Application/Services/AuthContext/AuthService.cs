@@ -25,7 +25,7 @@ public class AuthService : IAuthService
     private readonly IRefreshTokenRepository _refreshTokenRepository;
     private readonly IEmailService _emailService;
 
-    private readonly string _baseUrl = $"https://localhost:7159";
+    private readonly string _baseUrl = $"http://localhost:5173";
 
     public AuthService(UserManager<User> userManager, SignInManager<User> signInManager, IUnitOfWork unitOfWork, IAccountRepository accountRepository, 
         ITokenService tokenService, IRefreshTokenRepository refreshTokenRepository, IEmailService emailService)
@@ -76,7 +76,7 @@ public class AuthService : IAuthService
 
             var emailConfirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             var emailConfirmationEncodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(emailConfirmationToken));
-            var emailConfirmationLink = $"{_baseUrl}/api/v1/auth/confirm-email?token={emailConfirmationEncodedToken}&email={user.Email}";
+            var emailConfirmationLink = $"{_baseUrl}/confirm-email?token={emailConfirmationEncodedToken}&email={user.Email}";
 
             var emailMessage = EmailTemplates.WelcomeEmailTemplateMessageBody(account.FirstName, emailConfirmationLink);
             var emailSubject = EmailTemplates.WelcomeEmailTemplateSubject();
@@ -229,9 +229,9 @@ public class AuthService : IAuthService
 
         var emailConfirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
         var emailConfirmationEncodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(emailConfirmationToken));
-        var emailConfirmationLink = $"{_baseUrl}/api/v1/auth/confirm-email?token={emailConfirmationEncodedToken}&email={user.Email}";
+        var emailConfirmationLink = $"{_baseUrl}/confirm-email?token={emailConfirmationEncodedToken}&email={user.Email}";
 
-        var account = await _accountRepository.GetAccountByIdAsync(user.AccountId.ToString(), cancellationToken);
+        var account = await _accountRepository.GetAccountByIdAsync(user.AccountId.Id, cancellationToken);
         if (account is null)
             throw new KeyNotFoundException("Conta não encontrada.");
 
@@ -269,13 +269,13 @@ public class AuthService : IAuthService
                 throw new ArgumentException($"Erro ao trocar a senha: {error}");
             }
 
-            var passwordChangeAt = DateTime.UtcNow;
+            var passwordChangeAt = DateTime.Now;
 
             await _refreshTokenRepository.RevokeAllByUserIdAsync(user.Id, cancellationToken);
 
             await _unitOfWork.CommitTransactionAsync(cancellationToken);
 
-            var account = await _accountRepository.GetAccountByIdAsync(user.AccountId.ToString(), cancellationToken);
+            var account = await _accountRepository.GetAccountByIdAsync(user.AccountId.Id, cancellationToken);
             if (account is null)
                 throw new KeyNotFoundException("Conta não encontrada.");
 
@@ -313,9 +313,9 @@ public class AuthService : IAuthService
 
         var passwordResetToken = await _userManager.GeneratePasswordResetTokenAsync(user);
         var passwordResetEncodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(passwordResetToken));
-        var emailLink = $"{_baseUrl}/api/v1/auth/reset-password?token={passwordResetEncodedToken}&email={user.Email}";
+        var emailLink = $"{_baseUrl}/reset-password?token={passwordResetEncodedToken}&email={user.Email}";
 
-        var account = await _accountRepository.GetAccountByIdAsync(user.AccountId.ToString(), cancellationToken);
+        var account = await _accountRepository.GetAccountByIdAsync(user.AccountId.Id, cancellationToken);
         if (account is null)
             throw new KeyNotFoundException("Conta não encontrada.");
 

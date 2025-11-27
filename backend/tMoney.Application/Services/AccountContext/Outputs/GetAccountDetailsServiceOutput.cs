@@ -1,8 +1,8 @@
 ﻿using tMoney.Domain.ValueObjects;
 
-namespace tMoney.Application.Services.AuthContext.Outputs;
+namespace tMoney.Application.Services.AccountContext.Outputs;
 
-public sealed class RegisterAccountServiceOutput
+public sealed class GetAccountDetailsServiceOutput
 {
     public Guid AccountId { get; }
     public string FirstName { get; }
@@ -11,7 +11,7 @@ public sealed class RegisterAccountServiceOutput
     public decimal Balance { get; }
     public DateTime CreatedAt { get; }
 
-    private RegisterAccountServiceOutput(Guid accountId, string firstName, string lastName, string email, decimal balance, DateTime createdAt)
+    private GetAccountDetailsServiceOutput(Guid accountId, string firstName, string lastName, string email, decimal balance, DateTime createdAt)
     {
         AccountId = accountId;
         FirstName = firstName;
@@ -21,7 +21,7 @@ public sealed class RegisterAccountServiceOutput
         CreatedAt = createdAt;
     }
 
-    public static RegisterAccountServiceOutput Factory(IdValueObject accountId, FirstNameValueObject firstName, LastNameValueObject lastName, 
+    public static GetAccountDetailsServiceOutput Factory(IdValueObject accountId, FirstNameValueObject firstName, LastNameValueObject lastName,
         EmailValueObject email, decimal balance, DateTime createdAt)
-        => new (accountId.Id, firstName.FirstName, lastName.LastName, email.Email, balance, createdAt);
+        => new(accountId.Id, firstName.FirstName, lastName.LastName, email.Email, balance, createdAt);
 }

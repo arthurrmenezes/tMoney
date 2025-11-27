@@ -70,7 +70,7 @@ public static class EmailTemplates
                     </p>
 
                     <p style=""text-align:center;"">
-                        <a href=""{emailConfirmationLink}"" class=""button"">Confirmar conta</a>
+                        {emailConfirmationLink}
                     </p>
 
                     <p class=""text"">
@@ -147,7 +147,7 @@ public static class EmailTemplates
                     </p>
 
                     <p style=""text-align:center;"">
-                        <a href=""{emailConfirmationLink}"" class=""button"">Confirmar conta</a>
+                        {emailConfirmationLink}
                     </p>
 
                     <p class=""text"">
@@ -237,7 +237,8 @@ public static class EmailTemplates
                     <p class=""text"">
                         ❗ Mas se você <strong>não reconhece esta alteração</strong>, sua conta pode estar em risco!<br>
                         Recomendamos que:<br>
-                        1. <a href=""https://app.tmoney.com.br/recuperar-senha"">Redefina sua senha</a> imediatamente.<br>
+                        1. <strong>Redefina sua senha imediatamente:</strong><br>
+                        http://localhost:5173/forgot-password<br>
                         2. Entre em contato com nosso suporte.
                     </p>
 
@@ -318,7 +319,8 @@ public static class EmailTemplates
                     </p>
 
                     <p style=""text-align:center;"">
-                        <a href=""{resetPasswordLink}"" class=""button"">Redefinir senha</a>
+                        <strong>Redefinir senha:</strong><br>
+                        {resetPasswordLink}
                     </p>
 
                     <p class=""text"">
