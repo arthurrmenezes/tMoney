@@ -11,8 +11,9 @@ public sealed class RefreshTokenRepository : BaseRepository<RefreshToken>, IRefr
 
     public async Task<RefreshToken?> GetByTokenAsync(string token, CancellationToken cancellationToken)
     {
-        var refreshToken = await _dataContext.RefreshTokens.FirstOrDefaultAsync(r => r.Token == token, cancellationToken);
-        return refreshToken;
+        return await _dataContext.RefreshTokens
+            .AsNoTracking()
+            .FirstOrDefaultAsync(r => r.Token == token, cancellationToken);
     }
 
     public async Task RevokeAllByUserIdAsync(string userId, CancellationToken cancellationToken)

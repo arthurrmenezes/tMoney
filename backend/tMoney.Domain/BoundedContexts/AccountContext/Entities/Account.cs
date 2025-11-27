@@ -9,6 +9,7 @@ public class Account
     public LastNameValueObject LastName { get; private set; }
     public EmailValueObject Email { get; private set; }
     public decimal Balance { get; private set; }
+    public DateTime? UpdatedAt { get; private set; }
     public DateTime CreatedAt { get; private set; }
 
     protected Account() { }
@@ -20,6 +21,18 @@ public class Account
         LastName = lastName;
         Email = email;
         Balance = 0;
+        UpdatedAt = null;
         CreatedAt = DateTime.UtcNow;
+    }
+
+    public void UpdateAccountDetails(FirstNameValueObject? firstName, LastNameValueObject? lastName)
+    {
+        if (firstName is not null)
+            FirstName = firstName;
+
+        if (lastName is not null)
+            LastName = lastName;
+
+        UpdatedAt = DateTime.UtcNow;
     }
 }

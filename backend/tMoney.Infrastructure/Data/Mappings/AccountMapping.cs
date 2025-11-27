@@ -52,7 +52,12 @@ public sealed class AccountMapping : IEntityTypeConfiguration<Account>
             .IsRequired()
             .HasColumnName("balance")
             .HasPrecision(18, 2)
-            .ValueGeneratedNever();            
+            .ValueGeneratedNever();
+
+        builder.Property(a => a.UpdatedAt)
+            .IsRequired(false)
+            .HasColumnName("updated_at")
+            .ValueGeneratedNever();
 
         builder.Property(a => a.CreatedAt)
             .IsRequired()

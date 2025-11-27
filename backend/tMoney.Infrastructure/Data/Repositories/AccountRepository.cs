@@ -14,6 +14,8 @@ public class AccountRepository : BaseRepository<Account>, IAccountRepository
     {
         var voAccountId = IdValueObject.Factory(id);
 
-        return await _dataContext.Accounts.FirstOrDefaultAsync(a => a.AccountId == voAccountId, cancellationToken);
+        return await _dataContext.Accounts
+            .AsNoTracking()
+            .FirstOrDefaultAsync(a => a.AccountId == voAccountId, cancellationToken);
     }
 }
