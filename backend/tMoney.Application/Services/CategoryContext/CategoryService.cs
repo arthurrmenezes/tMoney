@@ -71,4 +71,35 @@ public class CategoryService : ICategoryService
 
         return output;
     }
+
+    public async Task<UpdateCategoryDetailsByIdServiceOutput> UpdateCategoryDetailsByIdServiceAsync(IdValueObject categoryId, IdValueObject accountId, 
+        UpdateCategoryDetailsByTitleServiceInput input, CancellationToken cancellationToken)
+    {
+        var category = await _categoryRepository.GetByIdAsync(categoryId.Id, accountId.Id, cancellationToken);
+        if (category is null)
+            throw new KeyNotFoundException("Categoria não encontrada.");
+
+        if (input.NewTitle is not null && input.NewTitle != category.Title)
+        {
+            var titleExists = await _categoryRepository.GetByTitleAsync(input.NewTitle, accountId.Id, cancellationToken);
+            if (titleExists is not null)
+                throw new ArgumentException($"Você já possui uma categoria chamada '{input.NewTitle}'.");
+        }
+
+        category.UpdateCategoryDetails(input.NewTitle, input.NewType);
+
+        _categoryRepository.Update(category);
+
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        var output = UpdateCategoryDetailsByIdServiceOutput.Factory(
+            id: category.Id.ToString(),
+            title: category.Title,
+            type: category.Type.ToString(),
+            accountId: category.AccountId.ToString(),
+            updatedAt: category.UpdatedAt!.Value,
+            createdAt: category.CreatedAt);
+
+        return output;
+    }
 }

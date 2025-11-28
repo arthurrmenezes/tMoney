@@ -16,4 +16,10 @@ public interface ICategoryService
         int pageNumber,
         int pageSize,
         CancellationToken cancellationToken);
+
+    public Task<UpdateCategoryDetailsByIdServiceOutput> UpdateCategoryDetailsByIdServiceAsync(
+        IdValueObject categoryId,
+        IdValueObject accountId,
+        UpdateCategoryDetailsByTitleServiceInput input,
+        CancellationToken cancellationToken);
 }

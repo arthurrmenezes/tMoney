@@ -74,4 +74,39 @@ public class CategoryController : ControllerBase
 
         return Ok(response);
     }
+
+    [HttpPatch]
+    [Route("{categoryId}")]
+    [Authorize]
+    public async Task<IActionResult> UpdateCategoryDetailsByTitleAsync(
+        [FromRoute] Guid categoryId,
+        [FromBody] UpdateCategoryDetailsByTitlePayload input,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(input.NewTitle) && input.NewType.ToString() is null)
+            throw new ArgumentException("Informe pelo menos um campo para atualizar.");
+
+        if (!string.IsNullOrEmpty(input.NewType.ToString()))
+        {
+            if (!Enum.IsDefined(typeof(CategoryType), input.NewType!))
+                throw new ArgumentException("Tipo de categoria inválido.");
+        }
+        
+        var accountIdString = User.FindFirst("accountId")?.Value;
+        if (string.IsNullOrEmpty(accountIdString))
+            throw new ArgumentException("Conta não encontrada.");
+
+        if (!Guid.TryParse(accountIdString, out var accountIdGuid))
+            throw new ArgumentException("ID da conta inválido no token");
+
+        var response = await _categoryService.UpdateCategoryDetailsByIdServiceAsync(
+            categoryId: IdValueObject.Factory(categoryId),
+            accountId: IdValueObject.Factory(accountIdGuid),
+            input: UpdateCategoryDetailsByTitleServiceInput.Factory(
+                newTitle: input.NewTitle,
+                newType: input.NewType),
+            cancellationToken: cancellationToken);
+
+        return Ok(response);
+    }
 }

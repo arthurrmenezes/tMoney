@@ -23,4 +23,15 @@ public class Category
         UpdatedAt = null;
         CreatedAt = DateTime.UtcNow;
     }
+
+    public void UpdateCategoryDetails(string? title, CategoryType? type)
+    {
+        if (title is not null)
+            Title = title;
+
+        if (type is not null)
+            Type = (CategoryType)type;
+
+        UpdatedAt = DateTime.UtcNow;
+    }
 }
