@@ -35,7 +35,7 @@ public class AuthController : ControllerBase
 
         var response = await _authService.RegisterAccountServiceAsync(serviceInput, cancellationToken);
 
-        return Ok(response);
+        return Created("api/v1/accounts/profile", response);
     }
 
     [HttpPost]

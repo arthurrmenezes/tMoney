@@ -5,6 +5,7 @@ using tMoney.Application.Services.CategoryContext.Interface;
 using tMoney.Domain.BoundedContexts.CategoryContext.ENUMs;
 using tMoney.Domain.ValueObjects;
 using tMoney.WebApi.Controllers.CategoryContext.Payloads;
+using tMoney.WebApi.Extensions;
 
 namespace tMoney.WebApi.Controllers.CategoryContext;
 
@@ -31,19 +32,31 @@ public class CategoryController : ControllerBase
         if (!Enum.IsDefined(typeof(CategoryType), input.Type))
             throw new ArgumentException("Tipo de categoria inválido.");
 
-        var accountIdString = User.FindFirst("accountId")?.Value;
-        if (string.IsNullOrEmpty(accountIdString))
-            throw new ArgumentException("Conta não encontrada.");
-
-        if (!Guid.TryParse(accountIdString, out var accountIdGuid))
-            throw new ArgumentException("ID da conta inválido no token");
+        var accountId = User.GetAccountId();
 
         var response = await _categoryService.CreateCategoryServiceAsync(
-            accountId: IdValueObject.Factory(accountIdGuid),
+            accountId: IdValueObject.Factory(accountId),
             input: CreateCategoryServiceInput.Factory(
                 title: input.Title,
                 type: input.Type),
             cancellationToken);
+
+        return Ok(response);
+    }
+
+    [HttpGet]
+    [Route("{categoryId}")]
+    [Authorize]
+    public async Task<IActionResult> GetCategoryByIdAsync(
+        [FromRoute] Guid categoryId,
+        CancellationToken cancellationToken)
+    {
+        var accountId = User.GetAccountId();
+
+        var response = await _categoryService.GetCategoryByIdServiceAsync(
+            categoryId: IdValueObject.Factory(categoryId),
+            accountId: IdValueObject.Factory(accountId),
+            cancellationToken: cancellationToken);
 
         return Ok(response);
     }
@@ -59,15 +72,10 @@ public class CategoryController : ControllerBase
         if (pageSize < 1) pageSize = 10;
         if (pageSize > 50) pageSize = 50;
 
-        var accountIdString = User.FindFirst("accountId")?.Value;
-        if (string.IsNullOrEmpty(accountIdString))
-            throw new ArgumentException("Conta não encontrada.");
-
-        if (!Guid.TryParse(accountIdString, out var accountIdGuid))
-            throw new ArgumentException("ID da conta inválido no token");
+        var accountId = User.GetAccountId();
 
         var response = await _categoryService.GetAllCategoriesByAccountIdServiceAsync(
-            accountId: IdValueObject.Factory(accountIdGuid),
+            accountId: IdValueObject.Factory(accountId),
             pageNumber: pageNumber,
             pageSize: pageSize,
             cancellationToken: cancellationToken);
@@ -91,17 +99,12 @@ public class CategoryController : ControllerBase
             if (!Enum.IsDefined(typeof(CategoryType), input.NewType!))
                 throw new ArgumentException("Tipo de categoria inválido.");
         }
-        
-        var accountIdString = User.FindFirst("accountId")?.Value;
-        if (string.IsNullOrEmpty(accountIdString))
-            throw new ArgumentException("Conta não encontrada.");
 
-        if (!Guid.TryParse(accountIdString, out var accountIdGuid))
-            throw new ArgumentException("ID da conta inválido no token");
+        var accountId = User.GetAccountId();
 
         var response = await _categoryService.UpdateCategoryDetailsByIdServiceAsync(
             categoryId: IdValueObject.Factory(categoryId),
-            accountId: IdValueObject.Factory(accountIdGuid),
+            accountId: IdValueObject.Factory(accountId),
             input: UpdateCategoryDetailsByTitleServiceInput.Factory(
                 newTitle: input.NewTitle,
                 newType: input.NewType),

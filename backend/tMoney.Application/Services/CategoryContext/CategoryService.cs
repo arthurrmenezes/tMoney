@@ -45,6 +45,23 @@ public class CategoryService : ICategoryService
         return output;
     }
 
+    public async Task<GetCategoryByIdServiceOutput> GetCategoryByIdServiceAsync(IdValueObject categoryId, IdValueObject accountId, CancellationToken cancellationToken)
+    {
+        var category = await _categoryRepository.GetByIdAsync(categoryId.Id, accountId.Id, cancellationToken);
+        if (category is null)
+            throw new KeyNotFoundException("Categoria não encontrada");
+
+        var output = GetCategoryByIdServiceOutput.Factory(
+            id: category.Id.ToString(),
+            title: category.Title,
+            type: category.Type.ToString(),
+            accountId: category.AccountId.ToString(),
+            updatedAt: category.UpdatedAt!.Value,
+            createdAt: category.CreatedAt);
+
+        return output;
+    }
+
     public async Task<GetAllCategoriesByAccountIdServiceOutput> GetAllCategoriesByAccountIdServiceAsync(IdValueObject accountId, int pageNumber, int pageSize,
         CancellationToken cancellationToken)
     {
