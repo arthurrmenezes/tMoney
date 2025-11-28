@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using tMoney.Domain.BoundedContexts.AccountContext.Entities;
+using tMoney.Domain.BoundedContexts.CategoryContext.Entities;
 using tMoney.Infrastructure.Auth.Entities;
 using tMoney.Infrastructure.Data.Mappings;
 
@@ -10,6 +11,7 @@ public sealed class DataContext : IdentityDbContext<User>
 {
     public DbSet<Account> Accounts { get; set; }
     public DbSet<RefreshToken> RefreshTokens { get; set; }
+    public DbSet<Category> Categories { get; set; }
 
     public DataContext(DbContextOptions<DataContext> options) : base(options) { }
 
@@ -18,6 +20,7 @@ public sealed class DataContext : IdentityDbContext<User>
         builder.ApplyConfiguration(new AccountMapping());
         builder.ApplyConfiguration(new UserMapping());
         builder.ApplyConfiguration(new RefreshTokenMapping());
+        builder.ApplyConfiguration(new CategoryMapping());
         base.OnModelCreating(builder);
     }
 }
