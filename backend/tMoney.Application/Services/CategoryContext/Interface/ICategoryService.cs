@@ -10,4 +10,10 @@ public interface ICategoryService
         IdValueObject accountId,
         CreateCategoryServiceInput input,
         CancellationToken cancellationToken);
+
+    public Task<GetAllCategoriesByAccountIdServiceOutput> GetAllCategoriesByAccountIdServiceAsync(
+        IdValueObject accountId,
+        int pageNumber,
+        int pageSize,
+        CancellationToken cancellationToken);
 }

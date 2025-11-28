@@ -44,4 +44,31 @@ public class CategoryService : ICategoryService
 
         return output;
     }
+
+    public async Task<GetAllCategoriesByAccountIdServiceOutput> GetAllCategoriesByAccountIdServiceAsync(IdValueObject accountId, int pageNumber, int pageSize,
+        CancellationToken cancellationToken)
+    {
+        var categories = await _categoryRepository.GetAllAsync(accountId.Id, pageNumber, pageSize, cancellationToken);
+
+        var categoriesOutput = categories.Select(c => new GetAllCategoriesByAccountIdServiceOutputCategory(
+            id: c.Id.ToString(),
+            title: c.Title,
+            type: c.Type.ToString(),
+            accountId: c.AccountId.ToString(),
+            updatedAt: c.UpdatedAt,
+            createdAt: c.CreatedAt)).ToArray();
+
+        var totalCategories = await _categoryRepository.GetTotalCategoriesNumberAsync(accountId.Id, cancellationToken);
+
+        var totalPages = (int) Math.Ceiling((double)totalCategories / pageSize);
+
+        var output = GetAllCategoriesByAccountIdServiceOutput.Factory(
+            totalCategories: totalCategories,
+            pageNumber: pageNumber,
+            pageSize: pageSize,
+            totalPages: totalPages,
+            categories: categoriesOutput);
+
+        return output;
+    }
 }

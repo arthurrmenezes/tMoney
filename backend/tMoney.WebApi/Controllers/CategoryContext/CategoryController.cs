@@ -21,7 +21,9 @@ public class CategoryController : ControllerBase
 
     [HttpPost]
     [Authorize]
-    public async Task<IActionResult> CreateCategoryAsync([FromBody] CreateCategoryPayload input, CancellationToken cancellationToken)
+    public async Task<IActionResult> CreateCategoryAsync(
+        [FromBody] CreateCategoryPayload input,
+        CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(input.Title))
             throw new ArgumentException("O nome é obrigatório.");
@@ -42,6 +44,33 @@ public class CategoryController : ControllerBase
                 title: input.Title,
                 type: input.Type),
             cancellationToken);
+
+        return Ok(response);
+    }
+
+    [HttpGet]
+    [Authorize]
+    public async Task<IActionResult> GetAllCategoriesByAccountIdAsync(
+        CancellationToken cancellationToken,
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 10)
+    {
+        if (pageNumber < 1) pageNumber = 1;
+        if (pageSize < 1) pageSize = 10;
+        if (pageSize > 50) pageSize = 50;
+
+        var accountIdString = User.FindFirst("accountId")?.Value;
+        if (string.IsNullOrEmpty(accountIdString))
+            throw new ArgumentException("Conta não encontrada.");
+
+        if (!Guid.TryParse(accountIdString, out var accountIdGuid))
+            throw new ArgumentException("ID da conta inválido no token");
+
+        var response = await _categoryService.GetAllCategoriesByAccountIdServiceAsync(
+            accountId: IdValueObject.Factory(accountIdGuid),
+            pageNumber: pageNumber,
+            pageSize: pageSize,
+            cancellationToken: cancellationToken);
 
         return Ok(response);
     }

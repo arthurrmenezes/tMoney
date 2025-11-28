@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using tMoney.Domain.BoundedContexts.AccountContext.Entities;
 using tMoney.Domain.BoundedContexts.CategoryContext.Entities;
 using tMoney.Domain.ValueObjects;
@@ -13,6 +14,12 @@ public sealed class CategoryMapping : IEntityTypeConfiguration<Category>
         builder.ToTable("categories");
 
         builder.HasKey(c => c.Id);
+
+        builder.HasOne<Account>()
+            .WithMany()
+            .HasForeignKey(c => c.AccountId)
+            .IsRequired()
+            .OnDelete(DeleteBehavior.Cascade);
 
         #region Properties Configuration
 
@@ -33,18 +40,14 @@ public sealed class CategoryMapping : IEntityTypeConfiguration<Category>
             .HasColumnName("type")
             .ValueGeneratedNever();
 
+        var accountIdConverter = new ValueConverter<IdValueObject, Guid>(
+            a => a.Id,
+            a => IdValueObject.Factory(a));
+
         builder.Property(c => c.AccountId)
             .IsRequired()
             .HasColumnName("account_id")
-            .HasConversion(
-                a => a.Id,
-                a => IdValueObject.Factory(a));
-
-        builder.HasOne<Account>()
-            .WithMany()
-            .HasForeignKey(c => c.AccountId)
-            .IsRequired()
-            .OnDelete(DeleteBehavior.Cascade);
+            .HasConversion(accountIdConverter);
 
         builder.Property(c => c.UpdatedAt)
             .IsRequired(false)

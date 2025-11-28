@@ -6,4 +6,6 @@ namespace tMoney.Infrastructure.Data.Repositories.Interfaces;
 public interface ICategoryRepository : IBaseRepository<Category>
 {
     public Task<Category?> GetByTitleAsync(string title, Guid accountId, CancellationToken cancellationToken);
+    public Task<Category[]> GetAllAsync(Guid accountId, int pageNumber, int pageSize, CancellationToken cancellationToken);
+    public Task<int> GetTotalCategoriesNumberAsync(Guid accountId, CancellationToken cancellationToken);
 }
