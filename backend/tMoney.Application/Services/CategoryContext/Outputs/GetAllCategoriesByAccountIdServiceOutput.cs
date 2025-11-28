@@ -29,15 +29,18 @@ public sealed class GetAllCategoriesByAccountIdServiceOutputCategory
     public string Title { get; }
     public string Type { get; }
     public string AccountId { get; }
+    public bool IsDefault { get; }
     public DateTime? UpdatedAt { get; }
     public DateTime CreatedAt { get; }
 
-    public GetAllCategoriesByAccountIdServiceOutputCategory(string id, string title, string type, string accountId, DateTime? updatedAt, DateTime createdAt)
+    public GetAllCategoriesByAccountIdServiceOutputCategory(string id, string title, string type, string accountId, bool isDefault, DateTime? updatedAt, 
+        DateTime createdAt)
     {
         Id = id;
         Title = title;
         Type = type;
         AccountId = accountId;
+        IsDefault = isDefault;
         UpdatedAt = updatedAt;
         CreatedAt = createdAt;
     }

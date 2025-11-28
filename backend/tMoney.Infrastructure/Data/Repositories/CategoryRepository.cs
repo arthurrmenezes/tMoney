@@ -46,4 +46,12 @@ public class CategoryRepository : BaseRepository<Category>, ICategoryRepository
             .Where(c => c.AccountId == voAccountId)
             .CountAsync(cancellationToken);
     }
+
+    public async Task<Category> GetDefaultCategoryByIdAsync(Guid accountId, CancellationToken cancellationToken)
+    {
+        var defaultCategory = await _dataContext.Categories
+            .FirstOrDefaultAsync(c => c.IsDefault && c.AccountId == IdValueObject.Factory(accountId), cancellationToken);
+
+        return defaultCategory!;
+    }
 }

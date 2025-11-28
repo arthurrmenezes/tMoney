@@ -12,14 +12,16 @@ public class CategoryService : ICategoryService
 {
     private readonly ICategoryRepository _categoryRepository;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly ITransactionRepository _transactionRepository;
 
-    public CategoryService(ICategoryRepository categoryRepository, IUnitOfWork unitOfWork)
+    public CategoryService(ICategoryRepository categoryRepository, IUnitOfWork unitOfWork, ITransactionRepository transactionRepository)
     {
         _categoryRepository = categoryRepository;
         _unitOfWork = unitOfWork;
+        _transactionRepository = transactionRepository;
     }
 
-    public async Task<CreateCategoryServiceOutput> CreateCategoryServiceAsync(IdValueObject accountId, CreateCategoryServiceInput input, 
+    public async Task<CreateCategoryServiceOutput> CreateCategoryServiceAsync(IdValueObject accountId, CreateCategoryServiceInput input,
         CancellationToken cancellationToken)
     {
         var categoryExists = await _categoryRepository.GetByTitleAsync(input.Title, accountId.Id, cancellationToken);
@@ -29,7 +31,8 @@ public class CategoryService : ICategoryService
         var category = new Category(
             title: input.Title,
             type: input.Type,
-            accountId: accountId);
+            accountId: accountId,
+            isDefault: false);
 
         await _categoryRepository.AddAsync(category, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
@@ -39,6 +42,7 @@ public class CategoryService : ICategoryService
             title: category.Title,
             type: category.Type.ToString(),
             accountId: category.AccountId.ToString(),
+            isDefault: category.IsDefault,
             updatedAt: null,
             createdAt: category.CreatedAt);
 
@@ -56,7 +60,8 @@ public class CategoryService : ICategoryService
             title: category.Title,
             type: category.Type.ToString(),
             accountId: category.AccountId.ToString(),
-            updatedAt: category.UpdatedAt!.Value,
+            isDefault: category.IsDefault,
+            updatedAt: category.UpdatedAt,
             createdAt: category.CreatedAt);
 
         return output;
@@ -72,12 +77,13 @@ public class CategoryService : ICategoryService
             title: c.Title,
             type: c.Type.ToString(),
             accountId: c.AccountId.ToString(),
+            isDefault: c.IsDefault,
             updatedAt: c.UpdatedAt,
             createdAt: c.CreatedAt)).ToArray();
 
         var totalCategories = await _categoryRepository.GetTotalCategoriesNumberAsync(accountId.Id, cancellationToken);
 
-        var totalPages = (int) Math.Ceiling((double)totalCategories / pageSize);
+        var totalPages = (int)Math.Ceiling((double)totalCategories / pageSize);
 
         var output = GetAllCategoriesByAccountIdServiceOutput.Factory(
             totalCategories: totalCategories,
@@ -89,7 +95,7 @@ public class CategoryService : ICategoryService
         return output;
     }
 
-    public async Task<UpdateCategoryDetailsByIdServiceOutput> UpdateCategoryDetailsByIdServiceAsync(IdValueObject categoryId, IdValueObject accountId, 
+    public async Task<UpdateCategoryDetailsByIdServiceOutput> UpdateCategoryDetailsByIdServiceAsync(IdValueObject categoryId, IdValueObject accountId,
         UpdateCategoryDetailsByTitleServiceInput input, CancellationToken cancellationToken)
     {
         var category = await _categoryRepository.GetByIdAsync(categoryId.Id, accountId.Id, cancellationToken);
@@ -114,9 +120,44 @@ public class CategoryService : ICategoryService
             title: category.Title,
             type: category.Type.ToString(),
             accountId: category.AccountId.ToString(),
+            isDefault: category.IsDefault,
             updatedAt: category.UpdatedAt!.Value,
             createdAt: category.CreatedAt);
 
         return output;
+    }
+
+    public async Task DeleteCategoryByIdServiceAsync(IdValueObject categoryId, IdValueObject accountId, CancellationToken cancellationToken)
+    {
+        var category = await _categoryRepository.GetByIdAsync(categoryId.Id, accountId.Id, cancellationToken);
+        if (category is null)
+            throw new KeyNotFoundException("Categoria não encontrada");
+
+        if (category.IsDefault)
+            throw new InvalidOperationException("A categoria padrão não pode ser removida.");
+
+        await _unitOfWork.BeginTransactionAsync(cancellationToken);
+
+        try
+        {
+            var defaultCategory = await _categoryRepository.GetDefaultCategoryByIdAsync(accountId.Id, cancellationToken);
+            if (defaultCategory is null)
+                throw new InvalidOperationException("Categoria padrão não encontrada para esta conta. Entre em contato com o suporte.");
+
+            await _transactionRepository.UpdateCategoryForDefaultAsync(
+                currentCategoryId: categoryId.Id,
+                defaultCategoryId: defaultCategory.Id.Id,
+                accountId: accountId.Id,
+                cancellationToken: cancellationToken);
+
+            _categoryRepository.Delete(category);
+
+            await _unitOfWork.CommitTransactionAsync(cancellationToken);
+        }
+        catch (Exception)
+        {
+            await _unitOfWork.RollbackTransactionAsync(cancellationToken);
+            throw;
+        }
     }
 }

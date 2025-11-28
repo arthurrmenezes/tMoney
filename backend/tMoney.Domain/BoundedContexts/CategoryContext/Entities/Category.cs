@@ -9,17 +9,19 @@ public class Category
     public string Title { get; private set; }
     public CategoryType Type { get; private set; }
     public IdValueObject AccountId { get; private set; }
+    public bool IsDefault { get; private set; }
     public DateTime? UpdatedAt { get; private set; }
     public DateTime CreatedAt { get; private set; }
 
     protected Category() { }
 
-    public Category(string title, CategoryType type, IdValueObject accountId)
+    public Category(string title, CategoryType type, IdValueObject accountId, bool isDefault)
     {
         Id = IdValueObject.New();
         Title = title;
         Type = type;
         AccountId = accountId;
+        IsDefault = isDefault;
         UpdatedAt = null;
         CreatedAt = DateTime.UtcNow;
     }

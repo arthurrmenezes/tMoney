@@ -49,6 +49,11 @@ public sealed class CategoryMapping : IEntityTypeConfiguration<Category>
             .HasColumnName("account_id")
             .HasConversion(accountIdConverter);
 
+        builder.Property(c => c.IsDefault)
+            .IsRequired()
+            .HasColumnName("is_default")
+            .ValueGeneratedNever();
+
         builder.Property(c => c.UpdatedAt)
             .IsRequired(false)
             .HasColumnName("updated_at")

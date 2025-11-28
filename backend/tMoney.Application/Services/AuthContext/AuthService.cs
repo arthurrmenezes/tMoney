@@ -5,6 +5,8 @@ using tMoney.Application.Services.AuthContext.Inputs;
 using tMoney.Application.Services.AuthContext.Interfaces;
 using tMoney.Application.Services.AuthContext.Outputs;
 using tMoney.Domain.BoundedContexts.AccountContext.Entities;
+using tMoney.Domain.BoundedContexts.CategoryContext.Entities;
+using tMoney.Domain.BoundedContexts.CategoryContext.ENUMs;
 using tMoney.Infrastructure.Auth.Entities;
 using tMoney.Infrastructure.Data.Repositories.Interfaces;
 using tMoney.Infrastructure.Data.UnitOfWork.Interfaces;
@@ -24,11 +26,12 @@ public class AuthService : IAuthService
     private readonly ITokenService _tokenService;
     private readonly IRefreshTokenRepository _refreshTokenRepository;
     private readonly IEmailService _emailService;
+    private readonly ICategoryRepository _categoryRepository;
 
     private readonly string _baseUrl = $"http://localhost:5173";
 
     public AuthService(UserManager<User> userManager, SignInManager<User> signInManager, IUnitOfWork unitOfWork, IAccountRepository accountRepository, 
-        ITokenService tokenService, IRefreshTokenRepository refreshTokenRepository, IEmailService emailService)
+        ITokenService tokenService, IRefreshTokenRepository refreshTokenRepository, IEmailService emailService, ICategoryRepository categoryRepository)
     {
         _userManager = userManager;
         _signInManager = signInManager;
@@ -37,6 +40,7 @@ public class AuthService : IAuthService
         _tokenService = tokenService;
         _refreshTokenRepository = refreshTokenRepository;
         _emailService = emailService;
+        _categoryRepository = categoryRepository;
     }
 
     public async Task<RegisterAccountServiceOutput> RegisterAccountServiceAsync(RegisterAccountServiceInput input, CancellationToken cancellationToken)
@@ -71,6 +75,14 @@ public class AuthService : IAuthService
                 var error = string.Join(", ", result.Errors.Select(e => e.Description));
                 throw new ArgumentException($"Falha ao criar conta: {error}");
             }
+
+            var defaultCategory = new Category(
+                title: "Outros",
+                type: CategoryType.Both,
+                accountId: account.AccountId,
+                isDefault: true);
+
+            await _categoryRepository.AddAsync(defaultCategory, cancellationToken);
 
             await _unitOfWork.CommitTransactionAsync(cancellationToken);
 

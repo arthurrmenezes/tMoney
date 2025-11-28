@@ -27,4 +27,9 @@ public interface ICategoryService
         IdValueObject accountId,
         UpdateCategoryDetailsByTitleServiceInput input,
         CancellationToken cancellationToken);
+
+    public Task DeleteCategoryByIdServiceAsync(
+        IdValueObject categoryId,
+        IdValueObject accountId,
+        CancellationToken cancellationToken);
 }
