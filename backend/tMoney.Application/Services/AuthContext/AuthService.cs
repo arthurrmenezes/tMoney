@@ -129,13 +129,13 @@ public class AuthService : IAuthService
         if (user is null)
             throw new ArgumentException("E-mail ou senha incorreta.");
 
+        if (!await _userManager.IsEmailConfirmedAsync(user))
+            throw new InvalidOperationException("Confirme seu e-mail antes de fazer login.");
+
         var verifyCredentials = await _signInManager.CheckPasswordSignInAsync(user, input.Password, true);
 
         if (verifyCredentials.IsLockedOut)
             throw new InvalidOperationException("Muitas tentativas falhas. Tente novamente mais tarde.");
-
-        if (!await _userManager.IsEmailConfirmedAsync(user))
-            throw new InvalidOperationException("Confirme seu e-mail antes de fazer login.");
 
         if (!verifyCredentials.Succeeded)
             throw new InvalidOperationException("E-mail ou senha incorreta.");
@@ -144,7 +144,6 @@ public class AuthService : IAuthService
         var tokenExpirationInSeconds = _tokenService.GetAccessTokenExpiration();
 
         var refreshToken = _tokenService.GenerateRefreshToken();
-
         var refreshTokenExpiration = DateTime.UtcNow.AddDays(_tokenService.GetRefreshTokenExpiration());
 
         var refreshTokenEntity = new RefreshToken(
