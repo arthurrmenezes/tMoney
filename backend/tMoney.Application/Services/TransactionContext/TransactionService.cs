@@ -3,6 +3,7 @@ using tMoney.Application.Services.TransactionContext.Interfaces;
 using tMoney.Application.Services.TransactionContext.Outputs;
 using tMoney.Domain.BoundedContexts.TransactionContext.Entities;
 using tMoney.Domain.BoundedContexts.TransactionContext.ENUMs;
+using tMoney.Domain.ValueObjects;
 using tMoney.Infrastructure.Data.Repositories.Interfaces;
 using tMoney.Infrastructure.Data.UnitOfWork.Interfaces;
 
@@ -90,5 +91,32 @@ public class TransactionService : ITransactionService
             await _unitOfWork.RollbackTransactionAsync(cancellationToken);
             throw;
         }
+    }
+
+    public async Task<GetTransactionByIdServiceOutput> GetTransactionByIdServiceAsync(
+        IdValueObject transactionId, 
+        IdValueObject accountId, 
+        CancellationToken cancellationToken)
+    {
+        var transaction = await _transactionRepository.GetByIdAsync(transactionId.Id, accountId.Id, cancellationToken);
+        if (transaction is null)
+            throw new KeyNotFoundException("Transação não encontrada");
+
+        var output = GetTransactionByIdServiceOutput.Factory(
+            id: transaction.Id.ToString(),
+            accountId: transaction.AccountId.ToString(),
+            categoryId: transaction.CategoryId.ToString(),
+            title: transaction.Title,
+            description: transaction.Description,
+            amount: transaction.Amount,
+            date: transaction.Date,
+            transactionType: transaction.TransactionType.ToString(),
+            paymentMethod: transaction.PaymentMethod.ToString(),
+            status: transaction.Status.ToString(),
+            destination: transaction.Destination,
+            updatedAt: transaction.UpdatedAt,
+            createdAt: transaction.CreatedAt);
+
+        return output;
     }
 }

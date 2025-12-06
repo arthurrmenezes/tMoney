@@ -46,4 +46,21 @@ public class TransactionController : ControllerBase
 
         return Ok(response);
     }
+
+    [HttpGet]
+    [Route("{transactionId}")]
+    [Authorize]
+    public async Task<IActionResult> GetTransactionByIdAsync(
+        [FromRoute] Guid transactionId,
+        CancellationToken cancellationToken)
+    {
+        var accountId = User.GetAccountId();
+
+        var serviceResult = await _transactionService.GetTransactionByIdServiceAsync(
+            transactionId: IdValueObject.Factory(transactionId),
+            accountId: IdValueObject.Factory(accountId),
+            cancellationToken: cancellationToken);
+
+        return Ok(serviceResult);
+    }
 }

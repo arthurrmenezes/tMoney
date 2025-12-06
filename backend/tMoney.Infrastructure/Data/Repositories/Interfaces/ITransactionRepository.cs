@@ -6,4 +6,5 @@ namespace tMoney.Infrastructure.Data.Repositories.Interfaces;
 public interface ITransactionRepository : IBaseRepository<Transaction>
 {
     public Task UpdateCategoryForDefaultAsync(Guid currentCategoryId, Guid defaultCategoryId, Guid accountId, CancellationToken cancellationToken);
+    public Task<Transaction?> GetByIdAsync(Guid transactionId, Guid accountId, CancellationToken cancellationToken);
 }

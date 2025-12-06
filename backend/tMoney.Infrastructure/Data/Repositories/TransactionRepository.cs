@@ -12,9 +12,22 @@ public class TransactionRepository : BaseRepository<Transaction>, ITransactionRe
 
     public async Task UpdateCategoryForDefaultAsync(Guid currentCategoryId, Guid defaultCategoryId, Guid accountId, CancellationToken cancellationToken)
     {
+        var voDefaultCategoryId = IdValueObject.Factory(defaultCategoryId);
+
         await _dataContext.Transactions
             .Where(t => t.CategoryId == IdValueObject.Factory(currentCategoryId) && t.AccountId == IdValueObject.Factory(accountId))
             .ExecuteUpdateAsync(calls => 
-                calls.SetProperty(t => t.CategoryId, IdValueObject.Factory(defaultCategoryId)), cancellationToken);
+                calls.SetProperty(t => t.CategoryId, voDefaultCategoryId), cancellationToken);
+    }
+
+    public async Task<Transaction?> GetByIdAsync(Guid transactionId, Guid accountId, CancellationToken cancellationToken)
+    {
+        var voTransactionId = IdValueObject.Factory(transactionId);
+        var voAccountId = IdValueObject.Factory(accountId);
+
+        return await _dataContext.Transactions
+            .AsNoTracking()
+            .FirstOrDefaultAsync(
+                t => t.Id == voTransactionId && t.AccountId == voAccountId, cancellationToken);
     }
 }
