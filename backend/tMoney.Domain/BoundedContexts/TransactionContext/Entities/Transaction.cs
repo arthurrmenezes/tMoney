@@ -22,6 +22,8 @@ public class Transaction
     public Transaction(IdValueObject accountId, IdValueObject categoryId, string title, string? description, decimal amount, DateTime date, 
         TransactionType transactionType, PaymentMethod paymentMethod, PaymentStatus status, string? destination)
     {
+        ValidateDomain(title, description, amount, transactionType, paymentMethod, status, destination);
+
         Id = IdValueObject.New();
         AccountId = accountId;
         CategoryId = categoryId;
@@ -35,5 +37,34 @@ public class Transaction
         Destination = destination;
         UpdatedAt = null;
         CreatedAt = DateTime.UtcNow;
+    }
+
+    private void ValidateDomain(string title, string? description, decimal amount, TransactionType transactionType, PaymentMethod paymentMethod, 
+        PaymentStatus status, string? destination)
+    {
+        if (string.IsNullOrWhiteSpace(title))
+            throw new ArgumentException("O título não pode ser nulo ou vazio.");
+        if (title.Length > 50)
+            throw new ArgumentException("O título não pode ultrapassar 50 caracteres.");
+
+        if (!string.IsNullOrWhiteSpace(description))
+            if (description.Length > 300)
+                throw new ArgumentException("A descrição não pode ultrapassar 300 caracteres");
+
+        if (amount <= 0)
+            throw new ArgumentException("Valor inválido.");
+
+        if (!Enum.IsDefined(typeof(TransactionType), transactionType))
+            throw new ArgumentException("Tipo de transação inválido.");
+
+        if (!Enum.IsDefined(typeof(PaymentMethod), paymentMethod))
+            throw new ArgumentException("Tipo de transação inválido.");
+
+        if (!Enum.IsDefined(typeof(PaymentStatus), status))
+            throw new ArgumentException("Status de pagamento inválido.");
+
+        if (!string.IsNullOrWhiteSpace(destination))
+            if (destination!.Length > 50)
+                throw new ArgumentException("O valor do destino não pode ultrapassar 50 caracteres");
     }
 }

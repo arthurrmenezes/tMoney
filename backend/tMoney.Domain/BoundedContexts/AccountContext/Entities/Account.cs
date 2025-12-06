@@ -35,4 +35,22 @@ public class Account
 
         UpdatedAt = DateTime.UtcNow;
     }
+
+    public void IncrementBalance(decimal amount)
+    {
+        if (amount <= 0)
+            return;
+
+        Balance += amount;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    public void DecrementBalance(decimal amount)
+    {
+        if (amount <= 0)
+            return;
+
+        Balance -= amount;
+        UpdatedAt = DateTime.UtcNow;
+    }
 }

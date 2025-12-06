@@ -90,6 +90,7 @@ public static class DependencyInjection
         serviceCollection.AddScoped<IAccountRepository, AccountRepository>();
         serviceCollection.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
         serviceCollection.AddScoped<ICategoryRepository, CategoryRepository>();
+        serviceCollection.AddScoped<ITransactionRepository, TransactionRepository>();
 
         #endregion
 

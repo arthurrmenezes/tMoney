@@ -5,6 +5,8 @@ using tMoney.Application.Services.AuthContext;
 using tMoney.Application.Services.AuthContext.Interfaces;
 using tMoney.Application.Services.CategoryContext;
 using tMoney.Application.Services.CategoryContext.Interface;
+using tMoney.Application.Services.TransactionContext;
+using tMoney.Application.Services.TransactionContext.Interfaces;
 
 namespace tMoney.Application;
 
@@ -15,6 +17,7 @@ public static class DependencyInjection
         serviceCollection.AddScoped<IAuthService, AuthService>();
         serviceCollection.AddScoped<IAccountService, AccountService>();
         serviceCollection.AddScoped<ICategoryService, CategoryService>();
+        serviceCollection.AddScoped<ITransactionService, TransactionService>();
 
         return serviceCollection;
     }

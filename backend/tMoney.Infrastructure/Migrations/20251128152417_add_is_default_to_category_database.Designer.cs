@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using tMoney.Infrastructure.Data;
@@ -11,9 +12,11 @@ using tMoney.Infrastructure.Data;
 namespace tMoney.Infrastructure.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20251128152417_add_is_default_to_category_database")]
+    partial class add_is_default_to_category_database
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -233,72 +236,6 @@ namespace tMoney.Infrastructure.Migrations
                     b.ToTable("categories", (string)null);
                 });
 
-            modelBuilder.Entity("tMoney.Domain.BoundedContexts.TransactionContext.Entities.Transaction", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("AccountId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("account_id");
-
-                    b.Property<decimal>("Amount")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)")
-                        .HasColumnName("amount");
-
-                    b.Property<Guid>("CategoryId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("category_id");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("date");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
-                        .HasColumnName("description");
-
-                    b.Property<string>("Destination")
-                        .HasColumnType("text")
-                        .HasColumnName("destination");
-
-                    b.Property<int>("PaymentMethod")
-                        .HasColumnType("integer")
-                        .HasColumnName("payment_method");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("integer")
-                        .HasColumnName("status");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
-                        .HasColumnName("title");
-
-                    b.Property<int>("TransactionType")
-                        .HasColumnType("integer")
-                        .HasColumnName("transaction_type");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AccountId");
-
-                    b.HasIndex("CategoryId");
-
-                    b.ToTable("transactions", (string)null);
-                });
-
             modelBuilder.Entity("tMoney.Infrastructure.Auth.Entities.RefreshToken", b =>
                 {
                     b.Property<Guid>("Id")
@@ -467,21 +404,6 @@ namespace tMoney.Infrastructure.Migrations
                     b.HasOne("tMoney.Domain.BoundedContexts.AccountContext.Entities.Account", null)
                         .WithMany()
                         .HasForeignKey("AccountId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("tMoney.Domain.BoundedContexts.TransactionContext.Entities.Transaction", b =>
-                {
-                    b.HasOne("tMoney.Domain.BoundedContexts.AccountContext.Entities.Account", null)
-                        .WithMany()
-                        .HasForeignKey("AccountId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("tMoney.Domain.BoundedContexts.CategoryContext.Entities.Category", null)
-                        .WithMany()
-                        .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
