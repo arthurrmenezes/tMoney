@@ -112,4 +112,21 @@ public class CategoryController : ControllerBase
 
         return Ok(response);
     }
+
+    [HttpDelete]
+    [Route("{categoryId}")]
+    [Authorize]
+    public async Task<IActionResult> DeleteCategoryByIdAsync(
+        [FromRoute] Guid categoryId,
+        CancellationToken cancellationToken)
+    {
+        var accountId = User.GetAccountId();
+
+        await _categoryService.DeleteCategoryByIdServiceAsync(
+            categoryId: IdValueObject.Factory(categoryId),
+            accountId: IdValueObject.Factory(accountId),
+            cancellationToken: cancellationToken);
+
+        return NoContent();
+    }
 }
