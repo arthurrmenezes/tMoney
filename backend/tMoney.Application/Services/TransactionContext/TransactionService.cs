@@ -119,4 +119,40 @@ public class TransactionService : ITransactionService
 
         return output;
     }
+
+    public async Task<GetAllTransactionsByAccountIdServiceOutput> GetAllTransactionsByAccountIdServiceAsync(
+        IdValueObject accountId, int pageNumber, int pageSize, CancellationToken cancellationToken)
+    {
+        var transactions = await _transactionRepository.GetAllByAccountIdAsync(accountId.Id, pageNumber, pageSize, cancellationToken);
+
+        var transactionOutput = transactions
+            .Select(t => new GetAllTransactionsByAccountIdServiceOutputTransaction(
+                id: t.Id.ToString(),
+                accountId: t.AccountId.ToString(),
+                categoryId: t.CategoryId.ToString(),
+                title: t.Title,
+                description: t.Description,
+                amount: t.Amount,
+                date: t.Date,
+                transactionType: t.TransactionType.ToString(),
+                paymentMethod: t.PaymentMethod.ToString(),
+                status: t.Status.ToString(),
+                destination: t.Destination,
+                updatedAt: t.UpdatedAt,
+                createdAt: t.CreatedAt))
+            .ToArray();
+
+        var totalTransactions = await _transactionRepository.GetTransactionsCountAsync(accountId.Id, cancellationToken);
+
+        var totalPages = (int)Math.Ceiling((double)totalTransactions / pageSize);
+
+        var output = GetAllTransactionsByAccountIdServiceOutput.Factory(
+            totalTransactions: totalTransactions,
+            pageNumber: pageNumber,
+            pageSize: pageSize,
+            totalPages: totalPages,
+            transactions: transactionOutput);
+
+        return output;
+    }
 }

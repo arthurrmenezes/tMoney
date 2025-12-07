@@ -63,4 +63,26 @@ public class TransactionController : ControllerBase
 
         return Ok(serviceResult);
     }
+
+    [HttpGet]
+    [Authorize]
+    public async Task<IActionResult> GetAllTransactionsAsync(
+        CancellationToken cancellationToken,
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 10)
+    {
+        if (pageNumber < 1) pageNumber = 1;
+        if (pageSize < 1) pageSize = 10;
+        if (pageSize > 50) pageSize = 50;
+
+        var accountId = User.GetAccountId();
+
+        var serviceResult = await _transactionService.GetAllTransactionsByAccountIdServiceAsync(
+            accountId: IdValueObject.Factory(accountId),
+            pageNumber: pageNumber,
+            pageSize: pageSize,
+            cancellationToken: cancellationToken);
+
+        return Ok(serviceResult);
+    }
 }

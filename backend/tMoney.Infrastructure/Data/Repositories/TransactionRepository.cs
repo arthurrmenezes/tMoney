@@ -30,4 +30,28 @@ public class TransactionRepository : BaseRepository<Transaction>, ITransactionRe
             .FirstOrDefaultAsync(
                 t => t.Id == voTransactionId && t.AccountId == voAccountId, cancellationToken);
     }
+
+    public async Task<Transaction[]> GetAllByAccountIdAsync(Guid accountId, int pageNumber, int pageSize, CancellationToken cancellationToken)
+    {
+        var skip = (pageNumber - 1) * pageSize;
+        var voAccountId = IdValueObject.Factory(accountId);
+
+        return await _dataContext.Transactions
+            .AsNoTracking()
+            .Where(t => t.AccountId == voAccountId)
+            .OrderByDescending(t => t.CreatedAt)
+            .Skip(skip)
+            .Take(pageSize)
+            .ToArrayAsync(cancellationToken);
+    }
+
+    public async Task<int> GetTransactionsCountAsync(Guid accountId, CancellationToken cancellationToken)
+    {
+        var voAccountId = IdValueObject.Factory(accountId);
+
+        return await _dataContext.Transactions
+            .AsNoTracking()
+            .Where(t => t.AccountId == voAccountId)
+            .CountAsync(cancellationToken);
+    }
 }

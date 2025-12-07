@@ -14,4 +14,10 @@ public interface ITransactionService
         IdValueObject transactionId,
         IdValueObject accountId,
         CancellationToken cancellationToken);
+
+    public Task<GetAllTransactionsByAccountIdServiceOutput> GetAllTransactionsByAccountIdServiceAsync(
+        IdValueObject accountId,
+        int pageNumber,
+        int pageSize,
+        CancellationToken cancellationToken);
 }
