@@ -135,7 +135,7 @@ public class AuthService : IAuthService
         var verifyCredentials = await _signInManager.CheckPasswordSignInAsync(user, input.Password, true);
 
         if (verifyCredentials.IsLockedOut)
-            throw new InvalidOperationException("Muitas tentativas falhas. Tente novamente mais tarde.");
+            throw new InvalidOperationException("Muitas tentativas falhas. Sua conta está temporariamente bloqueada. Tente novamente mais tarde.");
 
         if (!verifyCredentials.Succeeded)
             throw new InvalidOperationException("E-mail ou senha incorreta.");
