@@ -229,4 +229,40 @@ public class TransactionService : ITransactionService
             throw;
         }
     }
+
+    public async Task DeleteTransactionByIdServiceAsync(
+        IdValueObject transactionId, 
+        IdValueObject accountId, 
+        CancellationToken cancellationToken)
+    {
+        var transaction = await _transactionRepository.GetByIdAsync(transactionId.Id, accountId.Id, cancellationToken);
+        if (transaction is null)
+            throw new KeyNotFoundException("Transação não encontrada");
+
+        var account = await _accountRepository.GetAccountByIdAsync(accountId.Id, cancellationToken);
+        if (account is null)
+            throw new KeyNotFoundException("Conta não encontrada");
+
+        await _unitOfWork.BeginTransactionAsync(cancellationToken);
+
+        try
+        {
+            if (transaction.Status == PaymentStatus.Paid)
+                if (transaction.TransactionType == TransactionType.Income)
+                    account.DecrementBalance(transaction.Amount);
+                else
+                    account.IncrementBalance(transaction.Amount);
+
+            _transactionRepository.Delete(transaction);
+
+            _accountRepository.Update(account);
+
+            await _unitOfWork.CommitTransactionAsync(cancellationToken);
+        }
+        catch (Exception)
+        {
+            await _unitOfWork.RollbackTransactionAsync(cancellationToken);
+            throw;
+        }
+    }
 }

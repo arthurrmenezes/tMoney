@@ -134,4 +134,21 @@ public class TransactionController : ControllerBase
 
         return Ok(serviceResult);
     }
+
+    [HttpDelete]
+    [Route("{transactionId}")]
+    [Authorize]
+    public async Task<IActionResult> DeleteTransactionByIdAsync(
+        [FromRoute] Guid transactionId,
+        CancellationToken cancellationToken)
+    {
+        var accountId = User.GetAccountId();
+
+        await _transactionService.DeleteTransactionByIdServiceAsync(
+            transactionId: IdValueObject.Factory(transactionId),
+            accountId: IdValueObject.Factory(accountId),
+            cancellationToken: cancellationToken);
+
+        return NoContent();
+    }
 }
