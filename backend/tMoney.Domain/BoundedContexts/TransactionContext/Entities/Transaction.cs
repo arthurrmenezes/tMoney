@@ -67,4 +67,37 @@ public class Transaction
             if (destination!.Length > 50)
                 throw new ArgumentException("O valor do destino não pode ultrapassar 50 caracteres");
     }
+
+    public void UpdateTransactionDetails(IdValueObject? categoryId, string? title, string? description, decimal? amount, DateTime? date,
+        TransactionType? transactionType, PaymentMethod? paymentMethod, PaymentStatus? status, string? destination)
+    {
+        if (categoryId is not null)
+            CategoryId = categoryId;
+
+        if (!string.IsNullOrWhiteSpace(title) && title.Length <= 50)
+            Title = title;
+
+        if (!string.IsNullOrWhiteSpace(description) && description.Length <= 300)
+            Description = description;
+
+        if (amount.HasValue && amount > 0)
+            Amount = amount.Value;
+
+        if (date is not null)
+            Date = date.Value;
+
+        if (transactionType.HasValue && Enum.IsDefined(typeof(TransactionType), transactionType))
+            TransactionType = transactionType.Value;
+
+        if (paymentMethod.HasValue && Enum.IsDefined(typeof(PaymentMethod), paymentMethod))
+            PaymentMethod = paymentMethod.Value;
+
+        if (status.HasValue && Enum.IsDefined(typeof(PaymentStatus), status))
+            Status = status.Value;
+
+        if (!string.IsNullOrWhiteSpace(destination) && destination!.Length <= 50)
+            Destination = destination;
+
+        UpdatedAt = DateTime.UtcNow;
+    }
 }

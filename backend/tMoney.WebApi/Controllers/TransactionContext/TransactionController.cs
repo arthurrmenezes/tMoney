@@ -85,4 +85,53 @@ public class TransactionController : ControllerBase
 
         return Ok(serviceResult);
     }
+
+    [HttpPatch]
+    [Route("{transactionId}")]
+    [Authorize]
+    public async Task<IActionResult> UpdateTransactionDetailsAsync(
+        [FromRoute] Guid transactionId,
+        [FromBody] UpdateTransactionDetailsPayload input,
+        CancellationToken cancellationToken)
+    {
+        if (input.CategoryId is null &&
+            input.Title is null &&
+            input.Description is null &&
+            input.Amount is null &&
+            input.Date is null &&
+            input.TransactionType is null &&
+            input.PaymentMethod is null &&
+            input.Status is null &&
+            input.Destination is null)
+            throw new ArgumentException("Informe pelo menos um campo para atualizar.");
+
+        var accountId = User.GetAccountId();
+
+        Guid? categoryId = null;
+
+        if (input.CategoryId is not null)
+        {
+            if (!Guid.TryParse(input.CategoryId, out var parsedCategory))
+                throw new ArgumentException("Category ID inválido.");
+
+            categoryId = parsedCategory;
+        }
+
+        var serviceResult = await _transactionService.UpdateTransactionDetailsByIdServiceAsync(
+            transactionId: IdValueObject.Factory(transactionId),
+            accountId: IdValueObject.Factory(accountId),
+            input: UpdateTransactionDetailsByIdServiceInput.Factory(
+                categoryId: categoryId is null ? null : IdValueObject.Factory(categoryId.Value),
+                title: input.Title,
+                description: input.Description,
+                amount: input.Amount,
+                date: input.Date,
+                transactionType: input.TransactionType,
+                paymentMethod: input.PaymentMethod,
+                status: input.Status,
+                destination: input.Destination),
+            cancellationToken: cancellationToken);
+
+        return Ok(serviceResult);
+    }
 }

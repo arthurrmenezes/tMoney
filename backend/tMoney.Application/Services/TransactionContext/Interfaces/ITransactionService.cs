@@ -20,4 +20,10 @@ public interface ITransactionService
         int pageNumber,
         int pageSize,
         CancellationToken cancellationToken);
+
+    public Task<UpdateTransactionDetailsByIdServiceOutput> UpdateTransactionDetailsByIdServiceAsync(
+        IdValueObject transactionId,
+        IdValueObject accountId,
+        UpdateTransactionDetailsByIdServiceInput input,
+        CancellationToken cancellationToken);
 }

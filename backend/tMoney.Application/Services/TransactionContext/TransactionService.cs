@@ -155,4 +155,78 @@ public class TransactionService : ITransactionService
 
         return output;
     }
+
+    public async Task<UpdateTransactionDetailsByIdServiceOutput> UpdateTransactionDetailsByIdServiceAsync(IdValueObject transactionId, 
+        IdValueObject accountId, UpdateTransactionDetailsByIdServiceInput input, CancellationToken cancellationToken)
+    {
+        var transaction = await _transactionRepository.GetByIdAsync(transactionId.Id, accountId.Id, cancellationToken);
+        if (transaction is null)
+            throw new KeyNotFoundException("Transação não encontrada");
+
+        var account = await _accountRepository.GetAccountByIdAsync(accountId.Id, cancellationToken);
+        if (account is null)
+            throw new KeyNotFoundException("Conta não encontrada");
+
+        var validateDestination = input.TransactionType == TransactionType.Income ? null : input.Destination;
+
+        await _unitOfWork.BeginTransactionAsync(cancellationToken);
+
+        try
+        {
+            var oldAmount = transaction.Amount;
+            var oldTransactionType = transaction.TransactionType;
+            var oldStatus = transaction.Status;
+
+            if (oldStatus == PaymentStatus.Paid)
+                if (oldTransactionType == TransactionType.Income)
+                    account.DecrementBalance(oldAmount);
+                else
+                    account.IncrementBalance(oldAmount);
+
+            transaction.UpdateTransactionDetails(
+                categoryId: input.CategoryId,
+                title: input.Title,
+                description: input.Description,
+                amount: input.Amount,
+                date: input.Date,
+                transactionType: input.TransactionType,
+                paymentMethod: input.PaymentMethod,
+                status: input.Status,
+                destination: validateDestination);
+
+            if (transaction.Status == PaymentStatus.Paid)
+                if (transaction.TransactionType == TransactionType.Income)
+                    account.IncrementBalance(transaction.Amount);
+                else
+                    account.DecrementBalance(transaction.Amount);
+
+            _transactionRepository.Update(transaction);
+
+            _accountRepository.Update(account);
+
+            await _unitOfWork.CommitTransactionAsync(cancellationToken);
+
+            var output = UpdateTransactionDetailsByIdServiceOutput.Factory(
+                id: transaction.Id.ToString(),
+                accountId: transaction.AccountId.ToString(),
+                categoryId: transaction.CategoryId.ToString(),
+                title: transaction.Title,
+                description: transaction.Description,
+                amount: transaction.Amount,
+                date: transaction.Date,
+                transactionType: transaction.TransactionType.ToString(),
+                paymentMethod: transaction.PaymentMethod.ToString(),
+                status: transaction.Status.ToString(),
+                destination: transaction.Destination,
+                updatedAt: transaction.UpdatedAt,
+                createdAt: transaction.CreatedAt);
+
+            return output;
+        }
+        catch (Exception)
+        {
+            await _unitOfWork.RollbackTransactionAsync(cancellationToken);
+            throw;
+        }
+    }
 }

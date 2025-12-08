@@ -1,6 +1,6 @@
 ﻿namespace tMoney.Application.Services.TransactionContext.Outputs;
 
-public sealed class CreateTransactionServiceOutput
+public sealed class UpdateTransactionDetailsByIdServiceOutput
 {
     public string Id { get; }
     public string AccountId { get; }
@@ -16,8 +16,8 @@ public sealed class CreateTransactionServiceOutput
     public DateTime? UpdatedAt { get; }
     public DateTime CreatedAt { get; }
 
-    private CreateTransactionServiceOutput(string id, string accountId, string categoryId, string title, string? description, 
-        decimal amount, DateTime date, string transactionType, string paymentMethod, string status, string? destination, 
+    private UpdateTransactionDetailsByIdServiceOutput(string id, string accountId, string categoryId, string title, string? description,
+        decimal amount, DateTime date, string transactionType, string paymentMethod, string status, string? destination,
         DateTime? updatedAt, DateTime createdAt)
     {
         Id = id;
@@ -35,7 +35,7 @@ public sealed class CreateTransactionServiceOutput
         CreatedAt = createdAt;
     }
 
-    public static CreateTransactionServiceOutput Factory(string id, string accountId, string categoryId, string title, string? description,
+    public static UpdateTransactionDetailsByIdServiceOutput Factory(string id, string accountId, string categoryId, string title, string? description,
         decimal amount, DateTime date, string transactionType, string paymentMethod, string status, string? destination,
         DateTime? updatedAt, DateTime createdAt)
         => new(id, accountId, categoryId, title, description, amount, date, transactionType, paymentMethod, status, destination, updatedAt, createdAt);

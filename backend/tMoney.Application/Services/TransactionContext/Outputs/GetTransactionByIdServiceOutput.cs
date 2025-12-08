@@ -2,19 +2,19 @@
 
 public sealed class GetTransactionByIdServiceOutput
 {
-    public string Id { get; private set; }
-    public string AccountId { get; private set; }
-    public string CategoryId { get; private set; }
-    public string Title { get; private set; }
-    public string? Description { get; private set; }
-    public decimal Amount { get; private set; }
-    public DateTime Date { get; private set; }
-    public string TransactionType { get; private set; }
-    public string PaymentMethod { get; private set; }
-    public string Status { get; private set; }
-    public string? Destination { get; private set; }
-    public DateTime? UpdatedAt { get; private set; }
-    public DateTime CreatedAt { get; private set; }
+    public string Id { get; }
+    public string AccountId { get; }
+    public string CategoryId { get; }
+    public string Title { get; }
+    public string? Description { get; }
+    public decimal Amount { get; }
+    public DateTime Date { get; }
+    public string TransactionType { get; }
+    public string PaymentMethod { get; }
+    public string Status { get; }
+    public string? Destination { get; }
+    public DateTime? UpdatedAt { get; }
+    public DateTime CreatedAt { get; }
 
     private GetTransactionByIdServiceOutput(string id, string accountId, string categoryId, string title, string? description,
         decimal amount, DateTime date, string transactionType, string paymentMethod, string status, string? destination,
