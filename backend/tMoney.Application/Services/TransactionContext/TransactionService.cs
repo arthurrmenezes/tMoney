@@ -1,6 +1,7 @@
 ﻿using tMoney.Application.Services.TransactionContext.Inputs;
 using tMoney.Application.Services.TransactionContext.Interfaces;
 using tMoney.Application.Services.TransactionContext.Outputs;
+using tMoney.Domain.BoundedContexts.CategoryContext.ENUMs;
 using tMoney.Domain.BoundedContexts.TransactionContext.Entities;
 using tMoney.Domain.BoundedContexts.TransactionContext.ENUMs;
 using tMoney.Domain.ValueObjects;
@@ -36,6 +37,10 @@ public class TransactionService : ITransactionService
         var category = await _categoryRepository.GetByIdAsync(input.CategoryId.Id, input.AccountId.Id, cancellationToken);
         if (category is null)
             throw new KeyNotFoundException("Categoria não encontrada");
+
+        if (input.TransactionType == TransactionType.Income && category.Type == CategoryType.Expense ||
+            input.TransactionType == TransactionType.Expense && category.Type == CategoryType.Income)
+            throw new ArgumentException($"A categoria '{category.Title}' ({category.Type}) não pode ser usada para uma transação do tipo {input.TransactionType}.");
 
         var validateDestination = input.TransactionType == TransactionType.Income ? null : input.Destination;
 
