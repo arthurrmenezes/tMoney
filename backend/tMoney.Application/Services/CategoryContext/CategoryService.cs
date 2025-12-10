@@ -102,6 +102,9 @@ public class CategoryService : ICategoryService
         if (category is null)
             throw new KeyNotFoundException("Categoria não encontrada.");
 
+        if (category.IsDefault && input.NewType.HasValue && input.NewType != category.Type)
+            throw new InvalidOperationException("Não é permitido alterar o tipo de uma categoria padrão.");
+
         if (input.NewTitle is not null && input.NewTitle != category.Title)
         {
             var titleExists = await _categoryRepository.GetByTitleAsync(input.NewTitle, accountId.Id, cancellationToken);
