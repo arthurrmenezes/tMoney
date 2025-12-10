@@ -265,4 +265,31 @@ public class TransactionService : ITransactionService
             throw;
         }
     }
+
+    public async Task<GetFinancialSummaryServiceOutput> GetFinancialSummaryServiceAsync(
+        IdValueObject accountId, 
+        DateTime? startDate, 
+        DateTime? endDate, 
+        CancellationToken cancellationToken)
+    {
+        var account = await _accountRepository.GetAccountByIdAsync(accountId.Id, cancellationToken);
+        if (account is null)
+            throw new KeyNotFoundException("Conta não encontrada");
+
+        var start = startDate ?? new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1);
+        var end = endDate ?? start.AddMonths(1).AddDays(-1);
+
+        var (income, expense) = await _transactionRepository.GetFinancialSummaryAsync(accountId.Id, start, end, cancellationToken);
+
+        var balance = income - expense;
+
+        var output = GetFinancialSummaryServiceOutput.Factory(
+            totalIncome: income,
+            totalExpense: expense,
+            balance: balance,
+            startDate: start,
+            endDate: end);
+
+        return output;
+    }
 }

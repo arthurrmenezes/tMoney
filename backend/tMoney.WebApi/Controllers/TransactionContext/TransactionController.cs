@@ -151,4 +151,23 @@ public class TransactionController : ControllerBase
 
         return NoContent();
     }
+
+    [HttpGet]
+    [Route("financial-summary")]
+    [Authorize]
+    public async Task<IActionResult> GetFinancialSummaryAsync(
+        CancellationToken cancellationToken,
+        [FromQuery] DateTime? startDate,
+        [FromQuery] DateTime? endDate)
+    {
+        var accountId = User.GetAccountId();
+
+        var serviceResult = await _transactionService.GetFinancialSummaryServiceAsync(
+            accountId: IdValueObject.Factory(accountId),
+            startDate: startDate,
+            endDate: endDate,
+            cancellationToken: cancellationToken);
+
+        return Ok(serviceResult);
+    }
 }

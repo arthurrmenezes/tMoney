@@ -9,4 +9,6 @@ public interface ITransactionRepository : IBaseRepository<Transaction>
     public Task<Transaction?> GetByIdAsync(Guid transactionId, Guid accountId, CancellationToken cancellationToken);
     public Task<Transaction[]> GetAllByAccountIdAsync(Guid accountId, int pageNumber, int pageSize, CancellationToken cancellationToken);
     public Task<int> GetTransactionsCountAsync(Guid accountId, CancellationToken cancellationToken);
+    public Task<(decimal totalIncome, decimal totalExpense)> GetFinancialSummaryAsync(Guid accountId, DateTime startDate, DateTime endDate,
+        CancellationToken cancellationToken);
 }

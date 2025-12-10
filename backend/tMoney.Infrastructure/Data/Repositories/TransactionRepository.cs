@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using tMoney.Domain.BoundedContexts.TransactionContext.Entities;
+using tMoney.Domain.BoundedContexts.TransactionContext.ENUMs;
 using tMoney.Domain.ValueObjects;
 using tMoney.Infrastructure.Data.Repositories.Base;
 using tMoney.Infrastructure.Data.Repositories.Interfaces;
@@ -53,5 +54,35 @@ public class TransactionRepository : BaseRepository<Transaction>, ITransactionRe
             .AsNoTracking()
             .Where(t => t.AccountId == voAccountId)
             .CountAsync(cancellationToken);
+    }
+
+    public async Task<(decimal totalIncome, decimal totalExpense)> GetFinancialSummaryAsync(Guid accountId, DateTime startDate, DateTime endDate,
+        CancellationToken cancellationToken)
+    {
+        if (startDate.Kind == DateTimeKind.Unspecified)
+            startDate = DateTime.SpecifyKind(startDate, DateTimeKind.Utc);
+
+        if (endDate.Kind == DateTimeKind.Unspecified)
+            endDate = DateTime.SpecifyKind(endDate, DateTimeKind.Utc);
+
+        var voAccountId = IdValueObject.Factory(accountId);
+
+        var query = await _dataContext.Transactions
+            .AsNoTracking()
+            .Where(t => t.AccountId == voAccountId &&
+                t.Date >= startDate &&
+                t.Date <= endDate &&
+                t.Status == PaymentStatus.Paid)
+            .GroupBy(t => 1)
+            .Select(g => new
+            {
+                Income = g.Where(t => t.TransactionType == TransactionType.Income)
+                      .Sum(t => t.Amount),
+                Expense = g.Where(t => t.TransactionType == TransactionType.Expense)
+                       .Sum(t => t.Amount)
+            })
+            .FirstOrDefaultAsync(cancellationToken);
+
+        return (query?.Income ?? 0, query?.Expense ?? 0);
     }
 }

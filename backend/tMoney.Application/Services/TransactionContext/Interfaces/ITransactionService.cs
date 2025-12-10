@@ -31,4 +31,10 @@ public interface ITransactionService
         IdValueObject transactionId,
         IdValueObject accountId,
         CancellationToken cancellationToken);
+
+    public Task<GetFinancialSummaryServiceOutput> GetFinancialSummaryServiceAsync(
+        IdValueObject accountId,
+        DateTime? startDate,
+        DateTime? endDate,
+        CancellationToken cancellationToken);
 }
