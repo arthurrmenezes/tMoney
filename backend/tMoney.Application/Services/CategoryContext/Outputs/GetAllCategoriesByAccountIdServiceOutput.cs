@@ -6,21 +6,23 @@ public sealed class GetAllCategoriesByAccountIdServiceOutput
     public int PageNumber { get; }
     public int PageSize { get; }
     public int TotalPages { get; }
+    public string? CategoryType { get; }
     public GetAllCategoriesByAccountIdServiceOutputCategory[] Categories { get; }
 
-    private GetAllCategoriesByAccountIdServiceOutput(int totalCategories, int pageNumber, int pageSize, int totalPages, 
+    private GetAllCategoriesByAccountIdServiceOutput(int totalCategories, int pageNumber, int pageSize, int totalPages, string? categoryType,
         GetAllCategoriesByAccountIdServiceOutputCategory[] categories)
     {
         TotalCategories = totalCategories;
         PageNumber = pageNumber;
         PageSize = pageSize;
         TotalPages = totalPages;
+        CategoryType = categoryType;
         Categories = categories;
     }
 
-    public static GetAllCategoriesByAccountIdServiceOutput Factory(int totalCategories, int pageNumber, int pageSize, int totalPages,
+    public static GetAllCategoriesByAccountIdServiceOutput Factory(int totalCategories, int pageNumber, int pageSize, int totalPages, string? categoryType,
         GetAllCategoriesByAccountIdServiceOutputCategory[] categories)
-        => new(totalCategories, pageNumber, pageSize, totalPages, categories);
+        => new(totalCategories, pageNumber, pageSize, totalPages, categoryType, categories);
 }
 
 public sealed class GetAllCategoriesByAccountIdServiceOutputCategory

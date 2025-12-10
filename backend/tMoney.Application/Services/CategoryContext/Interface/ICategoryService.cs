@@ -1,5 +1,6 @@
 ﻿using tMoney.Application.Services.CategoryContext.Inputs;
 using tMoney.Application.Services.CategoryContext.Outputs;
+using tMoney.Domain.BoundedContexts.CategoryContext.ENUMs;
 using tMoney.Domain.ValueObjects;
 
 namespace tMoney.Application.Services.CategoryContext.Interface;
@@ -20,6 +21,7 @@ public interface ICategoryService
         IdValueObject accountId,
         int pageNumber,
         int pageSize,
+        CategoryType? categoryType,
         CancellationToken cancellationToken);
 
     public Task<UpdateCategoryDetailsByIdServiceOutput> UpdateCategoryDetailsByIdServiceAsync(

@@ -2,6 +2,7 @@
 using tMoney.Application.Services.CategoryContext.Interface;
 using tMoney.Application.Services.CategoryContext.Outputs;
 using tMoney.Domain.BoundedContexts.CategoryContext.Entities;
+using tMoney.Domain.BoundedContexts.CategoryContext.ENUMs;
 using tMoney.Domain.ValueObjects;
 using tMoney.Infrastructure.Data.Repositories.Interfaces;
 using tMoney.Infrastructure.Data.UnitOfWork.Interfaces;
@@ -67,10 +68,14 @@ public class CategoryService : ICategoryService
         return output;
     }
 
-    public async Task<GetAllCategoriesByAccountIdServiceOutput> GetAllCategoriesByAccountIdServiceAsync(IdValueObject accountId, int pageNumber, int pageSize,
+    public async Task<GetAllCategoriesByAccountIdServiceOutput> GetAllCategoriesByAccountIdServiceAsync(
+        IdValueObject accountId, 
+        int pageNumber, 
+        int pageSize,
+        CategoryType? categoryType,
         CancellationToken cancellationToken)
     {
-        var categories = await _categoryRepository.GetAllAsync(accountId.Id, pageNumber, pageSize, cancellationToken);
+        var categories = await _categoryRepository.GetAllAsync(accountId.Id, pageNumber, pageSize, categoryType, cancellationToken);
 
         var categoriesOutput = categories.Select(c => new GetAllCategoriesByAccountIdServiceOutputCategory(
             id: c.Id.ToString(),
@@ -81,7 +86,7 @@ public class CategoryService : ICategoryService
             updatedAt: c.UpdatedAt,
             createdAt: c.CreatedAt)).ToArray();
 
-        var totalCategories = await _categoryRepository.GetTotalCategoriesNumberAsync(accountId.Id, cancellationToken);
+        var totalCategories = await _categoryRepository.GetTotalCategoriesNumberAsync(accountId.Id, categoryType, cancellationToken);
 
         var totalPages = (int)Math.Ceiling((double)totalCategories / pageSize);
 
@@ -90,6 +95,7 @@ public class CategoryService : ICategoryService
             pageNumber: pageNumber,
             pageSize: pageSize,
             totalPages: totalPages,
+            categoryType: categoryType.HasValue ? categoryType.ToString() : "All",
             categories: categoriesOutput);
 
         return output;
