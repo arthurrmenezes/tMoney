@@ -25,7 +25,7 @@ public class CategoryRepository : BaseRepository<Category>, ICategoryRepository
             .FirstOrDefaultAsync(c => c.Title == title && c.AccountId == IdValueObject.Factory(accountId), cancellationToken);
     }
 
-    public async Task<Category[]> GetAllAsync(Guid accountId, int pageNumber, int pageSize, CategoryType? categoryType, 
+    public async Task<Category[]> GetAllAsync(Guid accountId, int pageNumber, int pageSize, CategoryType? categoryType, string? textSearch,
         CancellationToken cancellationToken)
     {
         int skip = (pageNumber - 1) * pageSize;
@@ -44,6 +44,13 @@ public class CategoryRepository : BaseRepository<Category>, ICategoryRepository
                 query = query.Where(c => c.Type == categoryType.Value || c.Type == CategoryType.Both);
         }
 
+        if (!string.IsNullOrEmpty(textSearch))
+        {
+            var text = textSearch.ToLower();
+
+            query = query.Where(t => t.Title.ToLower().Contains(text));
+        }
+
         return await query
             .OrderByDescending(c => c.CreatedAt)
             .Skip(skip)
@@ -51,7 +58,7 @@ public class CategoryRepository : BaseRepository<Category>, ICategoryRepository
             .ToArrayAsync(cancellationToken);
     }
 
-    public async Task<int> GetTotalCategoriesNumberAsync(Guid accountId, CategoryType? categoryType, CancellationToken cancellationToken)
+    public async Task<int> GetTotalCategoriesNumberAsync(Guid accountId, CategoryType? categoryType, string? textSearch, CancellationToken cancellationToken)
     {
         var voAccountId = IdValueObject.Factory(accountId);
 
@@ -65,6 +72,13 @@ public class CategoryRepository : BaseRepository<Category>, ICategoryRepository
                 query = query.Where(c => c.Type == CategoryType.Both);
             else
                 query = query.Where(c => c.Type == categoryType.Value || c.Type == CategoryType.Both);
+        }
+
+        if (!string.IsNullOrEmpty(textSearch))
+        {
+            var text = textSearch.ToLower();
+
+            query = query.Where(t => t.Title.ToLower().Contains(text));
         }
 
         return await query.CountAsync(cancellationToken);

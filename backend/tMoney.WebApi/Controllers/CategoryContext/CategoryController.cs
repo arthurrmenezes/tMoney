@@ -65,9 +65,9 @@ public class CategoryController : ControllerBase
     [Authorize]
     public async Task<IActionResult> GetAllCategoriesByAccountIdAsync(
         CancellationToken cancellationToken,
+        [FromQuery] GetAllCategoriesByAccountIdPayload input,
         [FromQuery] int pageNumber = 1,
-        [FromQuery] int pageSize = 10,
-        [FromQuery] CategoryType? categoryType = null)
+        [FromQuery] int pageSize = 10)
     {
         if (pageNumber < 1) pageNumber = 1;
         if (pageSize < 1) pageSize = 10;
@@ -77,9 +77,11 @@ public class CategoryController : ControllerBase
 
         var response = await _categoryService.GetAllCategoriesByAccountIdServiceAsync(
             accountId: IdValueObject.Factory(accountId),
-            pageNumber: pageNumber,
-            pageSize: pageSize,
-            categoryType: categoryType,
+            input: GetAllCategoriesByAccountIdServiceInput.Factory(
+                pageNumber: pageNumber,
+                pageSize: pageSize,
+                categoryType: input.CategoryType,
+                textSearch: input.TextSearch),
             cancellationToken: cancellationToken);
 
         return Ok(response);

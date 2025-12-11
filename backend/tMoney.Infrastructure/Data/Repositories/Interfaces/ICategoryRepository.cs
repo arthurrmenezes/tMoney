@@ -8,7 +8,8 @@ public interface ICategoryRepository : IBaseRepository<Category>
 {
     public Task<Category?> GetByIdAsync(Guid categoryId, Guid accountId, CancellationToken cancellationToken);
     public Task<Category?> GetByTitleAsync(string title, Guid accountId, CancellationToken cancellationToken);
-    public Task<Category[]> GetAllAsync(Guid accountId, int pageNumber, int pageSize, CategoryType? categoryType, CancellationToken cancellationToken);
-    public Task<int> GetTotalCategoriesNumberAsync(Guid accountId, CategoryType? categoryType, CancellationToken cancellationToken);
+    public Task<Category[]> GetAllAsync(Guid accountId, int pageNumber, int pageSize, CategoryType? categoryType, string? textSearch,
+        CancellationToken cancellationToken);
+    public Task<int> GetTotalCategoriesNumberAsync(Guid accountId, CategoryType? categoryType, string? textSearch, CancellationToken cancellationToken);
     public Task<Category> GetDefaultCategoryByIdAsync(Guid accountId, CancellationToken cancellationToken);
 }

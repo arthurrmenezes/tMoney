@@ -70,12 +70,11 @@ public class CategoryService : ICategoryService
 
     public async Task<GetAllCategoriesByAccountIdServiceOutput> GetAllCategoriesByAccountIdServiceAsync(
         IdValueObject accountId, 
-        int pageNumber, 
-        int pageSize,
-        CategoryType? categoryType,
+        GetAllCategoriesByAccountIdServiceInput input,
         CancellationToken cancellationToken)
     {
-        var categories = await _categoryRepository.GetAllAsync(accountId.Id, pageNumber, pageSize, categoryType, cancellationToken);
+        var categories = await _categoryRepository.GetAllAsync(accountId.Id, input.PageNumber, input.PageSize, input.CategoryType, input.TextSearch,
+            cancellationToken);
 
         var categoriesOutput = categories.Select(c => new GetAllCategoriesByAccountIdServiceOutputCategory(
             id: c.Id.ToString(),
@@ -86,16 +85,16 @@ public class CategoryService : ICategoryService
             updatedAt: c.UpdatedAt,
             createdAt: c.CreatedAt)).ToArray();
 
-        var totalCategories = await _categoryRepository.GetTotalCategoriesNumberAsync(accountId.Id, categoryType, cancellationToken);
+        var totalCategories = await _categoryRepository.GetTotalCategoriesNumberAsync(accountId.Id, input.CategoryType, input.TextSearch, cancellationToken);
 
-        var totalPages = (int)Math.Ceiling((double)totalCategories / pageSize);
+        var totalPages = (int)Math.Ceiling((double)totalCategories / input.PageSize);
 
         var output = GetAllCategoriesByAccountIdServiceOutput.Factory(
             totalCategories: totalCategories,
-            pageNumber: pageNumber,
-            pageSize: pageSize,
+            pageNumber: input.PageNumber,
+            pageSize: input.PageSize,
             totalPages: totalPages,
-            categoryType: categoryType.HasValue ? categoryType.ToString() : "All",
+            categoryType: input.CategoryType.HasValue ? input.CategoryType.ToString() : "All",
             categories: categoriesOutput);
 
         return output;
