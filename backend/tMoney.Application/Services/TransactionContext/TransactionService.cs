@@ -126,9 +126,27 @@ public class TransactionService : ITransactionService
     }
 
     public async Task<GetAllTransactionsByAccountIdServiceOutput> GetAllTransactionsByAccountIdServiceAsync(
-        IdValueObject accountId, int pageNumber, int pageSize, CancellationToken cancellationToken)
+        IdValueObject accountId,
+        GetAllTransactionsByAccountIdServiceInput input,
+        CancellationToken cancellationToken)
     {
-        var transactions = await _transactionRepository.GetAllByAccountIdAsync(accountId.Id, pageNumber, pageSize, cancellationToken);
+        if (input.MinValue > input.MaxValue)
+            throw new ArgumentException("O valor mínimo deve ser maior que o valor máximo");
+
+        var transactions = await _transactionRepository.GetAllByAccountIdAsync(
+            accountId: accountId.Id,
+            pageNumber: input.PageNumber,
+            pageSize: input.PageSize,
+            transactionType: input.TransactionType,
+            categoryId: input.CategoryId is null ? null : input.CategoryId.Id,
+            paymentMethod: input.PaymentMethod,
+            paymentStatus: input.PaymentStatus,
+            startDate: input.StartDate,
+            endDate: input.EndDate,
+            minValue: input.MinValue,
+            maxValue: input.MaxValue,
+            textSearch: input.TextSearch,
+            cancellationToken: cancellationToken);
 
         var transactionOutput = transactions
             .Select(t => new GetAllTransactionsByAccountIdServiceOutputTransaction(
@@ -147,14 +165,25 @@ public class TransactionService : ITransactionService
                 createdAt: t.CreatedAt))
             .ToArray();
 
-        var totalTransactions = await _transactionRepository.GetTransactionsCountAsync(accountId.Id, cancellationToken);
+        var totalTransactions = await _transactionRepository.GetTransactionsCountAsync(
+            accountId: accountId.Id,
+            transactionType: input.TransactionType,
+            categoryId: input.CategoryId is null ? null : input.CategoryId.Id,
+            paymentMethod: input.PaymentMethod,
+            paymentStatus: input.PaymentStatus,
+            startDate: input.StartDate,
+            endDate: input.EndDate,
+            minValue: input.MinValue,
+            maxValue: input.MaxValue,
+            textSearch: input.TextSearch,
+            cancellationToken: cancellationToken);
 
-        var totalPages = (int)Math.Ceiling((double)totalTransactions / pageSize);
+        var totalPages = (int)Math.Ceiling((double)totalTransactions / input.PageSize);
 
         var output = GetAllTransactionsByAccountIdServiceOutput.Factory(
             totalTransactions: totalTransactions,
-            pageNumber: pageNumber,
-            pageSize: pageSize,
+            pageNumber: input.PageNumber,
+            pageSize: input.PageSize,
             totalPages: totalPages,
             transactions: transactionOutput);
 

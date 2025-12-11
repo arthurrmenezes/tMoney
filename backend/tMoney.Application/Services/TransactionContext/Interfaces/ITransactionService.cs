@@ -17,8 +17,7 @@ public interface ITransactionService
 
     public Task<GetAllTransactionsByAccountIdServiceOutput> GetAllTransactionsByAccountIdServiceAsync(
         IdValueObject accountId,
-        int pageNumber,
-        int pageSize,
+        GetAllTransactionsByAccountIdServiceInput input,
         CancellationToken cancellationToken);
 
     public Task<UpdateTransactionDetailsByIdServiceOutput> UpdateTransactionDetailsByIdServiceAsync(
