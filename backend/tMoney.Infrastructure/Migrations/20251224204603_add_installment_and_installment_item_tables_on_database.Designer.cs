@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using tMoney.Infrastructure.Data;
@@ -11,9 +12,11 @@ using tMoney.Infrastructure.Data;
 namespace tMoney.Infrastructure.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20251224204603_add_installment_and_installment_item_tables_on_database")]
+    partial class add_installment_and_installment_item_tables_on_database
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -290,8 +293,7 @@ namespace tMoney.Infrastructure.Migrations
                         .HasColumnName("amount");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime>("DueDate")
                         .HasColumnType("timestamp with time zone")
@@ -314,8 +316,7 @@ namespace tMoney.Infrastructure.Migrations
                         .HasColumnName("status");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -391,8 +392,7 @@ namespace tMoney.Infrastructure.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.HasIndex("InstallmentId")
-                        .IsUnique();
+                    b.HasIndex("InstallmentId");
 
                     b.ToTable("transactions", (string)null);
                 });
@@ -602,9 +602,9 @@ namespace tMoney.Infrastructure.Migrations
                         .IsRequired();
 
                     b.HasOne("tMoney.Domain.BoundedContexts.InstallmentContext.Entities.Installment", null)
-                        .WithOne()
-                        .HasForeignKey("tMoney.Domain.BoundedContexts.TransactionContext.Entities.Transaction", "InstallmentId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .WithMany()
+                        .HasForeignKey("InstallmentId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("tMoney.Infrastructure.Auth.Entities.RefreshToken", b =>

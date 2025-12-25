@@ -8,6 +8,7 @@ public class Transaction
     public IdValueObject Id { get; private set; }
     public IdValueObject AccountId { get; private set; }
     public IdValueObject CategoryId { get; private set; }
+    public IdValueObject? InstallmentId { get; private set; }
     public string Title { get; private set; }
     public string? Description { get; private set; }
     public decimal Amount { get; private set; }
@@ -19,14 +20,15 @@ public class Transaction
     public DateTime? UpdatedAt { get; private set; }
     public DateTime CreatedAt { get; private set; }
 
-    public Transaction(IdValueObject accountId, IdValueObject categoryId, string title, string? description, decimal amount, DateTime date, 
-        TransactionType transactionType, PaymentMethod paymentMethod, PaymentStatus status, string? destination)
+    public Transaction(IdValueObject accountId, IdValueObject categoryId, IdValueObject? installmentId, string title, string? description, decimal amount, 
+        DateTime date, TransactionType transactionType, PaymentMethod paymentMethod, PaymentStatus status, string? destination)
     {
         ValidateDomain(title, description, amount, transactionType, paymentMethod, status, destination);
 
         Id = IdValueObject.New();
         AccountId = accountId;
         CategoryId = categoryId;
+        InstallmentId = installmentId;
         Title = title;
         Description = description;
         Amount = amount;
@@ -39,7 +41,7 @@ public class Transaction
         CreatedAt = DateTime.UtcNow;
     }
 
-    private void ValidateDomain(string title, string? description, decimal amount, TransactionType transactionType, PaymentMethod paymentMethod, 
+    private void ValidateDomain(string title, string? description, decimal amount, TransactionType transactionType, PaymentMethod paymentMethod,
         PaymentStatus status, string? destination)
     {
         if (string.IsNullOrWhiteSpace(title))

@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using tMoney.Domain.BoundedContexts.AccountContext.Entities;
 using tMoney.Domain.BoundedContexts.CategoryContext.Entities;
+using tMoney.Domain.BoundedContexts.InstallmentContext.Entities;
 using tMoney.Domain.BoundedContexts.TransactionContext.Entities;
 using tMoney.Domain.ValueObjects;
 
@@ -28,6 +29,12 @@ public sealed class TransactionMapping : IEntityTypeConfiguration<Transaction>
             .IsRequired()
             .OnDelete(DeleteBehavior.Cascade);
 
+        builder.HasOne<Installment>()
+            .WithOne()
+            .HasForeignKey<Transaction>(t => t.InstallmentId)
+            .IsRequired(false)
+            .OnDelete(DeleteBehavior.SetNull);
+
         var idConverter = new ValueConverter<IdValueObject, Guid>(
             t => t.Id,
             t => IdValueObject.Factory(t));
@@ -47,6 +54,13 @@ public sealed class TransactionMapping : IEntityTypeConfiguration<Transaction>
             .IsRequired()
             .HasColumnName("category_id")
             .HasConversion(idConverter);
+
+        builder.Property(t => t.InstallmentId)
+            .IsRequired(false)
+            .HasColumnName("installment_id")
+            .HasConversion(
+                valueObject => valueObject! != null! ? valueObject.Id : (Guid?)null,
+                dbValue => dbValue.HasValue ? IdValueObject.Factory(dbValue.Value) : null);
 
         builder.Property(t => t.Title)
             .IsRequired()
