@@ -35,6 +35,14 @@ builder.Services.AddCors(options =>
             .AllowAnyMethod()
             .AllowCredentials();
     });
+
+    options.AddPolicy("ProductionPolicy", policy =>
+    {
+        policy.WithOrigins("https://tmoney.onrender.com")
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
+    });
 });
 
 #endregion
@@ -47,7 +55,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseCors("DevelopmentPolicy");
+app.UseCors("ProductionPolicy");
 
 app.UseMiddleware<ExceptionMiddleware>();
 
