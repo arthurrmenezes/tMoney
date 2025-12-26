@@ -2,7 +2,6 @@
 using tMoney.Application.Services.CategoryContext.Interface;
 using tMoney.Application.Services.CategoryContext.Outputs;
 using tMoney.Domain.BoundedContexts.CategoryContext.Entities;
-using tMoney.Domain.BoundedContexts.CategoryContext.ENUMs;
 using tMoney.Domain.ValueObjects;
 using tMoney.Infrastructure.Data.Repositories.Interfaces;
 using tMoney.Infrastructure.Data.UnitOfWork.Interfaces;

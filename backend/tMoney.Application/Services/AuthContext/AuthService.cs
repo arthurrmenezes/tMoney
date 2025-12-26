@@ -130,7 +130,7 @@ public class AuthService : IAuthService
             throw new ArgumentException("E-mail ou senha incorreta.");
 
         if (!await _userManager.IsEmailConfirmedAsync(user))
-            throw new InvalidOperationException("Confirme seu e-mail antes de fazer login.");
+            throw new UnauthorizedAccessException("Confirme seu e-mail antes de fazer login.");
 
         var verifyCredentials = await _signInManager.CheckPasswordSignInAsync(user, input.Password, true);
 

@@ -66,11 +66,11 @@ public class CategoryController : ControllerBase
     public async Task<IActionResult> GetAllCategoriesByAccountIdAsync(
         CancellationToken cancellationToken,
         [FromQuery] GetAllCategoriesByAccountIdPayload input,
-        [FromQuery] int pageNumber = 1,
-        [FromQuery] int pageSize = 10)
+        [FromQuery] int? pageNumber = 1,
+        [FromQuery] int? pageSize = 10)
     {
-        if (pageNumber < 1) pageNumber = 1;
-        if (pageSize < 1) pageSize = 10;
+        if (pageNumber < 1 || pageNumber is null) pageNumber = 1;
+        if (pageSize < 1 || pageSize is null) pageSize = 10;
         if (pageSize > 50) pageSize = 50;
 
         var accountId = User.GetAccountId();
@@ -78,8 +78,8 @@ public class CategoryController : ControllerBase
         var response = await _categoryService.GetAllCategoriesByAccountIdServiceAsync(
             accountId: IdValueObject.Factory(accountId),
             input: GetAllCategoriesByAccountIdServiceInput.Factory(
-                pageNumber: pageNumber,
-                pageSize: pageSize,
+                pageNumber: pageNumber!.Value,
+                pageSize: pageSize.Value,
                 categoryType: input.CategoryType,
                 textSearch: input.TextSearch),
             cancellationToken: cancellationToken);
