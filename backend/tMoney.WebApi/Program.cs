@@ -38,7 +38,7 @@ builder.Services.AddCors(options =>
 
     options.AddPolicy("ProductionPolicy", policy =>
     {
-        policy.WithOrigins("https://tmoney.onrender.com")
+        policy.WithOrigins("https://tmoney.lovable.app")
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();
