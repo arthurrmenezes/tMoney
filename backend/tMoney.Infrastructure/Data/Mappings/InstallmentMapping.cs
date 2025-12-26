@@ -51,12 +51,6 @@ public sealed class InstallmentMapping : IEntityTypeConfiguration<Installment>
             .HasPrecision(18, 2)
             .ValueGeneratedNever();
 
-        builder.Property(i => i.InterestRate)
-            .IsRequired()
-            .HasColumnName("interest_rate")
-            .HasPrecision(5, 2)
-            .ValueGeneratedNever();
-
         builder.Property(i => i.FirstPaymentDate)
             .IsRequired()
             .HasColumnName("first_payment_date")

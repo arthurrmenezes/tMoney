@@ -2,6 +2,9 @@
 using Microsoft.AspNetCore.Mvc;
 using tMoney.Application.Services.TransactionContext.Inputs;
 using tMoney.Application.Services.TransactionContext.Interfaces;
+using tMoney.Application.UseCases.Interfaces;
+using tMoney.Application.UseCases.TransactionContext.CreateTransactionUseCase.Inputs;
+using tMoney.Application.UseCases.TransactionContext.CreateTransactionUseCase.Outputs;
 using tMoney.Domain.ValueObjects;
 using tMoney.WebApi.Controllers.TransactionContext.Payloads;
 using tMoney.WebApi.Extensions;
@@ -22,18 +25,23 @@ public class TransactionController : ControllerBase
     [HttpPost]
     [Authorize]
     public async Task<IActionResult> CreateTransactionAsync(
+        [FromServices] IUseCase<CreateTransactionUseCaseInput, CreateTransactionUseCaseOutput> useCase,
         [FromBody] CreateTransactionPayload input,
         CancellationToken cancellationToken)
     {
         var accountId = User.GetAccountId();
 
-        if (!Guid.TryParse(input.CategoryId, out var category))
+        if (!Guid.TryParse(input.CategoryId, out var categoryId))
             throw new ArgumentException("Category ID inválido.");
 
-        var response = await _transactionService.CreateTransactionServiceAsync(
-            input: CreateTransactionServiceInput.Factory(
+        var hasInstallment = input.HasInstallment is null ? null :
+            new CreateTransactionUseCaseInputInstallment(
+                totalInstallments: input.HasInstallment.TotalInstallments);
+
+        var useCaseResult = await useCase.ExecuteUseCaseAsync(
+            input: CreateTransactionUseCaseInput.Factory(
                 accountId: IdValueObject.Factory(accountId),
-                categoryId: IdValueObject.Factory(category),
+                categoryId: IdValueObject.Factory(categoryId),
                 title: input.Title,
                 description: input.Description,
                 amount: input.Amount,
@@ -41,10 +49,11 @@ public class TransactionController : ControllerBase
                 transactionType: input.TransactionType,
                 paymentMethod: input.PaymentMethod,
                 status: input.Status,
-                destination: input.Destination),
+                destination: input.Destination,
+                hasInstallment: hasInstallment),
             cancellationToken: cancellationToken);
 
-        return Ok(response);
+        return CreatedAtAction("GetTransactionById", new { transactionId = useCaseResult.Id }, useCaseResult);
     }
 
     [HttpGet]

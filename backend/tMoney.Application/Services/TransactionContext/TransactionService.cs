@@ -42,15 +42,10 @@ public class TransactionService : ITransactionService
             input.TransactionType == TransactionType.Expense && category.Type == CategoryType.Income)
             throw new ArgumentException($"A categoria '{category.Title}' ({category.Type}) não pode ser usada para uma transação do tipo {input.TransactionType}.");
 
-        var validateDestination = input.TransactionType == TransactionType.Income ? null : input.Destination;
-
-        await _unitOfWork.BeginTransactionAsync(cancellationToken);
-
-        try
-        {
-            var transaction = new Transaction(
+        var transaction = new Transaction(
             accountId: input.AccountId,
             categoryId: input.CategoryId,
+            installmentId: input.InstallmentId,
             title: input.Title,
             description: input.Description,
             amount: input.Amount,
@@ -58,9 +53,7 @@ public class TransactionService : ITransactionService
             transactionType: input.TransactionType,
             paymentMethod: input.PaymentMethod,
             status: input.Status,
-            destination: validateDestination);
-
-            await _transactionRepository.AddAsync(transaction, cancellationToken);
+            destination: input.Destination);
 
             if (input.Status == PaymentStatus.Paid)
             {
@@ -72,12 +65,13 @@ public class TransactionService : ITransactionService
                 _accountRepository.Update(account);
             }
 
-            await _unitOfWork.CommitTransactionAsync(cancellationToken);
+            await _transactionRepository.AddAsync(transaction, cancellationToken);
 
             var output = CreateTransactionServiceOutput.Factory(
                 id: transaction.Id.ToString(),
                 accountId: transaction.AccountId.ToString(),
                 categoryId: transaction.CategoryId.ToString(),
+                installmentId: transaction.InstallmentId is null ? null : transaction.InstallmentId.ToString(),
                 title: transaction.Title,
                 description: transaction.Description,
                 amount: transaction.Amount,
@@ -90,12 +84,6 @@ public class TransactionService : ITransactionService
                 createdAt: transaction.CreatedAt);
 
             return output;
-        }
-        catch (Exception)
-        {
-            await _unitOfWork.RollbackTransactionAsync(cancellationToken);
-            throw;
-        }
     }
 
     public async Task<GetTransactionByIdServiceOutput> GetTransactionByIdServiceAsync(

@@ -94,6 +94,7 @@ public static class DependencyInjection
         serviceCollection.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
         serviceCollection.AddScoped<ICategoryRepository, CategoryRepository>();
         serviceCollection.AddScoped<ITransactionRepository, TransactionRepository>();
+        serviceCollection.AddScoped<IInstallmentRepository, InstallmentRepository>();
 
         #endregion
 

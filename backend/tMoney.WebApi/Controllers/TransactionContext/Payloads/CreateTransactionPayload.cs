@@ -13,9 +13,10 @@ public sealed class CreateTransactionPayload
     public PaymentMethod PaymentMethod { get; init; }
     public PaymentStatus Status { get; init; }
     public string? Destination { get; init; }
+    public CreateTransactionPayloadInstallment? HasInstallment { get; init; }
 
     public CreateTransactionPayload(string categoryId, string title, string? description, decimal amount, DateTime date, TransactionType transactionType, 
-        PaymentMethod paymentMethod, PaymentStatus status, string? destination)
+        PaymentMethod paymentMethod, PaymentStatus status, string? destination, CreateTransactionPayloadInstallment? hasInstallment)
     {
         CategoryId = categoryId;
         Title = title;
@@ -26,5 +27,16 @@ public sealed class CreateTransactionPayload
         PaymentMethod = paymentMethod;
         Status = status;
         Destination = destination;
+        HasInstallment = hasInstallment;
+    }
+}
+
+public sealed class CreateTransactionPayloadInstallment
+{
+    public int TotalInstallments { get; init; }
+
+    public CreateTransactionPayloadInstallment(int totalInstallments)
+    {
+        TotalInstallments = totalInstallments;
     }
 }
