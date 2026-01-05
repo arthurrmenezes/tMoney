@@ -13,6 +13,8 @@ using tMoney.Infrastructure.Data.UnitOfWork;
 using tMoney.Infrastructure.Data.UnitOfWork.Interfaces;
 using tMoney.Infrastructure.Services.EmailService;
 using tMoney.Infrastructure.Services.EmailService.Interfaces;
+using tMoney.Infrastructure.Services.OAuthService.Google;
+using tMoney.Infrastructure.Services.OAuthService.Google.Interfaces;
 using tMoney.Infrastructure.Services.TokenService;
 using tMoney.Infrastructure.Services.TokenService.Interfaces;
 
@@ -82,11 +84,14 @@ public static class DependencyInjection
 
         #endregion
 
+        #region Services Configuration
+
         serviceCollection.AddScoped<IUnitOfWork, UnitOfWork>();
-
         serviceCollection.AddScoped<ITokenService, TokenService>();
-
         serviceCollection.AddHttpClient<IEmailService, EmailService>();
+        serviceCollection.AddScoped<IGoogleService, GoogleService>();
+
+        #endregion
 
         #region Repositories Configuration
 
