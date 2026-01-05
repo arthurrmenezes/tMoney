@@ -9,6 +9,9 @@ using tMoney.Application.Services.InstallmentContext;
 using tMoney.Application.Services.InstallmentContext.Interfaces;
 using tMoney.Application.Services.TransactionContext;
 using tMoney.Application.Services.TransactionContext.Interfaces;
+using tMoney.Application.UseCases.AuthContext.GoogleAuthUseCase;
+using tMoney.Application.UseCases.AuthContext.GoogleAuthUseCase.Inputs;
+using tMoney.Application.UseCases.AuthContext.GoogleAuthUseCase.Outputs;
 using tMoney.Application.UseCases.Interfaces;
 using tMoney.Application.UseCases.TransactionContext.CreateTransactionUseCase;
 using tMoney.Application.UseCases.TransactionContext.CreateTransactionUseCase.Inputs;
@@ -33,6 +36,8 @@ public static class DependencyInjection
         #region Use Cases Dependencies Configuration
 
         serviceCollection.AddScoped<IUseCase<CreateTransactionUseCaseInput, CreateTransactionUseCaseOutput>, CreateTransactionUseCase>();
+
+        serviceCollection.AddScoped<IUseCase<GoogleAuthUseCaseInput, GoogleAuthUseCaseOutput>, GoogleAuthUseCase>();
 
         #endregion
 

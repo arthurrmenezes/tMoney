@@ -3,6 +3,9 @@ using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using tMoney.Application.Services.AuthContext.Inputs;
 using tMoney.Application.Services.AuthContext.Interfaces;
+using tMoney.Application.UseCases.AuthContext.GoogleAuthUseCase.Inputs;
+using tMoney.Application.UseCases.AuthContext.GoogleAuthUseCase.Outputs;
+using tMoney.Application.UseCases.Interfaces;
 using tMoney.WebApi.Controllers.AuthContext.Payloads;
 
 namespace tMoney.WebApi.Controllers.AuthContext;
@@ -187,5 +190,24 @@ public class AuthController : ControllerBase
             cancellationToken: cancellationToken);
 
         return NoContent();
+    }
+
+    [HttpPost]
+    [Route("signin-google")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GoogleAuthAsync(
+        [FromServices] IUseCase<GoogleAuthUseCaseInput, GoogleAuthUseCaseOutput> useCase,
+        [FromBody] GoogleAuthPayload input,
+        CancellationToken cancellationToken)
+    {
+        var useCaseResult = await useCase.ExecuteUseCaseAsync(
+            input: GoogleAuthUseCaseInput.Factory(
+                googleToken: input.GoogleToken),
+            cancellationToken: cancellationToken);
+
+        if (useCaseResult is null)
+            throw new UnauthorizedAccessException("Google token inválido.");
+
+        return Ok(useCaseResult);
     }
 }
