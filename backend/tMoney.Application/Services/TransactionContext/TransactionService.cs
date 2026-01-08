@@ -95,10 +95,13 @@ public class TransactionService : ITransactionService
         if (transaction is null)
             throw new KeyNotFoundException("Transação não encontrada");
 
+        var installmentId = transaction.InstallmentId is null ? null : transaction.InstallmentId.ToString();
+
         var output = GetTransactionByIdServiceOutput.Factory(
             id: transaction.Id.ToString(),
             accountId: transaction.AccountId.ToString(),
             categoryId: transaction.CategoryId.ToString(),
+            installmentId: installmentId,
             title: transaction.Title,
             description: transaction.Description,
             amount: transaction.Amount,

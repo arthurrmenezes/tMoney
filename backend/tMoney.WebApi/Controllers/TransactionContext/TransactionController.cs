@@ -5,6 +5,8 @@ using tMoney.Application.Services.TransactionContext.Interfaces;
 using tMoney.Application.UseCases.Interfaces;
 using tMoney.Application.UseCases.TransactionContext.CreateTransactionUseCase.Inputs;
 using tMoney.Application.UseCases.TransactionContext.CreateTransactionUseCase.Outputs;
+using tMoney.Application.UseCases.TransactionContext.GetTransactionUseCase.Inputs;
+using tMoney.Application.UseCases.TransactionContext.GetTransactionUseCase.Outputs;
 using tMoney.Domain.ValueObjects;
 using tMoney.WebApi.Controllers.TransactionContext.Payloads;
 using tMoney.WebApi.Extensions;
@@ -60,17 +62,19 @@ public class TransactionController : ControllerBase
     [Route("{transactionId}")]
     [Authorize]
     public async Task<IActionResult> GetTransactionByIdAsync(
+        [FromServices] IUseCase<GetTransactionUseCaseInput, GetTransactionUseCaseOutput> useCase,
         [FromRoute] Guid transactionId,
         CancellationToken cancellationToken)
     {
         var accountId = User.GetAccountId();
 
-        var serviceResult = await _transactionService.GetTransactionByIdServiceAsync(
-            transactionId: IdValueObject.Factory(transactionId),
-            accountId: IdValueObject.Factory(accountId),
+        var useCaseResult = await useCase.ExecuteUseCaseAsync(
+            input: GetTransactionUseCaseInput.Factory(
+                transactionId: IdValueObject.Factory(transactionId),
+                accountId: IdValueObject.Factory(accountId)),
             cancellationToken: cancellationToken);
 
-        return Ok(serviceResult);
+        return Ok(useCaseResult);
     }
 
     [HttpGet]

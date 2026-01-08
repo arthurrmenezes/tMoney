@@ -3,6 +3,7 @@ using tMoney.Application.Services.InstallmentContext.Interfaces;
 using tMoney.Application.Services.InstallmentContext.Outputs;
 using tMoney.Domain.BoundedContexts.InstallmentContext.Entities;
 using tMoney.Domain.BoundedContexts.TransactionContext.ENUMs;
+using tMoney.Domain.ValueObjects;
 using tMoney.Infrastructure.Data.Repositories.Interfaces;
 
 namespace tMoney.Application.Services.InstallmentContext;
@@ -50,6 +51,40 @@ public class InstallmentService : IInstallmentService
             firstPaymentDate: installment.FirstPaymentDate,
             status: installment.Status.ToString(),
             installmentItems: installmentItemOutput,
+            updatedAt: installment.UpdatedAt,
+            createdAt: installment.CreatedAt);
+
+        return output;
+    }
+
+    public async Task<GetInstallmentServiceOutput> GetInstallmentServiceAsync(IdValueObject installmentId, IdValueObject accountId, CancellationToken cancellationToken)
+    {
+        var installment = await _installmentRepository.GetByIdAsync(installmentId.Id, accountId.Id, cancellationToken);
+        if (installment is null)
+            throw new KeyNotFoundException("Parcelamento não encontrado");
+
+        var installmentItemsOutput = installment.Installments
+            .OrderBy(i => i.Number)
+            .Select(i => new GetInstallmentServiceOutputInstallmentItem(
+                id: i.Id.ToString(),
+                installmentId: i.InstallmentId.ToString(),
+                number: i.Number,
+                amount: i.Amount,
+                dueDate: i.DueDate,
+                status: i.Status.ToString(),
+                paidAt: i.PaidAt,
+                updatedAt: i.UpdatedAt,
+                createdAt: i.CreatedAt))
+            .ToArray();
+
+        var output = GetInstallmentServiceOutput.Factory(
+            id: installment.Id.ToString(),
+            accountId: installment.AccountId.ToString(),
+            totalInstallments: installment.TotalInstallments,
+            totalAmount: installment.TotalAmount,
+            firstPaymentDate: installment.FirstPaymentDate,
+            status: installment.Status.ToString(),
+            installments: installmentItemsOutput,
             updatedAt: installment.UpdatedAt,
             createdAt: installment.CreatedAt);
 
