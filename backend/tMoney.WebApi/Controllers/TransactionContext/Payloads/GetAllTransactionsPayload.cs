@@ -14,11 +14,12 @@ public class GetAllTransactionsPayload
     public decimal? MinValue { get; init; }
     public decimal? MaxValue { get; init; }
     public string? TextSearch { get; init; }
+    public bool? HasInstallment { get; init; }
 
     public GetAllTransactionsPayload() { }
 
     public GetAllTransactionsPayload(TransactionType? transactionType, IdValueObject? categoryId, PaymentMethod? paymentMethod, PaymentStatus? paymentStatus, 
-        DateTime? startDate, DateTime? endDate, decimal? minValue, decimal? maxValue, string? textSearch)
+        DateTime? startDate, DateTime? endDate, decimal? minValue, decimal? maxValue, string? textSearch, bool? hasInstallment)
     {
         TransactionType = transactionType;
         CategoryId = categoryId;
@@ -29,5 +30,6 @@ public class GetAllTransactionsPayload
         MinValue = minValue;
         MaxValue = maxValue;
         TextSearch = textSearch;
+        HasInstallment = hasInstallment;
     }
 }

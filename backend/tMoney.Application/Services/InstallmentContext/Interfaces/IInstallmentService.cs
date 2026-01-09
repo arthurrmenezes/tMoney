@@ -10,8 +10,13 @@ public interface IInstallmentService
         CreateInstallmentServiceInput input,
         CancellationToken cancellationToken);
 
-    public Task<GetInstallmentServiceOutput> GetInstallmentServiceAsync(
+    public Task<GetInstallmentServiceOutput> GetInstallmentByIdServiceAsync(
         IdValueObject installmentId,
         IdValueObject accountId,
+        CancellationToken cancellationToken);
+
+    public Task<GetAllInstallmentsByAccountIdServiceOutput[]> GetAllInstallmentsByTransactionIdServiceAsync(
+        IdValueObject accountId,
+        IdValueObject[] installmentIds,
         CancellationToken cancellationToken);
 }

@@ -17,7 +17,9 @@ public class InstallmentService : IInstallmentService
         _installmentRepository = installmentRepository;
     }
 
-    public async Task<CreateInstallmentServiceOutput> CreateInstallmentServiceAsync(CreateInstallmentServiceInput input, CancellationToken cancellationToken)
+    public async Task<CreateInstallmentServiceOutput> CreateInstallmentServiceAsync(
+        CreateInstallmentServiceInput input, 
+        CancellationToken cancellationToken)
     {
         var installment = new Installment(
             accountId: input.AccountId,
@@ -34,7 +36,7 @@ public class InstallmentService : IInstallmentService
         await _installmentRepository.AddAsync(installment, cancellationToken);
 
         var installmentItemOutput = installment.Installments.Select(i => new CreateInstallmentServiceOutputInstallmentItem(
-            id: i.Id,
+            id: i.Id.ToString(),
             number: i.Number,
             amount: i.Amount,
             dueDate: i.DueDate,
@@ -44,8 +46,8 @@ public class InstallmentService : IInstallmentService
             createdAt: i.CreatedAt)).ToArray();
 
         var output = CreateInstallmentServiceOutput.Factory(
-            id: installment.Id,
-            accountId: installment.AccountId,
+            id: installment.Id.ToString(),
+            accountId: installment.AccountId.ToString(),
             totalInstallments: installment.TotalInstallments,
             totalAmount: installment.TotalAmount,
             firstPaymentDate: installment.FirstPaymentDate,
@@ -57,7 +59,10 @@ public class InstallmentService : IInstallmentService
         return output;
     }
 
-    public async Task<GetInstallmentServiceOutput> GetInstallmentServiceAsync(IdValueObject installmentId, IdValueObject accountId, CancellationToken cancellationToken)
+    public async Task<GetInstallmentServiceOutput> GetInstallmentByIdServiceAsync(
+        IdValueObject installmentId, 
+        IdValueObject accountId, 
+        CancellationToken cancellationToken)
     {
         var installment = await _installmentRepository.GetByIdAsync(installmentId.Id, accountId.Id, cancellationToken);
         if (installment is null)
@@ -87,6 +92,40 @@ public class InstallmentService : IInstallmentService
             installments: installmentItemsOutput,
             updatedAt: installment.UpdatedAt,
             createdAt: installment.CreatedAt);
+
+        return output;
+    }
+
+    public async Task<GetAllInstallmentsByAccountIdServiceOutput[]> GetAllInstallmentsByTransactionIdServiceAsync(
+        IdValueObject accountId,
+        IdValueObject[] installmentIds, 
+        CancellationToken cancellationToken)
+    {
+        Installment[]? installments = null;
+        if (installmentIds.Any())
+            installments = await _installmentRepository.GetAllByInstallmentIdAsync(accountId.Id, installmentIds.Select(i => i.Id), cancellationToken);
+
+        var output = installments is null ? Array.Empty<GetAllInstallmentsByAccountIdServiceOutput>() : installments.Select(i => GetAllInstallmentsByAccountIdServiceOutput.Factory(
+            id: i.Id.ToString(),
+            accountId: i.AccountId.ToString(),
+            totalInstallments: i.TotalInstallments,
+            totalAmount: i.TotalAmount,
+            firstPaymentDate: i.FirstPaymentDate,
+            status: i.Status.ToString(),
+            installments: i.Installments
+            .OrderBy(ii => ii.Number)
+            .Select(ii => new GetAllInstallmentsByAccountIdServiceOutputInstallmentItem(
+                id: ii.Id.ToString(),
+                number: ii.Number,
+                amount: ii.Amount,
+                dueDate: ii.DueDate,
+                status: ii.Status.ToString(),
+                paidAt: ii.PaidAt,
+                updatedAt: ii.UpdatedAt,
+                createdAt: ii.CreatedAt)).ToArray(),
+            updatedAt: i.UpdatedAt,
+            createdAt: i.CreatedAt))
+            .ToArray();
 
         return output;
     }

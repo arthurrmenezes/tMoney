@@ -5,6 +5,8 @@ using tMoney.Application.Services.TransactionContext.Interfaces;
 using tMoney.Application.UseCases.Interfaces;
 using tMoney.Application.UseCases.TransactionContext.CreateTransactionUseCase.Inputs;
 using tMoney.Application.UseCases.TransactionContext.CreateTransactionUseCase.Outputs;
+using tMoney.Application.UseCases.TransactionContext.GetAllTransactionsUseCase.Inputs;
+using tMoney.Application.UseCases.TransactionContext.GetAllTransactionsUseCase.Outputs;
 using tMoney.Application.UseCases.TransactionContext.GetTransactionUseCase.Inputs;
 using tMoney.Application.UseCases.TransactionContext.GetTransactionUseCase.Outputs;
 using tMoney.Domain.ValueObjects;
@@ -80,6 +82,7 @@ public class TransactionController : ControllerBase
     [HttpGet]
     [Authorize]
     public async Task<IActionResult> GetAllTransactionsAsync(
+        [FromServices] IUseCase<GetAllTransactionsUseCaseInput, GetAllTransactionsUseCaseOutput> useCase,
         CancellationToken cancellationToken,
         [FromQuery] GetAllTransactionsPayload input,
         [FromQuery] int? pageNumber = 1,
@@ -93,9 +96,9 @@ public class TransactionController : ControllerBase
 
         var category = input.CategoryId is not null ? IdValueObject.Factory(input.CategoryId.Id) : null;
 
-        var serviceResult = await _transactionService.GetAllTransactionsByAccountIdServiceAsync(
-            accountId: IdValueObject.Factory(accountId),
-            input: GetAllTransactionsByAccountIdServiceInput.Factory(
+        var useCaseResult = await useCase.ExecuteUseCaseAsync(
+            input: GetAllTransactionsUseCaseInput.Factory(
+                accountId: IdValueObject.Factory(accountId),
                 pageNumber: pageNumber is not null ? pageNumber.Value : 0,
                 pageSize: pageSize is not null ? pageSize.Value : 0,
                 transactionType: input.TransactionType,
@@ -106,10 +109,11 @@ public class TransactionController : ControllerBase
                 endDate: input.EndDate,
                 minValue: input.MinValue,
                 maxValue: input.MaxValue,
-                textSearch: input.TextSearch),
+                textSearch: input.TextSearch,
+                hasInstallment: input.HasInstallment),
             cancellationToken: cancellationToken);
 
-        return Ok(serviceResult);
+        return Ok(useCaseResult);
     }
 
     [HttpPatch]

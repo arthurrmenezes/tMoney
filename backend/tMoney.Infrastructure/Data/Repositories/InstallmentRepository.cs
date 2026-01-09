@@ -20,4 +20,18 @@ public class InstallmentRepository : BaseRepository<Installment>, IInstallmentRe
             .Include(i => i.Installments)
             .FirstOrDefaultAsync(i => i.Id == voInstallmentId && i.AccountId == voAccountId, cancellationToken);
     }
+
+    public async Task<Installment[]> GetAllByInstallmentIdAsync(Guid accountId, IEnumerable<Guid> installmentIds, CancellationToken cancellationToken)
+    {
+        var voAccountId = IdValueObject.Factory(accountId);
+        var voInstallmentIds = installmentIds
+            .Select(id => IdValueObject.Factory(id))
+            .ToArray();
+
+        return await _dataContext.Installments
+            .AsNoTracking()
+            .Include(i => i.Installments)
+            .Where(i => i.AccountId == voAccountId && voInstallmentIds.Contains(i.Id))
+            .ToArrayAsync(cancellationToken);
+    }
 }

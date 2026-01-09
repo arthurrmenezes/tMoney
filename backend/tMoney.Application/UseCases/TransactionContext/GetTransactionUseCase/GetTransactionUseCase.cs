@@ -33,7 +33,7 @@ public sealed class GetTransactionUseCase : IUseCase<GetTransactionUseCaseInput,
             if (!Guid.TryParse(transactionServiceOutput.InstallmentId, out var installmentId))
                 throw new ArgumentException("Installment ID inválido.");
 
-            installmentServiceOutput = await _installmentService.GetInstallmentServiceAsync(
+            installmentServiceOutput = await _installmentService.GetInstallmentByIdServiceAsync(
                 installmentId: IdValueObject.Factory(installmentId),
                 accountId: input.AccountId,
                 cancellationToken: cancellationToken);
