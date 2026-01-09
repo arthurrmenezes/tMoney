@@ -84,11 +84,9 @@ public class AuthService : IAuthService
 
             await _categoryRepository.AddAsync(defaultCategory, cancellationToken);
 
-            await _unitOfWork.CommitTransactionAsync(cancellationToken);
-
             var emailConfirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             var emailConfirmationEncodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(emailConfirmationToken));
-            var emailConfirmationLink = $"{_baseUrl}/confirm-email?token={emailConfirmationEncodedToken}&email={user.Email}";
+            var emailConfirmationLink = $"{_baseUrl}/confirmar-email?token={emailConfirmationEncodedToken}&email={user.Email}";
 
             var emailMessage = EmailTemplates.WelcomeEmailTemplateMessageBody(account.FirstName, emailConfirmationLink);
             var emailSubject = EmailTemplates.WelcomeEmailTemplateSubject();
@@ -105,6 +103,8 @@ public class AuthService : IAuthService
             await _emailService.SendEmailAsync(
                 input: emailInput,
                 cancellationToken: cancellationToken);
+
+            await _unitOfWork.CommitTransactionAsync(cancellationToken);
 
             var output = RegisterAccountServiceOutput.Factory(
                 accountId: account.AccountId,

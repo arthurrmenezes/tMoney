@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using tMoney.Application.Services.AuthContext.Interfaces;
 using tMoney.Application.UseCases.AuthContext.GoogleAuthUseCase.Inputs;
 using tMoney.Application.UseCases.AuthContext.GoogleAuthUseCase.Outputs;
 using tMoney.Application.UseCases.Interfaces;
@@ -21,7 +20,6 @@ public sealed class GoogleAuthUseCase : IUseCase<GoogleAuthUseCaseInput, GoogleA
 {
     private readonly IGoogleService _googleService;
     private readonly UserManager<User> _userManager;
-    private readonly IAuthService _authService;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ITokenService _tokenService;
     private readonly IRefreshTokenRepository _refreshTokenRepository;
@@ -29,13 +27,11 @@ public sealed class GoogleAuthUseCase : IUseCase<GoogleAuthUseCaseInput, GoogleA
     private readonly ICategoryRepository _categoryRepository;
     private readonly IEmailService _emailService;
 
-    public GoogleAuthUseCase(IGoogleService googleService, UserManager<User> userManager, IAuthService authService, IUnitOfWork unitOfWork,
-        ITokenService tokenService, IRefreshTokenRepository refreshTokenRepository, IAccountRepository accountRepository, 
-        ICategoryRepository categoryRepository, IEmailService emailService)
+    public GoogleAuthUseCase(IGoogleService googleService, UserManager<User> userManager, IUnitOfWork unitOfWork, ITokenService tokenService, 
+        IRefreshTokenRepository refreshTokenRepository, IAccountRepository accountRepository, ICategoryRepository categoryRepository, IEmailService emailService)
     {
         _googleService = googleService;
         _userManager = userManager;
-        _authService = authService;
         _unitOfWork = unitOfWork;
         _tokenService = tokenService;
         _refreshTokenRepository = refreshTokenRepository;

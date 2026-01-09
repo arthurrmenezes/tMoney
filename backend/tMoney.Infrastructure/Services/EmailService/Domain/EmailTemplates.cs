@@ -88,7 +88,7 @@ public static class EmailTemplates
 
     public static string WelcomeEmailTemplateSubject()
     {
-        return "Bem-vindo(a) à tMoney! Confirme seu e-mail para começar 🚀";
+        return "Bem-vindo(a) à tMoney! Confirme seu e-mail para começar";
     }
 
     public static string ResendConfirmationEmailTemplateMessageBody(string firstName, string emailConfirmationLink)
@@ -166,7 +166,7 @@ public static class EmailTemplates
 
     public static string ResendConfirmationEmailTemplateSubject()
     {
-        return $"Confirme seu e-mail - tMoney 💵";
+        return $"Confirme seu e-mail - tMoney";
     }
 
     public static string ChangePasswordTemplateMessageBody(string firstName, DateTime dateTime)
@@ -254,7 +254,7 @@ public static class EmailTemplates
 
     public static string ChangePasswordTemplateSubject()
     {
-        return $"Alteração de senha confirmada - tMoney 💵";
+        return $"Alteração de senha confirmada - tMoney";
     }
 
     public static string ForgotPasswordTemplateMessageBody(string firstName, string resetPasswordLink)
@@ -338,7 +338,7 @@ public static class EmailTemplates
 
     public static string ForgotPasswordTemplateSubject()
     {
-        return $"Recuperação de senha - tMoney 💵";
+        return $"Recuperação de senha - tMoney";
     }
 
     public static string WelcomeEmailGoogleAuthTemplateMessageBody(string firstName)
@@ -413,6 +413,6 @@ public static class EmailTemplates
 
     public static string WelcomeEmailGoogleAuthTemplateSubject()
     {
-        return "Bem-vindo(a) à tMoney! Conta criada com sucesso 🚀";
+        return "Bem-vindo(a) à tMoney! Conta criada com sucesso!";
     }
 }

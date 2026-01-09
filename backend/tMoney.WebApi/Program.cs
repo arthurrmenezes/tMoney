@@ -26,24 +26,32 @@ builder.Services.AddSwaggerGen();
 
 #region CORS Configuration
 
-builder.Services.AddCors(options =>
+var corsPolicyName = "ProductionPolicy";
+if (builder.Environment.IsDevelopment())
 {
-    options.AddPolicy("DevelopmentPolicy", policy =>
+    builder.Services.AddCors(options =>
     {
-        policy.WithOrigins("http://localhost:5173")
-            .AllowAnyHeader()
-            .AllowAnyMethod()
-            .AllowCredentials();
+        options.AddPolicy("DevelopmentPolicy", policy =>
+        {
+            policy.AllowAnyOrigin()
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        });
+        corsPolicyName = "DevelopmentPolicy";
     });
-
-    options.AddPolicy("ProductionPolicy", policy =>
+}
+else
+{
+    builder.Services.AddCors(options =>
     {
-        policy.WithOrigins("https://tmoney.lovable.app")
-            .AllowAnyHeader()
-            .AllowAnyMethod()
-            .AllowCredentials();
+        options.AddPolicy("ProductionPolicy", policy =>
+        {
+            policy.WithOrigins("https://tmoney.lovable.app")
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        });
     });
-});
+}
 
 #endregion
 
@@ -55,7 +63,20 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseCors("ProductionPolicy");
+if (app.Environment.IsDevelopment())
+{
+    app.Use(async (context, next) =>
+    {
+        context.Response.Headers.Remove("Cross-Origin-Opener-Policy");
+        context.Response.Headers.Remove("Cross-Origin-Embedder-Policy");
+        await next();
+    });
+}
+
+app.UseCors(corsPolicyName);
+
+if (!app.Environment.IsDevelopment())
+    app.UseHsts();
 
 app.UseMiddleware<ExceptionMiddleware>();
 
