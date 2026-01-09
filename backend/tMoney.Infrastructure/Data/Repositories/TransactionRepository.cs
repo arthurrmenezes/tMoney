@@ -17,7 +17,7 @@ public class TransactionRepository : BaseRepository<Transaction>, ITransactionRe
 
         await _dataContext.Transactions
             .Where(t => t.CategoryId == IdValueObject.Factory(currentCategoryId) && t.AccountId == IdValueObject.Factory(accountId))
-            .ExecuteUpdateAsync(calls => 
+            .ExecuteUpdateAsync(calls =>
                 calls.SetProperty(t => t.CategoryId, voDefaultCategoryId), cancellationToken);
     }
 
@@ -33,8 +33,8 @@ public class TransactionRepository : BaseRepository<Transaction>, ITransactionRe
     }
 
     public async Task<Transaction[]> GetAllByAccountIdAsync(Guid accountId, int pageNumber, int pageSize, TransactionType? transactionType, Guid? categoryId,
-        PaymentMethod? paymentMethod, PaymentStatus? paymentStatus, DateTime? startDate, DateTime? endDate, decimal? minValue, decimal? maxValue, 
-        string? textSearch, CancellationToken cancellationToken)
+        PaymentMethod? paymentMethod, PaymentStatus? paymentStatus, DateTime? startDate, DateTime? endDate, decimal? minValue, decimal? maxValue,
+        string? textSearch, bool? hasInstallment, CancellationToken cancellationToken)
     {
         var skip = (pageNumber - 1) * pageSize;
         var voAccountId = IdValueObject.Factory(accountId);
@@ -69,7 +69,7 @@ public class TransactionRepository : BaseRepository<Transaction>, ITransactionRe
         {
             query = query.Where(t => t.Date >= startDate);
         }
-        
+
         if (endDate.HasValue)
         {
             query = query.Where(t => t.Date <= endDate);
@@ -85,21 +85,27 @@ public class TransactionRepository : BaseRepository<Transaction>, ITransactionRe
         {
             var text = textSearch.ToLower();
 
-            query = query.Where(t => 
+            query = query.Where(t =>
                 (t.Title != null && t.Title.ToLower().Contains(text)) ||
                 (t.Description != null && t.Description.ToLower().Contains(text)) ||
                 (t.Destination != null && t.Destination.ToLower().Contains(text)));
         }
 
+        if (hasInstallment.HasValue)
+            if (hasInstallment.Value)
+                query = query.Where(t => t.InstallmentId != null);
+            else
+                query = query.Where(t => t.InstallmentId == null);
+
         return await query
-                .OrderByDescending(t => t.CreatedAt)
-                .Skip(skip)
-                .Take(pageSize)
-                .ToArrayAsync(cancellationToken);
+            .OrderByDescending(t => t.CreatedAt)
+            .Skip(skip)
+            .Take(pageSize)
+            .ToArrayAsync(cancellationToken);
     }
 
     public async Task<int> GetTransactionsCountAsync(Guid accountId, TransactionType? transactionType, Guid? categoryId, PaymentMethod? paymentMethod,
-        PaymentStatus? paymentStatus, DateTime? startDate, DateTime? endDate, decimal? minValue, decimal? maxValue, string? textSearch, 
+        PaymentStatus? paymentStatus, DateTime? startDate, DateTime? endDate, decimal? minValue, decimal? maxValue, string? textSearch, bool? hasInstallment,
         CancellationToken cancellationToken)
     {
         var voAccountId = IdValueObject.Factory(accountId);
@@ -150,6 +156,12 @@ public class TransactionRepository : BaseRepository<Transaction>, ITransactionRe
                 (t.Description != null && t.Description.ToLower().Contains(text)) ||
                 (t.Destination != null && t.Destination.ToLower().Contains(text)));
         }
+
+        if (hasInstallment.HasValue)
+            if (hasInstallment.Value)
+                query = query.Where(t => t.InstallmentId != null);
+            else
+                query = query.Where(t => t.InstallmentId == null);
 
         return await query.CountAsync(cancellationToken);
     }

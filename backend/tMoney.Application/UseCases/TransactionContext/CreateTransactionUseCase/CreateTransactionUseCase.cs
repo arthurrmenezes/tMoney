@@ -6,6 +6,7 @@ using tMoney.Application.Services.TransactionContext.Interfaces;
 using tMoney.Application.UseCases.Interfaces;
 using tMoney.Application.UseCases.TransactionContext.CreateTransactionUseCase.Inputs;
 using tMoney.Application.UseCases.TransactionContext.CreateTransactionUseCase.Outputs;
+using tMoney.Domain.ValueObjects;
 using tMoney.Infrastructure.Data.UnitOfWork.Interfaces;
 
 namespace tMoney.Application.UseCases.TransactionContext.CreateTransactionUseCase;
@@ -30,6 +31,8 @@ public sealed class CreateTransactionUseCase : IUseCase<CreateTransactionUseCase
         try
         {
             CreateInstallmentServiceOutput? installmentServiceOutput = null;
+            IdValueObject? voInstallmentId = null;
+
             if (input.HasInstallment is not null)
             {
                 installmentServiceOutput = await _installmentService.CreateInstallmentServiceAsync(
@@ -40,15 +43,18 @@ public sealed class CreateTransactionUseCase : IUseCase<CreateTransactionUseCase
                         firstPaymentDate: input.Date,
                         status: input.Status),
                     cancellationToken: cancellationToken);
-            }
 
-            var installmentId = installmentServiceOutput is null ? null : installmentServiceOutput.Id;
+                if (!Guid.TryParse(installmentServiceOutput.Id, out var installmentId))
+                    throw new ArgumentException("Installment ID inválido.");
+
+                voInstallmentId = IdValueObject.Factory(installmentId);
+            }
 
             var transactionServiceOutput = await _transactionService.CreateTransactionServiceAsync(
                 CreateTransactionServiceInput.Factory(
                     accountId: input.AccountId,
                     categoryId: input.CategoryId,
-                    installmentId: installmentId,
+                    installmentId: voInstallmentId,
                     title: input.Title,
                     description: input.Description,
                     amount: input.Amount,

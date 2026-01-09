@@ -28,6 +28,7 @@ public class GetAllTransactionsByAccountIdServiceOutputTransaction
     public string Id { get; }
     public string AccountId { get; }
     public string CategoryId { get; }
+    public string? InstallmentId { get; }
     public string Title { get; }
     public string? Description { get; }
     public decimal Amount { get; }
@@ -39,12 +40,14 @@ public class GetAllTransactionsByAccountIdServiceOutputTransaction
     public DateTime? UpdatedAt { get; }
     public DateTime CreatedAt { get; }
 
-    public GetAllTransactionsByAccountIdServiceOutputTransaction(string id, string accountId, string categoryId, string title, string? description,
-        decimal amount, DateTime date, string transactionType, string paymentMethod, string status, string? destination, DateTime? updatedAt, DateTime createdAt)
+    public GetAllTransactionsByAccountIdServiceOutputTransaction(string id, string accountId, string categoryId, string? installmentId, string title, 
+        string? description, decimal amount, DateTime date, string transactionType, string paymentMethod, string status, string? destination, 
+        DateTime? updatedAt, DateTime createdAt)
     {
         Id = id;
         AccountId = accountId;
         CategoryId = categoryId;
+        InstallmentId = installmentId;
         Title = title;
         Description = description;
         Amount = amount;

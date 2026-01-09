@@ -95,10 +95,13 @@ public class TransactionService : ITransactionService
         if (transaction is null)
             throw new KeyNotFoundException("Transação não encontrada");
 
+        var installmentId = transaction.InstallmentId is null ? null : transaction.InstallmentId.ToString();
+
         var output = GetTransactionByIdServiceOutput.Factory(
             id: transaction.Id.ToString(),
             accountId: transaction.AccountId.ToString(),
             categoryId: transaction.CategoryId.ToString(),
+            installmentId: installmentId,
             title: transaction.Title,
             description: transaction.Description,
             amount: transaction.Amount,
@@ -119,7 +122,7 @@ public class TransactionService : ITransactionService
         CancellationToken cancellationToken)
     {
         if (input.MinValue > input.MaxValue)
-            throw new ArgumentException("O valor mínimo deve ser maior que o valor máximo");
+            throw new ArgumentException("O valor mínimo deve ser menor ou igual ao valor máximo.");
 
         var transactions = await _transactionRepository.GetAllByAccountIdAsync(
             accountId: accountId.Id,
@@ -134,6 +137,7 @@ public class TransactionService : ITransactionService
             minValue: input.MinValue,
             maxValue: input.MaxValue,
             textSearch: input.TextSearch,
+            hasInstallment: input.HasInstallment,
             cancellationToken: cancellationToken);
 
         var transactionOutput = transactions
@@ -141,6 +145,7 @@ public class TransactionService : ITransactionService
                 id: t.Id.ToString(),
                 accountId: t.AccountId.ToString(),
                 categoryId: t.CategoryId.ToString(),
+                installmentId: t.InstallmentId is null ? null : t.InstallmentId.ToString(),
                 title: t.Title,
                 description: t.Description,
                 amount: t.Amount,
@@ -164,6 +169,7 @@ public class TransactionService : ITransactionService
             minValue: input.MinValue,
             maxValue: input.MaxValue,
             textSearch: input.TextSearch,
+            hasInstallment: input.HasInstallment,
             cancellationToken: cancellationToken);
 
         var totalPages = (int)Math.Ceiling((double)totalTransactions / input.PageSize);
