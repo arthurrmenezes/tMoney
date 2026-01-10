@@ -18,4 +18,11 @@ public class AccountRepository : BaseRepository<Account>, IAccountRepository
             .AsNoTracking()
             .FirstOrDefaultAsync(a => a.AccountId == voAccountId, cancellationToken);
     }
+
+    public async Task<Account?> GetAccountByEmailAsync(string email, CancellationToken cancellationToken)
+    {
+        return await _dataContext.Accounts
+            .AsNoTracking()
+            .FirstOrDefaultAsync(a => a.Email == email, cancellationToken);
+    }
 }

@@ -9,6 +9,7 @@ public class Account
     public LastNameValueObject LastName { get; private set; }
     public EmailValueObject Email { get; private set; }
     public decimal Balance { get; private set; }
+    public DateTime? LastLoginAt { get; private set; }
     public DateTime? UpdatedAt { get; private set; }
     public DateTime CreatedAt { get; private set; }
 
@@ -22,6 +23,7 @@ public class Account
         Email = email;
         Balance = 0;
         UpdatedAt = null;
+        LastLoginAt = null;
         CreatedAt = DateTime.UtcNow;
     }
 
@@ -52,5 +54,10 @@ public class Account
 
         Balance -= amount;
         UpdatedAt = DateTime.UtcNow;
+    }
+
+    public void UpdateLastLoginDate()
+    {
+        LastLoginAt = DateTime.UtcNow;
     }
 }

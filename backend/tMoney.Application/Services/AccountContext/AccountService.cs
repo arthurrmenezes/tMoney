@@ -30,6 +30,8 @@ public class AccountService : IAccountService
             lastName: account.LastName,
             email: account.Email,
             balance: account.Balance,
+            lastLoginAt: account.LastLoginAt,
+            updatedAt: account.UpdatedAt,
             createdAt: account.CreatedAt);
 
         return output;
@@ -59,6 +61,7 @@ public class AccountService : IAccountService
             lastName: account.LastName,
             email: account.Email,
             balance: account.Balance,
+            lastLoginAt: account.LastLoginAt,
             updatedAt: account.UpdatedAt,
             createdAt: account.CreatedAt);
 

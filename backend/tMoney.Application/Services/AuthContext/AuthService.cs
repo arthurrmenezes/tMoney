@@ -86,7 +86,7 @@ public class AuthService : IAuthService
 
             var emailConfirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             var emailConfirmationEncodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(emailConfirmationToken));
-            var emailConfirmationLink = $"{_baseUrl}/confirmar-email?token={emailConfirmationEncodedToken}&email={user.Email}";
+            var emailConfirmationLink = $"{_baseUrl}/confirm-email?token={emailConfirmationEncodedToken}&email={user.Email}";
 
             var emailMessage = EmailTemplates.WelcomeEmailTemplateMessageBody(account.FirstName, emailConfirmationLink);
             var emailSubject = EmailTemplates.WelcomeEmailTemplateSubject();
@@ -140,27 +140,46 @@ public class AuthService : IAuthService
         if (!verifyCredentials.Succeeded)
             throw new InvalidOperationException("E-mail ou senha incorreta.");
 
-        var acessToken = _tokenService.GenerateAccessToken(user);
-        var tokenExpirationInSeconds = _tokenService.GetAccessTokenExpiration();
+        await _unitOfWork.BeginTransactionAsync(cancellationToken);
 
-        var refreshToken = _tokenService.GenerateRefreshToken();
-        var refreshTokenExpiration = DateTime.UtcNow.AddDays(_tokenService.GetRefreshTokenExpiration());
+        try
+        {
+            var account = await _accountRepository.GetAccountByIdAsync(user.AccountId.Id, cancellationToken);
+            if (account is null)
+                throw new KeyNotFoundException($"Conta não foi encontrada.");
 
-        var refreshTokenEntity = new RefreshToken(
-            token: refreshToken,
-            userId: user.Id,
-            expiresAt: refreshTokenExpiration);
+            account.UpdateLastLoginDate();
 
-        await _refreshTokenRepository.AddAsync(refreshTokenEntity, cancellationToken);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
+            _accountRepository.Update(account);
 
-        var output = LoginServiceOutput.Factory(
-            accessToken: acessToken,
-            tokenType: "Bearer",
-            expiresIn: tokenExpirationInSeconds,
-            refreshToken: refreshToken);
+            var acessToken = _tokenService.GenerateAccessToken(user);
+            var tokenExpirationInSeconds = _tokenService.GetAccessTokenExpiration();
 
-        return output;
+            var refreshToken = _tokenService.GenerateRefreshToken();
+            var refreshTokenExpiration = DateTime.UtcNow.AddDays(_tokenService.GetRefreshTokenExpiration());
+
+            var refreshTokenEntity = new RefreshToken(
+                token: refreshToken,
+                userId: user.Id,
+                expiresAt: refreshTokenExpiration);
+
+            await _refreshTokenRepository.AddAsync(refreshTokenEntity, cancellationToken);
+
+            await _unitOfWork.CommitTransactionAsync(cancellationToken);
+
+            var output = LoginServiceOutput.Factory(
+                accessToken: acessToken,
+                tokenType: "Bearer",
+                expiresIn: tokenExpirationInSeconds,
+                refreshToken: refreshToken);
+
+            return output;
+        }
+        catch (Exception)
+        {
+            await _unitOfWork.RollbackTransactionAsync(cancellationToken);
+            throw;
+        }
     }
 
     public async Task<RefreshTokenServiceOutput> RefreshTokenServiceAsync(RefreshTokenServiceInput input, CancellationToken cancellationToken)

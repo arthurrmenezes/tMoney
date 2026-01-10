@@ -54,6 +54,11 @@ public sealed class AccountMapping : IEntityTypeConfiguration<Account>
             .HasPrecision(18, 2)
             .ValueGeneratedNever();
 
+        builder.Property(a => a.LastLoginAt)
+            .IsRequired(false)
+            .HasColumnName("last_login_at")
+            .ValueGeneratedNever();
+
         builder.Property(a => a.UpdatedAt)
             .IsRequired(false)
             .HasColumnName("updated_at")

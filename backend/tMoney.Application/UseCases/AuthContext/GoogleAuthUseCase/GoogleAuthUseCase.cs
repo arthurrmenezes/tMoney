@@ -47,32 +47,51 @@ public sealed class GoogleAuthUseCase : IUseCase<GoogleAuthUseCaseInput, GoogleA
         var googleUser = await _userManager.FindByEmailAsync(googleResult.Email);
         if (googleUser is not null)
         {
-            var accessToken = _tokenService.GenerateAccessToken(googleUser);
-            var tokenExpirationInSeconds = _tokenService.GetAccessTokenExpiration();
+            await _unitOfWork.BeginTransactionAsync(cancellationToken);
 
-            var refreshToken = _tokenService.GenerateRefreshToken();
-            var refreshTokenExpiration = DateTime.UtcNow.AddDays(_tokenService.GetRefreshTokenExpiration());
+            try
+            {
+                var account = await _accountRepository.GetAccountByEmailAsync(googleUser.Email!, cancellationToken);
+                if (account is null)
+                    throw new KeyNotFoundException($"Conta não foi encontrada.");
 
-            var refreshTokenEntity = new RefreshToken(
-                token: refreshToken,
-                userId: googleUser.Id,
-                expiresAt: refreshTokenExpiration);
+                account.UpdateLastLoginDate();
 
-            await _refreshTokenRepository.AddAsync(refreshTokenEntity, cancellationToken);
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
+                _accountRepository.Update(account);
 
-            var output = GoogleAuthUseCaseOutput.Factory(
-                accountId: googleUser.AccountId.ToString(),
-                firstName: null,
-                lastName: null,
-                email: googleUser.Email!,
-                accessToken: accessToken,
-                tokenType: "Bearer",
-                expiresIn: tokenExpirationInSeconds,
-                refreshToken: refreshToken,
-                createdAt: null);
+                var accessToken = _tokenService.GenerateAccessToken(googleUser);
+                var tokenExpirationInSeconds = _tokenService.GetAccessTokenExpiration();
 
-            return output;
+                var refreshToken = _tokenService.GenerateRefreshToken();
+                var refreshTokenExpiration = DateTime.UtcNow.AddDays(_tokenService.GetRefreshTokenExpiration());
+
+                var refreshTokenEntity = new RefreshToken(
+                    token: refreshToken,
+                    userId: googleUser.Id,
+                    expiresAt: refreshTokenExpiration);
+
+                await _refreshTokenRepository.AddAsync(refreshTokenEntity, cancellationToken);
+                
+                await _unitOfWork.CommitTransactionAsync(cancellationToken);
+
+                var output = GoogleAuthUseCaseOutput.Factory(
+                    accountId: googleUser.AccountId.ToString(),
+                    firstName: null,
+                    lastName: null,
+                    email: googleUser.Email!,
+                    accessToken: accessToken,
+                    tokenType: "Bearer",
+                    expiresIn: tokenExpirationInSeconds,
+                    refreshToken: refreshToken,
+                    createdAt: null);
+
+                return output;
+            }
+            catch (Exception)
+            {
+                await _unitOfWork.RollbackTransactionAsync(cancellationToken);
+                throw;
+            }
         }
 
         await _unitOfWork.BeginTransactionAsync(cancellationToken);
@@ -120,6 +139,10 @@ public sealed class GoogleAuthUseCase : IUseCase<GoogleAuthUseCaseInput, GoogleA
                 token: refreshToken,
                 userId: user.Id,
                 expiresAt: refreshTokenExpiration);
+
+            account.UpdateLastLoginDate();
+
+            _accountRepository.Update(account);
 
             await _refreshTokenRepository.AddAsync(refreshTokenEntity, cancellationToken);
 

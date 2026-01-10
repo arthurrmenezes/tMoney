@@ -37,8 +37,8 @@ if (builder.Environment.IsDevelopment())
                 .AllowAnyHeader()
                 .AllowAnyMethod();
         });
-        corsPolicyName = "DevelopmentPolicy";
     });
+    corsPolicyName = "DevelopmentPolicy";
 }
 else
 {
@@ -57,30 +57,22 @@ else
 
 var app = builder.Build();
 
+app.UseMiddleware<ExceptionMiddleware>();
+
+if (!app.Environment.IsDevelopment())
+    app.UseHsts();
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-if (app.Environment.IsDevelopment())
-{
-    app.Use(async (context, next) =>
-    {
-        context.Response.Headers.Remove("Cross-Origin-Opener-Policy");
-        context.Response.Headers.Remove("Cross-Origin-Embedder-Policy");
-        await next();
-    });
-}
+app.UseHttpsRedirection();
+
+app.UseRouting();
 
 app.UseCors(corsPolicyName);
-
-if (!app.Environment.IsDevelopment())
-    app.UseHsts();
-
-app.UseMiddleware<ExceptionMiddleware>();
-
-app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
