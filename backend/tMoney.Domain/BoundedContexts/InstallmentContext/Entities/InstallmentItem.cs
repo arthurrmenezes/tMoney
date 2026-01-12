@@ -30,7 +30,7 @@ public class InstallmentItem
         CreatedAt = DateTime.UtcNow;
     }
 
-    public void PayAllInstallments()
+    public void PayInstallment()
     {
         Status = PaymentStatus.Paid;
     }

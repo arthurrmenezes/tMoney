@@ -69,20 +69,51 @@ public class Installment
     public void PayAllInstallments()
     {
         if (Installments.Count() == 0)
-            throw new ArgumentException($"Não há parcelas registradas.");
+            throw new ArgumentException("Não há parcelas registradas.");
 
-        Installments.ForEach(i => i.PayAllInstallments());
+        Installments.ForEach(i => i.PayInstallment());
+
+        UpdatedAt = DateTime.UtcNow;
     }
-
-    public void PaySingleInstallmentItem(int number, DateTime paidAt)
+    
+    public void UpdateInstallmentDetails(int? totalInstallments, decimal? totalAmount, DateTime? firstPaymentDate, PaymentStatus? status)
     {
-        var installmentItem = Installments.FirstOrDefault(i => i.Number == number);
-        if (installmentItem is null)
-            throw new ArgumentException($"Não foi encontrado nenhuma parcela de número {number}.");
+        if (Status == PaymentStatus.Paid && status.HasValue && status != PaymentStatus.Paid)
+            throw new InvalidOperationException("Não é possível reabrir um parcelamento já quitado.");
 
-        if (installmentItem.Status == PaymentStatus.Paid)
-            throw new InvalidOperationException($"A parcela {number} já foi paga.");
+        var isStructuralChange =
+            (totalInstallments.HasValue && totalInstallments != TotalInstallments) ||
+            (totalAmount.HasValue && totalAmount != TotalAmount) ||
+            (firstPaymentDate.HasValue && firstPaymentDate != FirstPaymentDate);
 
-        installmentItem.UpdateInstallmentItem(PaymentStatus.Paid, paidAt);
+        var hasPaidItems = Installments.Any(i => i.Status == PaymentStatus.Paid);
+
+        if (isStructuralChange && hasPaidItems)
+            throw new ArgumentException("Não foi possível alterar os dados pois já existem parcelas pagas.");
+
+        if (totalInstallments.HasValue)
+            TotalInstallments = totalInstallments.Value;
+
+        if (totalAmount.HasValue)
+            TotalAmount = totalAmount.Value;
+
+        if (firstPaymentDate.HasValue)
+            FirstPaymentDate = firstPaymentDate.Value;
+
+        if (status.HasValue && Enum.IsDefined(typeof(PaymentStatus), status))
+            Status = status.Value;
+
+        if (isStructuralChange)
+        {
+            Installments.Clear();
+            GenerateInstallments();
+        }
+
+        if ((status.HasValue && status.Value == PaymentStatus.Paid) || 
+            Status == PaymentStatus.Paid || 
+            (isStructuralChange && Status == PaymentStatus.Paid))
+            PayAllInstallments();
+
+        UpdatedAt = DateTime.UtcNow;
     }
 }

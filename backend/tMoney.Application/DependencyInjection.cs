@@ -22,6 +22,9 @@ using tMoney.Application.UseCases.TransactionContext.GetAllTransactionsUseCase.O
 using tMoney.Application.UseCases.TransactionContext.GetTransactionUseCase;
 using tMoney.Application.UseCases.TransactionContext.GetTransactionUseCase.Inputs;
 using tMoney.Application.UseCases.TransactionContext.GetTransactionUseCase.Outputs;
+using tMoney.Application.UseCases.TransactionContext.UpdateTransactionUseCase;
+using tMoney.Application.UseCases.TransactionContext.UpdateTransactionUseCase.Input;
+using tMoney.Application.UseCases.TransactionContext.UpdateTransactionUseCase.Outputs;
 
 namespace tMoney.Application;
 
@@ -44,6 +47,7 @@ public static class DependencyInjection
         serviceCollection.AddScoped<IUseCase<CreateTransactionUseCaseInput, CreateTransactionUseCaseOutput>, CreateTransactionUseCase>();
         serviceCollection.AddScoped<IUseCase<GetTransactionUseCaseInput, GetTransactionUseCaseOutput>, GetTransactionUseCase>();
         serviceCollection.AddScoped<IUseCase<GetAllTransactionsUseCaseInput, GetAllTransactionsUseCaseOutput>, GetAllTransactionsUseCase>();
+        serviceCollection.AddScoped<IUseCase<UpdateTransactionUseCaseInput, UpdateTransactionUseCaseOutput>, UpdateTransactionUseCase>();
 
         serviceCollection.AddScoped<IUseCase<GoogleAuthUseCaseInput, GoogleAuthUseCaseOutput>, GoogleAuthUseCase>();
 

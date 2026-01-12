@@ -6,6 +6,7 @@ namespace tMoney.Application.Services.TransactionContext.Inputs;
 public sealed class UpdateTransactionDetailsByIdServiceInput
 {
     public IdValueObject? CategoryId { get; }
+    public IdValueObject? InstallmentId { get; }
     public string? Title { get; }
     public string? Description { get; }
     public decimal? Amount { get; }
@@ -15,10 +16,11 @@ public sealed class UpdateTransactionDetailsByIdServiceInput
     public PaymentStatus? Status { get; }
     public string? Destination { get; }
 
-    private UpdateTransactionDetailsByIdServiceInput(IdValueObject? categoryId, string? title, string? description, decimal? amount,
-        DateTime? date, TransactionType? transactionType, PaymentMethod? paymentMethod, PaymentStatus? status, string? destination)
+    private UpdateTransactionDetailsByIdServiceInput(IdValueObject? categoryId, IdValueObject? installmentId, string? title, string? description, 
+        decimal? amount, DateTime? date, TransactionType? transactionType, PaymentMethod? paymentMethod, PaymentStatus? status, string? destination)
     {
         CategoryId = categoryId;
+        InstallmentId = installmentId;
         Title = title;
         Description = description;
         Amount = amount;
@@ -29,7 +31,7 @@ public sealed class UpdateTransactionDetailsByIdServiceInput
         Destination = destination;
     }
 
-    public static UpdateTransactionDetailsByIdServiceInput Factory(IdValueObject? categoryId, string? title, string? description, decimal? amount, 
-        DateTime? date, TransactionType? transactionType, PaymentMethod? paymentMethod, PaymentStatus? status, string? destination)
-        => new(categoryId, title, description, amount, date, transactionType, paymentMethod, status, destination);
+    public static UpdateTransactionDetailsByIdServiceInput Factory(IdValueObject? categoryId, IdValueObject? installmentId, string? title, string? description, 
+        decimal? amount, DateTime? date, TransactionType? transactionType, PaymentMethod? paymentMethod, PaymentStatus? status, string? destination)
+        => new(categoryId, installmentId, title, description, amount, date, transactionType, paymentMethod, status, destination);
 }

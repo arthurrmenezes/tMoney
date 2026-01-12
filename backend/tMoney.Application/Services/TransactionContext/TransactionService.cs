@@ -88,7 +88,7 @@ public class TransactionService : ITransactionService
 
     public async Task<GetTransactionByIdServiceOutput> GetTransactionByIdServiceAsync(
         IdValueObject transactionId, 
-        IdValueObject accountId, 
+        IdValueObject accountId,
         CancellationToken cancellationToken)
     {
         var transaction = await _transactionRepository.GetByIdAsync(transactionId.Id, accountId.Id, cancellationToken);
@@ -197,65 +197,55 @@ public class TransactionService : ITransactionService
 
         var validateDestination = input.TransactionType == TransactionType.Income ? null : input.Destination;
 
-        await _unitOfWork.BeginTransactionAsync(cancellationToken);
+        var oldAmount = transaction.Amount;
+        var oldTransactionType = transaction.TransactionType;
+        var oldStatus = transaction.Status;
 
-        try
-        {
-            var oldAmount = transaction.Amount;
-            var oldTransactionType = transaction.TransactionType;
-            var oldStatus = transaction.Status;
+        if (oldStatus == PaymentStatus.Paid)
+            if (oldTransactionType == TransactionType.Income)
+                account.DecrementBalance(oldAmount);
+            else
+                account.IncrementBalance(oldAmount);
 
-            if (oldStatus == PaymentStatus.Paid)
-                if (oldTransactionType == TransactionType.Income)
-                    account.DecrementBalance(oldAmount);
-                else
-                    account.IncrementBalance(oldAmount);
+        transaction.UpdateTransactionDetails(
+            categoryId: input.CategoryId,
+            installmentId: input.InstallmentId,
+            title: input.Title,
+            description: input.Description,
+            amount: input.Amount,
+            date: input.Date,
+            transactionType: input.TransactionType,
+            paymentMethod: input.PaymentMethod,
+            status: input.Status,
+            destination: validateDestination);
 
-            transaction.UpdateTransactionDetails(
-                categoryId: input.CategoryId,
-                title: input.Title,
-                description: input.Description,
-                amount: input.Amount,
-                date: input.Date,
-                transactionType: input.TransactionType,
-                paymentMethod: input.PaymentMethod,
-                status: input.Status,
-                destination: validateDestination);
+        if (transaction.Status == PaymentStatus.Paid)
+            if (transaction.TransactionType == TransactionType.Income)
+                account.IncrementBalance(transaction.Amount);
+            else
+                account.DecrementBalance(transaction.Amount);
 
-            if (transaction.Status == PaymentStatus.Paid)
-                if (transaction.TransactionType == TransactionType.Income)
-                    account.IncrementBalance(transaction.Amount);
-                else
-                    account.DecrementBalance(transaction.Amount);
+        _transactionRepository.Update(transaction);
 
-            _transactionRepository.Update(transaction);
+        _accountRepository.Update(account);
 
-            _accountRepository.Update(account);
+        var output = UpdateTransactionDetailsByIdServiceOutput.Factory(
+            id: transaction.Id.ToString(),
+            accountId: transaction.AccountId.ToString(),
+            categoryId: transaction.CategoryId.ToString(),
+            installmentId: transaction.InstallmentId is null ? null : transaction.InstallmentId.ToString(),
+            title: transaction.Title,
+            description: transaction.Description,
+            amount: transaction.Amount,
+            date: transaction.Date,
+            transactionType: transaction.TransactionType.ToString(),
+            paymentMethod: transaction.PaymentMethod.ToString(),
+            status: transaction.Status.ToString(),
+            destination: transaction.Destination,
+            updatedAt: transaction.UpdatedAt,
+            createdAt: transaction.CreatedAt);
 
-            await _unitOfWork.CommitTransactionAsync(cancellationToken);
-
-            var output = UpdateTransactionDetailsByIdServiceOutput.Factory(
-                id: transaction.Id.ToString(),
-                accountId: transaction.AccountId.ToString(),
-                categoryId: transaction.CategoryId.ToString(),
-                title: transaction.Title,
-                description: transaction.Description,
-                amount: transaction.Amount,
-                date: transaction.Date,
-                transactionType: transaction.TransactionType.ToString(),
-                paymentMethod: transaction.PaymentMethod.ToString(),
-                status: transaction.Status.ToString(),
-                destination: transaction.Destination,
-                updatedAt: transaction.UpdatedAt,
-                createdAt: transaction.CreatedAt);
-
-            return output;
-        }
-        catch (Exception)
-        {
-            await _unitOfWork.RollbackTransactionAsync(cancellationToken);
-            throw;
-        }
+        return output;
     }
 
     public async Task DeleteTransactionByIdServiceAsync(

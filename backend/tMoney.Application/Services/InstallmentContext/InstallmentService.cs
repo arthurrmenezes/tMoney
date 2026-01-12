@@ -28,6 +28,9 @@ public class InstallmentService : IInstallmentService
             firstPaymentDate: input.FirstPaymentDate,
             status: input.Status);
         
+        if (installment.TotalInstallments <= 1)
+            throw new ArgumentException("O número total de parcelas deve ser maior que 1 para criar um parcelamento.");
+
         installment.GenerateInstallments();
 
         if (installment.Status == PaymentStatus.Paid)
@@ -64,7 +67,7 @@ public class InstallmentService : IInstallmentService
         IdValueObject accountId, 
         CancellationToken cancellationToken)
     {
-        var installment = await _installmentRepository.GetByIdAsync(installmentId.Id, accountId.Id, cancellationToken);
+        var installment = await _installmentRepository.GetByIdAsync(installmentId.Id, accountId.Id, false, cancellationToken);
         if (installment is null)
             throw new KeyNotFoundException("Parcelamento não encontrado");
 
@@ -126,6 +129,43 @@ public class InstallmentService : IInstallmentService
             updatedAt: i.UpdatedAt,
             createdAt: i.CreatedAt))
             .ToArray();
+
+        return output;
+    }
+
+    public async Task<UpdateInstallmentDetailsByIdServiceOutput> UpdateInstallmentDetailsByIdServiceAsync(
+        IdValueObject installmentId, 
+        IdValueObject accountId, 
+        UpdateInstallmentDetailsByIdServiceInput input, 
+        CancellationToken cancellationToken)
+    {
+        var installment = await _installmentRepository.GetByIdAsync(installmentId.Id, accountId.Id, true, cancellationToken);
+        if (installment is null)
+            throw new KeyNotFoundException("Parcelamento não encontrado");
+
+        installment.UpdateInstallmentDetails(input.TotalInstallments, input.TotalAmount, input.FirstPaymentDate, input.Status);
+
+        _installmentRepository.Update(installment);
+
+        var output = UpdateInstallmentDetailsByIdServiceOutput.Factory(
+            id: installment.Id.ToString(),
+            accountId: installment.AccountId.ToString(),
+            totalInstallments: installment.TotalInstallments,
+            totalAmount: installment.TotalAmount,
+            firstPaymentDate: installment.FirstPaymentDate,
+            status: installment.Status.ToString(),
+            installments: installment.Installments.Select(i => new UpdateInstallmentDetailsByIdServiceOutputInstallment(
+                id: i.Id.ToString(),
+                number: i.Number,
+                amount: i.Amount,
+                dueDate: i.DueDate,
+                status: i.Status.ToString(),
+                paidAt: i.PaidAt,
+                updatedAt: i.UpdatedAt,
+                createdAt: i.CreatedAt))
+            .ToArray(),
+            updatedAt: installment.UpdatedAt!.Value,
+            createdAt: installment.CreatedAt);
 
         return output;
     }

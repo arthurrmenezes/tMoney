@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using tMoney.Application.Services.TransactionContext.Inputs;
 using tMoney.Application.Services.TransactionContext.Interfaces;
 using tMoney.Application.UseCases.Interfaces;
 using tMoney.Application.UseCases.TransactionContext.CreateTransactionUseCase.Inputs;
@@ -9,6 +8,8 @@ using tMoney.Application.UseCases.TransactionContext.GetAllTransactionsUseCase.I
 using tMoney.Application.UseCases.TransactionContext.GetAllTransactionsUseCase.Outputs;
 using tMoney.Application.UseCases.TransactionContext.GetTransactionUseCase.Inputs;
 using tMoney.Application.UseCases.TransactionContext.GetTransactionUseCase.Outputs;
+using tMoney.Application.UseCases.TransactionContext.UpdateTransactionUseCase.Input;
+using tMoney.Application.UseCases.TransactionContext.UpdateTransactionUseCase.Outputs;
 using tMoney.Domain.ValueObjects;
 using tMoney.WebApi.Controllers.TransactionContext.Payloads;
 using tMoney.WebApi.Extensions;
@@ -120,6 +121,7 @@ public class TransactionController : ControllerBase
     [Route("{transactionId}")]
     [Authorize]
     public async Task<IActionResult> UpdateTransactionDetailsAsync(
+        [FromServices] IUseCase<UpdateTransactionUseCaseInput, UpdateTransactionUseCaseOutput> useCase,
         [FromRoute] Guid transactionId,
         [FromBody] UpdateTransactionDetailsPayload input,
         CancellationToken cancellationToken)
@@ -132,13 +134,13 @@ public class TransactionController : ControllerBase
             input.TransactionType is null &&
             input.PaymentMethod is null &&
             input.Status is null &&
-            input.Destination is null)
+            input.Destination is null &&
+            input.Installment is null)
             throw new ArgumentException("Informe pelo menos um campo para atualizar.");
 
         var accountId = User.GetAccountId();
 
         Guid? categoryId = null;
-
         if (input.CategoryId is not null)
         {
             if (!Guid.TryParse(input.CategoryId, out var parsedCategory))
@@ -147,10 +149,15 @@ public class TransactionController : ControllerBase
             categoryId = parsedCategory;
         }
 
-        var serviceResult = await _transactionService.UpdateTransactionDetailsByIdServiceAsync(
-            transactionId: IdValueObject.Factory(transactionId),
-            accountId: IdValueObject.Factory(accountId),
-            input: UpdateTransactionDetailsByIdServiceInput.Factory(
+        UpdateTransactionUseCaseInputInstallment? installmentUseCaseInput = null;
+        if (input.Installment is not null)
+            installmentUseCaseInput = new UpdateTransactionUseCaseInputInstallment(
+                totalInstallments: input.Installment.TotalInstallments);
+
+        var useCaseResult = await useCase.ExecuteUseCaseAsync(
+            input: UpdateTransactionUseCaseInput.Factory(
+                transactionId: IdValueObject.Factory(transactionId),
+                accountId: IdValueObject.Factory(accountId),
                 categoryId: categoryId is null ? null : IdValueObject.Factory(categoryId.Value),
                 title: input.Title,
                 description: input.Description,
@@ -159,10 +166,11 @@ public class TransactionController : ControllerBase
                 transactionType: input.TransactionType,
                 paymentMethod: input.PaymentMethod,
                 status: input.Status,
-                destination: input.Destination),
+                destination: input.Destination,
+                installment: installmentUseCaseInput),
             cancellationToken: cancellationToken);
 
-        return Ok(serviceResult);
+        return Ok(useCaseResult);
     }
 
     [HttpDelete]

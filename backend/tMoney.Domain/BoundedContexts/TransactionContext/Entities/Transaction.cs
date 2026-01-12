@@ -70,11 +70,14 @@ public class Transaction
                 throw new ArgumentException("O valor do destino não pode ultrapassar 50 caracteres");
     }
 
-    public void UpdateTransactionDetails(IdValueObject? categoryId, string? title, string? description, decimal? amount, DateTime? date,
+    public void UpdateTransactionDetails(IdValueObject? categoryId, IdValueObject? installmentId, string? title, string? description, decimal? amount, DateTime? date,
         TransactionType? transactionType, PaymentMethod? paymentMethod, PaymentStatus? status, string? destination)
     {
         if (categoryId is not null)
             CategoryId = categoryId;
+
+        if (InstallmentId is null && installmentId is not null)
+            InstallmentId = installmentId;
 
         if (!string.IsNullOrWhiteSpace(title) && title.Length <= 50)
             Title = title;

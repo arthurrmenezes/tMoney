@@ -10,13 +10,17 @@ public class InstallmentRepository : BaseRepository<Installment>, IInstallmentRe
 {
     public InstallmentRepository(DataContext dataContext) : base(dataContext) { }
 
-    public async Task<Installment?> GetByIdAsync(Guid installmentId, Guid accountId, CancellationToken cancellationToken)
+    public async Task<Installment?> GetByIdAsync(Guid installmentId, Guid accountId, bool toUpdate, CancellationToken cancellationToken)
     {
         var voInstallmentId = IdValueObject.Factory(installmentId);
         var voAccountId = IdValueObject.Factory(accountId);
 
-        return await _dataContext.Installments
-            .AsNoTracking()
+        IQueryable<Installment> query = _dataContext.Installments;
+
+        if (!toUpdate)
+            query = query.AsNoTracking();
+
+        return await query
             .Include(i => i.Installments)
             .FirstOrDefaultAsync(i => i.Id == voInstallmentId && i.AccountId == voAccountId, cancellationToken);
     }

@@ -13,9 +13,11 @@ public sealed class UpdateTransactionDetailsPayload
     public PaymentMethod? PaymentMethod { get; init; }
     public PaymentStatus? Status { get; init; }
     public string? Destination { get; init; }
+    public UpdateTransactionDetailsPayloadInstallment? Installment { get; init; }
 
     public UpdateTransactionDetailsPayload(string? categoryId, string? title, string? description, decimal? amount,
-        DateTime? date, TransactionType? transactionType, PaymentMethod? paymentMethod, PaymentStatus? status, string? destination)
+        DateTime? date, TransactionType? transactionType, PaymentMethod? paymentMethod, PaymentStatus? status, string? destination,
+        UpdateTransactionDetailsPayloadInstallment? installment)
     {
         CategoryId = categoryId;
         Title = title;
@@ -26,5 +28,16 @@ public sealed class UpdateTransactionDetailsPayload
         PaymentMethod = paymentMethod;
         Status = status;
         Destination = destination;
+        Installment = installment;
+    }
+}
+
+public sealed class UpdateTransactionDetailsPayloadInstallment
+{
+    public int? TotalInstallments { get; }
+
+    public UpdateTransactionDetailsPayloadInstallment(int? totalInstallments)
+    {
+        TotalInstallments = totalInstallments;
     }
 }

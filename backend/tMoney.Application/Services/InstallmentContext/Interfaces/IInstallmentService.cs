@@ -19,4 +19,10 @@ public interface IInstallmentService
         IdValueObject accountId,
         IdValueObject[] installmentIds,
         CancellationToken cancellationToken);
+
+    public Task<UpdateInstallmentDetailsByIdServiceOutput> UpdateInstallmentDetailsByIdServiceAsync(
+        IdValueObject installmentId,
+        IdValueObject accountId,
+        UpdateInstallmentDetailsByIdServiceInput input,
+        CancellationToken cancellationToken);
 }
