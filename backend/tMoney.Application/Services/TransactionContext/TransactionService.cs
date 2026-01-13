@@ -222,7 +222,7 @@ public class TransactionService : ITransactionService
         return output;
     }
 
-    public async Task DeleteTransactionByIdServiceAsync(
+    public async Task<DeleteTransactionByIdServiceOutput> DeleteTransactionByIdServiceAsync(
         IdValueObject transactionId, 
         IdValueObject accountId, 
         CancellationToken cancellationToken)
@@ -231,25 +231,14 @@ public class TransactionService : ITransactionService
         if (transaction is null)
             throw new KeyNotFoundException("Transação não encontrada");
 
-        var account = await _accountRepository.GetAccountByIdAsync(accountId.Id, cancellationToken);
-        if (account is null)
-            throw new KeyNotFoundException("Conta não encontrada");
+        string? installmentOutput = null;
+        if (transaction.InstallmentId is not null)
+            installmentOutput = transaction.InstallmentId.ToString();
 
-        await _unitOfWork.BeginTransactionAsync(cancellationToken);
+        _transactionRepository.Delete(transaction);
 
-        try
-        {
-            _transactionRepository.Delete(transaction);
-
-            _accountRepository.Update(account);
-
-            await _unitOfWork.CommitTransactionAsync(cancellationToken);
-        }
-        catch (Exception)
-        {
-            await _unitOfWork.RollbackTransactionAsync(cancellationToken);
-            throw;
-        }
+        return DeleteTransactionByIdServiceOutput.Factory(
+            installment: installmentOutput);
     }
 
     public async Task<GetFinancialSummaryServiceOutput> GetFinancialSummaryServiceAsync(

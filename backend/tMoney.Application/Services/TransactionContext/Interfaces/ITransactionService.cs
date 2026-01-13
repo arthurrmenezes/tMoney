@@ -26,7 +26,7 @@ public interface ITransactionService
         UpdateTransactionDetailsByIdServiceInput input,
         CancellationToken cancellationToken);
 
-    public Task DeleteTransactionByIdServiceAsync(
+    public Task<DeleteTransactionByIdServiceOutput> DeleteTransactionByIdServiceAsync(
         IdValueObject transactionId,
         IdValueObject accountId,
         CancellationToken cancellationToken);

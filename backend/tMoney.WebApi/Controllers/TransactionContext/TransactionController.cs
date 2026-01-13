@@ -4,6 +4,7 @@ using tMoney.Application.Services.TransactionContext.Interfaces;
 using tMoney.Application.UseCases.Interfaces;
 using tMoney.Application.UseCases.TransactionContext.CreateTransactionUseCase.Inputs;
 using tMoney.Application.UseCases.TransactionContext.CreateTransactionUseCase.Outputs;
+using tMoney.Application.UseCases.TransactionContext.DeleteTransactionUseCase.Inputs;
 using tMoney.Application.UseCases.TransactionContext.GetAllTransactionsUseCase.Inputs;
 using tMoney.Application.UseCases.TransactionContext.GetAllTransactionsUseCase.Outputs;
 using tMoney.Application.UseCases.TransactionContext.GetTransactionUseCase.Inputs;
@@ -177,14 +178,16 @@ public class TransactionController : ControllerBase
     [Route("{transactionId}")]
     [Authorize]
     public async Task<IActionResult> DeleteTransactionByIdAsync(
+        [FromServices] IUseCase<DeleteTransactionUseCaseInput, bool> useCase,
         [FromRoute] Guid transactionId,
         CancellationToken cancellationToken)
     {
         var accountId = User.GetAccountId();
 
-        await _transactionService.DeleteTransactionByIdServiceAsync(
-            transactionId: IdValueObject.Factory(transactionId),
-            accountId: IdValueObject.Factory(accountId),
+        await useCase.ExecuteUseCaseAsync(
+            input: DeleteTransactionUseCaseInput.Factory(
+                transactionId: IdValueObject.Factory(transactionId),
+                accountId: IdValueObject.Factory(accountId)),
             cancellationToken: cancellationToken);
 
         return NoContent();

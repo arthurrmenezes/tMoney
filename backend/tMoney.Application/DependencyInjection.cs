@@ -16,6 +16,8 @@ using tMoney.Application.UseCases.Interfaces;
 using tMoney.Application.UseCases.TransactionContext.CreateTransactionUseCase;
 using tMoney.Application.UseCases.TransactionContext.CreateTransactionUseCase.Inputs;
 using tMoney.Application.UseCases.TransactionContext.CreateTransactionUseCase.Outputs;
+using tMoney.Application.UseCases.TransactionContext.DeleteTransactionUseCase;
+using tMoney.Application.UseCases.TransactionContext.DeleteTransactionUseCase.Inputs;
 using tMoney.Application.UseCases.TransactionContext.GetAllTransactionsUseCase;
 using tMoney.Application.UseCases.TransactionContext.GetAllTransactionsUseCase.Inputs;
 using tMoney.Application.UseCases.TransactionContext.GetAllTransactionsUseCase.Outputs;
@@ -48,6 +50,7 @@ public static class DependencyInjection
         serviceCollection.AddScoped<IUseCase<GetTransactionUseCaseInput, GetTransactionUseCaseOutput>, GetTransactionUseCase>();
         serviceCollection.AddScoped<IUseCase<GetAllTransactionsUseCaseInput, GetAllTransactionsUseCaseOutput>, GetAllTransactionsUseCase>();
         serviceCollection.AddScoped<IUseCase<UpdateTransactionUseCaseInput, UpdateTransactionUseCaseOutput>, UpdateTransactionUseCase>();
+        serviceCollection.AddScoped<IUseCase<DeleteTransactionUseCaseInput, bool>, DeleteTransactionUseCase>();
 
         serviceCollection.AddScoped<IUseCase<GoogleAuthUseCaseInput, GoogleAuthUseCaseOutput>, GoogleAuthUseCase>();
 
