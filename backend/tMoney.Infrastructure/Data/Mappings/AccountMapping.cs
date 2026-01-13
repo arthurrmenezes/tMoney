@@ -48,12 +48,6 @@ public sealed class AccountMapping : IEntityTypeConfiguration<Account>
                 a => EmailValueObject.Factory(a))
             .ValueGeneratedNever();
 
-        builder.Property(a => a.Balance)
-            .IsRequired()
-            .HasColumnName("balance")
-            .HasPrecision(18, 2)
-            .ValueGeneratedNever();
-
         builder.Property(a => a.LastLoginAt)
             .IsRequired(false)
             .HasColumnName("last_login_at")

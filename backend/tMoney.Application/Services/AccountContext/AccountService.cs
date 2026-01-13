@@ -29,7 +29,6 @@ public class AccountService : IAccountService
             firstName: account.FirstName,
             lastName: account.LastName,
             email: account.Email,
-            balance: account.Balance,
             lastLoginAt: account.LastLoginAt,
             updatedAt: account.UpdatedAt,
             createdAt: account.CreatedAt);
@@ -60,7 +59,6 @@ public class AccountService : IAccountService
             firstName: account.FirstName,
             lastName: account.LastName,
             email: account.Email,
-            balance: account.Balance,
             lastLoginAt: account.LastLoginAt,
             updatedAt: account.UpdatedAt,
             createdAt: account.CreatedAt);

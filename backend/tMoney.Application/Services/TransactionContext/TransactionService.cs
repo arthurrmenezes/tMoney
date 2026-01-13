@@ -30,10 +30,6 @@ public class TransactionService : ITransactionService
         CreateTransactionServiceInput input, 
         CancellationToken cancellationToken)
     {
-        var account = await _accountRepository.GetAccountByIdAsync(input.AccountId.Id, cancellationToken);
-        if (account is null)
-            throw new KeyNotFoundException("Conta não encontrada");
-
         var category = await _categoryRepository.GetByIdAsync(input.CategoryId.Id, input.AccountId.Id, cancellationToken);
         if (category is null)
             throw new KeyNotFoundException("Categoria não encontrada");
@@ -54,16 +50,6 @@ public class TransactionService : ITransactionService
             paymentMethod: input.PaymentMethod,
             status: input.Status,
             destination: input.Destination);
-
-            if (input.Status == PaymentStatus.Paid)
-            {
-                if (input.TransactionType == TransactionType.Income)
-                    account.IncrementBalance(input.Amount);
-                else
-                    account.DecrementBalance(input.Amount);
-
-                _accountRepository.Update(account);
-            }
 
             await _transactionRepository.AddAsync(transaction, cancellationToken);
 
@@ -201,12 +187,6 @@ public class TransactionService : ITransactionService
         var oldTransactionType = transaction.TransactionType;
         var oldStatus = transaction.Status;
 
-        if (oldStatus == PaymentStatus.Paid)
-            if (oldTransactionType == TransactionType.Income)
-                account.DecrementBalance(oldAmount);
-            else
-                account.IncrementBalance(oldAmount);
-
         transaction.UpdateTransactionDetails(
             categoryId: input.CategoryId,
             installmentId: input.InstallmentId,
@@ -218,12 +198,6 @@ public class TransactionService : ITransactionService
             paymentMethod: input.PaymentMethod,
             status: input.Status,
             destination: validateDestination);
-
-        if (transaction.Status == PaymentStatus.Paid)
-            if (transaction.TransactionType == TransactionType.Income)
-                account.IncrementBalance(transaction.Amount);
-            else
-                account.DecrementBalance(transaction.Amount);
 
         _transactionRepository.Update(transaction);
 
@@ -265,12 +239,6 @@ public class TransactionService : ITransactionService
 
         try
         {
-            if (transaction.Status == PaymentStatus.Paid)
-                if (transaction.TransactionType == TransactionType.Income)
-                    account.DecrementBalance(transaction.Amount);
-                else
-                    account.IncrementBalance(transaction.Amount);
-
             _transactionRepository.Delete(transaction);
 
             _accountRepository.Update(account);

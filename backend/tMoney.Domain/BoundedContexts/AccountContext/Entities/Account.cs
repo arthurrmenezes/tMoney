@@ -8,7 +8,6 @@ public class Account
     public FirstNameValueObject FirstName { get; private set; }
     public LastNameValueObject LastName { get; private set; }
     public EmailValueObject Email { get; private set; }
-    public decimal Balance { get; private set; }
     public DateTime? LastLoginAt { get; private set; }
     public DateTime? UpdatedAt { get; private set; }
     public DateTime CreatedAt { get; private set; }
@@ -21,7 +20,6 @@ public class Account
         FirstName = firstName;
         LastName = lastName;
         Email = email;
-        Balance = 0;
         UpdatedAt = null;
         LastLoginAt = null;
         CreatedAt = DateTime.UtcNow;
@@ -35,24 +33,6 @@ public class Account
         if (lastName is not null)
             LastName = lastName;
 
-        UpdatedAt = DateTime.UtcNow;
-    }
-
-    public void IncrementBalance(decimal amount)
-    {
-        if (amount <= 0)
-            return;
-
-        Balance += amount;
-        UpdatedAt = DateTime.UtcNow;
-    }
-
-    public void DecrementBalance(decimal amount)
-    {
-        if (amount <= 0)
-            return;
-
-        Balance -= amount;
         UpdatedAt = DateTime.UtcNow;
     }
 

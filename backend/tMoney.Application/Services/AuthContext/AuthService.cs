@@ -111,7 +111,6 @@ public class AuthService : IAuthService
                 firstName: account.FirstName,
                 lastName: account.LastName,
                 email: account.Email,
-                balance: account.Balance,
                 createdAt: account.CreatedAt);
 
             return output;
