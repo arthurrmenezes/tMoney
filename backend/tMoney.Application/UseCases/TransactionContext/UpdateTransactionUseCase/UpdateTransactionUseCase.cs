@@ -88,7 +88,7 @@ public sealed class UpdateTransactionUseCase : IUseCase<UpdateTransactionUseCase
                         updatedAt: DateTime.UtcNow,
                         createdAt: createInstallmentServiceOutput.CreatedAt);
                 }
-                else
+                else if (installmentId is not null)
                 {
                     if (!Guid.TryParse(installmentId, out var guidInstallmentId))
                         throw new ArgumentException("Installment ID inválido.");

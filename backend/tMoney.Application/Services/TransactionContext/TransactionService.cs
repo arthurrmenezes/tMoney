@@ -6,22 +6,19 @@ using tMoney.Domain.BoundedContexts.TransactionContext.Entities;
 using tMoney.Domain.BoundedContexts.TransactionContext.ENUMs;
 using tMoney.Domain.ValueObjects;
 using tMoney.Infrastructure.Data.Repositories.Interfaces;
-using tMoney.Infrastructure.Data.UnitOfWork.Interfaces;
 
 namespace tMoney.Application.Services.TransactionContext;
 
 public class TransactionService : ITransactionService
 {
     private readonly ITransactionRepository _transactionRepository;
-    private readonly IUnitOfWork _unitOfWork;
     private readonly IAccountRepository _accountRepository;
     private readonly ICategoryRepository _categoryRepository;
 
-    public TransactionService(ITransactionRepository transactionRepository, IUnitOfWork unitOfWork, IAccountRepository accountRepository, 
+    public TransactionService(ITransactionRepository transactionRepository, IAccountRepository accountRepository, 
         ICategoryRepository categoryRepository)
     {
-        _transactionRepository = transactionRepository; 
-        _unitOfWork = unitOfWork;
+        _transactionRepository = transactionRepository;
         _accountRepository = accountRepository;
         _categoryRepository = categoryRepository;
     }
@@ -37,6 +34,9 @@ public class TransactionService : ITransactionService
         if (input.TransactionType == TransactionType.Income && category.Type == CategoryType.Expense ||
             input.TransactionType == TransactionType.Expense && category.Type == CategoryType.Income)
             throw new ArgumentException($"A categoria '{category.Title}' ({category.Type}) não pode ser usada para uma transação do tipo {input.TransactionType}.");
+
+        if (input.Date >= DateTime.UtcNow.AddDays(1) && input.Status == PaymentStatus.Paid)
+            throw new ArgumentException("Uma transação futura não pode ter o status 'Pago'.");
 
         var transaction = new Transaction(
             accountId: input.AccountId,
@@ -247,20 +247,16 @@ public class TransactionService : ITransactionService
         DateTime? endDate, 
         CancellationToken cancellationToken)
     {
-        var account = await _accountRepository.GetAccountByIdAsync(accountId.Id, cancellationToken);
-        if (account is null)
-            throw new KeyNotFoundException("Conta não encontrada");
-
         var start = startDate ?? new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1);
         var end = endDate ?? start.AddMonths(1).AddDays(-1);
 
-        var (income, expense) = await _transactionRepository.GetFinancialSummaryAsync(accountId.Id, start, end, cancellationToken);
+        var (periodIncome, periodExpense) = await _transactionRepository.GetFinancialSummaryAsync(accountId.Id, start, end, cancellationToken);
 
-        var balance = income - expense;
+        var balance = await _transactionRepository.GetTotalBalanceAsync(accountId.Id, cancellationToken);
 
         var output = GetFinancialSummaryServiceOutput.Factory(
-            totalIncome: income,
-            totalExpense: expense,
+            periodIncome: periodIncome,
+            periodExpense: periodExpense,
             balance: balance,
             startDate: start,
             endDate: end);

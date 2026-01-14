@@ -195,4 +195,19 @@ public class TransactionRepository : BaseRepository<Transaction>, ITransactionRe
 
         return (query?.Income ?? 0, query?.Expense ?? 0);
     }
+
+    public async Task<decimal> GetTotalBalanceAsync(Guid accountId, CancellationToken cancellationToken)
+    {
+        var voAccountId = IdValueObject.Factory(accountId);
+
+        return await _dataContext.Transactions
+            .AsNoTracking()
+            .Where(t => t.AccountId == voAccountId && t.Status == PaymentStatus.Paid)
+            .SumAsync(t => t.TransactionType == TransactionType.Income 
+                ? t.Amount
+                : t.TransactionType == TransactionType.Expense
+                    ? -t.Amount
+                    : 0,
+            cancellationToken);
+    }
 }
