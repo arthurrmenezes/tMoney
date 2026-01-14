@@ -22,4 +22,6 @@ public interface ITransactionRepository : IBaseRepository<Transaction>
         CancellationToken cancellationToken);
 
     public Task<decimal> GetTotalBalanceAsync(Guid accountId, CancellationToken cancellationToken);
+
+    public Task UpdateOverdueTransactionsAsync(CancellationToken cancellationToken);
 }

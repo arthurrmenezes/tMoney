@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using tMoney.Domain.BoundedContexts.InstallmentContext.Entities;
+using tMoney.Domain.BoundedContexts.TransactionContext.ENUMs;
 using tMoney.Domain.ValueObjects;
 using tMoney.Infrastructure.Data.Repositories.Base;
 using tMoney.Infrastructure.Data.Repositories.Interfaces;
@@ -37,5 +38,14 @@ public class InstallmentRepository : BaseRepository<Installment>, IInstallmentRe
             .Include(i => i.Installments)
             .Where(i => i.AccountId == voAccountId && voInstallmentIds.Contains(i.Id))
             .ToArrayAsync(cancellationToken);
+    }
+
+    public async Task UpdateOverdueInstallmentsAsync(CancellationToken cancellationToken)
+    {
+        await _dataContext.InstallmentItems
+            .Where(i => i.Status == PaymentStatus.Pending && DateTime.UtcNow > i.DueDate)
+            .ExecuteUpdateAsync(calls =>
+                calls.SetProperty(i => i.Status, PaymentStatus.Overdue)
+                    .SetProperty(i => i.UpdatedAt, DateTime.UtcNow), cancellationToken);
     }
 }

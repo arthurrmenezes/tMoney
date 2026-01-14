@@ -34,17 +34,4 @@ public class InstallmentItem
     {
         Status = PaymentStatus.Paid;
     }
-
-    public void UpdateInstallmentItem(PaymentStatus status, DateTime paidAt)
-    {
-        Status = status;
-
-        if (paidAt > DateTime.UtcNow)
-            throw new ArgumentException("Data de pagamento inválida.");
-
-        if (status == PaymentStatus.Paid)
-            PaidAt = paidAt;
-
-        UpdatedAt = DateTime.UtcNow;
-    } 
 }

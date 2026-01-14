@@ -1,6 +1,7 @@
 using tMoney.Application;
 using tMoney.Infrastructure;
 using tMoney.WebApi.Middlewares;
+using tMoney.WebApi.WorkerServices.TransactionContext;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +14,12 @@ builder.Services.ApplyInfrastructureDependencyInjection(builder.Configuration);
 #region Application Dependency Injection
 
 builder.Services.ApplyApplicationDependencyInjection();
+
+#endregion
+
+#region Worker Services Dependency Injection
+
+builder.Services.AddHostedService<TransactionOverdueJob>();
 
 #endregion
 

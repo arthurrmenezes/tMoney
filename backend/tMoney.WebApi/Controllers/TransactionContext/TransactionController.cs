@@ -178,7 +178,7 @@ public class TransactionController : ControllerBase
     [Route("{transactionId}")]
     [Authorize]
     public async Task<IActionResult> DeleteTransactionByIdAsync(
-        [FromServices] IUseCase<DeleteTransactionUseCaseInput, bool> useCase,
+        [FromServices] IUseCase<DeleteTransactionUseCaseInput> useCase,
         [FromRoute] Guid transactionId,
         CancellationToken cancellationToken)
     {

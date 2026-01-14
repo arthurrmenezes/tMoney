@@ -170,7 +170,10 @@ public class InstallmentService : IInstallmentService
         return output;
     }
 
-    public async Task DeleteInstallmentByIdServiceAsync(IdValueObject installmentId, IdValueObject accountId, CancellationToken cancellationToken)
+    public async Task DeleteInstallmentByIdServiceAsync(
+        IdValueObject installmentId, 
+        IdValueObject accountId, 
+        CancellationToken cancellationToken)
     {
         var installment = await _installmentRepository.GetByIdAsync(installmentId.Id, accountId.Id, true, cancellationToken);
         if (installment is null)

@@ -24,6 +24,7 @@ using tMoney.Application.UseCases.TransactionContext.GetAllTransactionsUseCase.O
 using tMoney.Application.UseCases.TransactionContext.GetTransactionUseCase;
 using tMoney.Application.UseCases.TransactionContext.GetTransactionUseCase.Inputs;
 using tMoney.Application.UseCases.TransactionContext.GetTransactionUseCase.Outputs;
+using tMoney.Application.UseCases.TransactionContext.UpdateOverdueTransactionsUseCase;
 using tMoney.Application.UseCases.TransactionContext.UpdateTransactionUseCase;
 using tMoney.Application.UseCases.TransactionContext.UpdateTransactionUseCase.Input;
 using tMoney.Application.UseCases.TransactionContext.UpdateTransactionUseCase.Outputs;
@@ -50,7 +51,8 @@ public static class DependencyInjection
         serviceCollection.AddScoped<IUseCase<GetTransactionUseCaseInput, GetTransactionUseCaseOutput>, GetTransactionUseCase>();
         serviceCollection.AddScoped<IUseCase<GetAllTransactionsUseCaseInput, GetAllTransactionsUseCaseOutput>, GetAllTransactionsUseCase>();
         serviceCollection.AddScoped<IUseCase<UpdateTransactionUseCaseInput, UpdateTransactionUseCaseOutput>, UpdateTransactionUseCase>();
-        serviceCollection.AddScoped<IUseCase<DeleteTransactionUseCaseInput, bool>, DeleteTransactionUseCase>();
+        serviceCollection.AddScoped<IUseCase<DeleteTransactionUseCaseInput>, DeleteTransactionUseCase>();
+        serviceCollection.AddScoped<UpdateOverdueTransactionsUseCase>();
 
         serviceCollection.AddScoped<IUseCase<GoogleAuthUseCaseInput, GoogleAuthUseCaseOutput>, GoogleAuthUseCase>();
 

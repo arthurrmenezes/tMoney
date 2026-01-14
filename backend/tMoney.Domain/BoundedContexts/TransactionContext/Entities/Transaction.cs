@@ -23,8 +23,6 @@ public class Transaction
     public Transaction(IdValueObject accountId, IdValueObject categoryId, IdValueObject? installmentId, string title, string? description, decimal amount, 
         DateTime date, TransactionType transactionType, PaymentMethod paymentMethod, PaymentStatus status, string? destination)
     {
-        ValidateDomain(title, description, amount, transactionType, paymentMethod, status, destination);
-
         Id = IdValueObject.New();
         AccountId = accountId;
         CategoryId = categoryId;
@@ -39,34 +37,40 @@ public class Transaction
         Destination = destination;
         UpdatedAt = null;
         CreatedAt = DateTime.UtcNow;
+
+        ValidateDomain();
     }
 
-    private void ValidateDomain(string title, string? description, decimal amount, TransactionType transactionType, PaymentMethod paymentMethod,
-        PaymentStatus status, string? destination)
+    private void ValidateDomain()
     {
-        if (string.IsNullOrWhiteSpace(title))
+        if (string.IsNullOrWhiteSpace(Title))
             throw new ArgumentException("O título não pode ser nulo ou vazio.");
-        if (title.Length > 50)
+        if (Title.Length > 50)
             throw new ArgumentException("O título não pode ultrapassar 50 caracteres.");
 
-        if (!string.IsNullOrWhiteSpace(description))
-            if (description.Length > 300)
+        if (!string.IsNullOrWhiteSpace(Description))
+            if (Description.Length > 300)
                 throw new ArgumentException("A descrição não pode ultrapassar 300 caracteres");
 
-        if (amount <= 0)
+        if (Amount <= 0)
             throw new ArgumentException("Valor inválido.");
 
-        if (!Enum.IsDefined(typeof(TransactionType), transactionType))
+        if (Date >= DateTime.UtcNow.AddDays(1) && (Status == PaymentStatus.Paid || Status == PaymentStatus.Overdue))
+            throw new ArgumentException($"Uma transação futura não pode ter o status '{Status}'.");
+        if (Date < DateTime.Today && Status == PaymentStatus.Pending)
+            throw new ArgumentException("Uma transação passada não pode ter o status 'Pendente'.");
+
+        if (!Enum.IsDefined(typeof(TransactionType), TransactionType))
             throw new ArgumentException("Tipo de transação inválido.");
 
-        if (!Enum.IsDefined(typeof(PaymentMethod), paymentMethod))
+        if (!Enum.IsDefined(typeof(PaymentMethod), PaymentMethod))
             throw new ArgumentException("Tipo de transação inválido.");
 
-        if (!Enum.IsDefined(typeof(PaymentStatus), status))
+        if (!Enum.IsDefined(typeof(PaymentStatus), Status))
             throw new ArgumentException("Status de pagamento inválido.");
 
-        if (!string.IsNullOrWhiteSpace(destination))
-            if (destination!.Length > 50)
+        if (!string.IsNullOrWhiteSpace(Destination))
+            if (Destination.Length > 50)
                 throw new ArgumentException("O valor do destino não pode ultrapassar 50 caracteres");
     }
 
@@ -104,5 +108,7 @@ public class Transaction
             Destination = destination;
 
         UpdatedAt = DateTime.UtcNow;
+
+        ValidateDomain();
     }
 }

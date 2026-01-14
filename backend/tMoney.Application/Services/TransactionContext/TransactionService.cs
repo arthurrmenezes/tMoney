@@ -33,10 +33,7 @@ public class TransactionService : ITransactionService
 
         if (input.TransactionType == TransactionType.Income && category.Type == CategoryType.Expense ||
             input.TransactionType == TransactionType.Expense && category.Type == CategoryType.Income)
-            throw new ArgumentException($"A categoria '{category.Title}' ({category.Type}) não pode ser usada para uma transação do tipo {input.TransactionType}.");
-
-        if (input.Date >= DateTime.UtcNow.AddDays(1) && input.Status == PaymentStatus.Paid)
-            throw new ArgumentException("Uma transação futura não pode ter o status 'Pago'.");
+            throw new ArgumentException($"A categoria '{category.Title}' ({category.Type.ToString()}) não pode ser usada para uma transação do tipo {input.TransactionType.ToString()}.");
 
         var transaction = new Transaction(
             accountId: input.AccountId,

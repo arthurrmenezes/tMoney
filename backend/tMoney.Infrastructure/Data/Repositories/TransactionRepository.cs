@@ -210,4 +210,13 @@ public class TransactionRepository : BaseRepository<Transaction>, ITransactionRe
                     : 0,
             cancellationToken);
     }
+
+    public async Task UpdateOverdueTransactionsAsync(CancellationToken cancellationToken)
+    {
+        await _dataContext.Transactions
+            .Where(t => t.Status == PaymentStatus.Pending && DateTime.UtcNow > t.Date)
+            .ExecuteUpdateAsync(calls =>
+                calls.SetProperty(t => t.Status, PaymentStatus.Overdue)
+                    .SetProperty(t => t.UpdatedAt, DateTime.UtcNow), cancellationToken);
+    }
 }

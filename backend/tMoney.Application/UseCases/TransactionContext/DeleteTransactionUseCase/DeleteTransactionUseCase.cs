@@ -7,7 +7,7 @@ using tMoney.Infrastructure.Data.UnitOfWork.Interfaces;
 
 namespace tMoney.Application.UseCases.TransactionContext.DeleteTransactionUseCase;
 
-public sealed class DeleteTransactionUseCase : IUseCase<DeleteTransactionUseCaseInput, bool>
+public sealed class DeleteTransactionUseCase : IUseCase<DeleteTransactionUseCaseInput>
 {
     private readonly ITransactionService _transactionService;
     private readonly IInstallmentService _installmentService;
@@ -20,7 +20,7 @@ public sealed class DeleteTransactionUseCase : IUseCase<DeleteTransactionUseCase
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<bool> ExecuteUseCaseAsync(DeleteTransactionUseCaseInput input, CancellationToken cancellationToken)
+    public async Task ExecuteUseCaseAsync(DeleteTransactionUseCaseInput input, CancellationToken cancellationToken)
     {
         await _unitOfWork.BeginTransactionAsync(cancellationToken);
 
@@ -43,8 +43,6 @@ public sealed class DeleteTransactionUseCase : IUseCase<DeleteTransactionUseCase
             }
 
             await _unitOfWork.CommitTransactionAsync(cancellationToken);
-
-            return true;
         }
         catch (Exception)
         {
