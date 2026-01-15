@@ -47,5 +47,12 @@ public class InstallmentRepository : BaseRepository<Installment>, IInstallmentRe
             .ExecuteUpdateAsync(calls =>
                 calls.SetProperty(i => i.Status, PaymentStatus.Overdue)
                     .SetProperty(i => i.UpdatedAt, DateTime.UtcNow), cancellationToken);
+
+        await _dataContext.Installments
+            .Where(i => i.Status != PaymentStatus.Overdue &&
+                i.Installments.Any(ii => ii.Status == PaymentStatus.Overdue))
+            .ExecuteUpdateAsync(calls =>
+                calls.SetProperty(i => i.Status, PaymentStatus.Overdue)
+                    .SetProperty(i => i.UpdatedAt, DateTime.UtcNow), cancellationToken);
     }
 }

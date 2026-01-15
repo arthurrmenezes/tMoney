@@ -16,7 +16,7 @@ public class AccountRepository : BaseRepository<Account>, IAccountRepository
 
         return await _dataContext.Accounts
             .AsNoTracking()
-            .FirstOrDefaultAsync(a => a.AccountId == voAccountId, cancellationToken);
+            .FirstOrDefaultAsync(a => a.Id == voAccountId, cancellationToken);
     }
 
     public async Task<Account?> GetAccountByEmailAsync(string email, CancellationToken cancellationToken)

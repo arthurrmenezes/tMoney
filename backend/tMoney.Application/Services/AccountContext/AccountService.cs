@@ -25,7 +25,7 @@ public class AccountService : IAccountService
             throw new KeyNotFoundException($"Conta não foi encontrada.");
 
         var output = GetAccountDetailsServiceOutput.Factory(
-            accountId: account.AccountId.ToString(),
+             accountId: account.Id.ToString(),
             firstName: account.FirstName,
             lastName: account.LastName,
             email: account.Email,
@@ -55,7 +55,7 @@ public class AccountService : IAccountService
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         var output = UpdateAccountDetailsServiceOutput.Factory(
-            accountId: account.AccountId.ToString(),
+            accountId: account.Id.ToString(),
             firstName: account.FirstName,
             lastName: account.LastName,
             email: account.Email,

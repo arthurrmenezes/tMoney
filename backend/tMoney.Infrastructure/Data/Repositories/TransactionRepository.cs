@@ -218,5 +218,16 @@ public class TransactionRepository : BaseRepository<Transaction>, ITransactionRe
             .ExecuteUpdateAsync(calls =>
                 calls.SetProperty(t => t.Status, PaymentStatus.Overdue)
                     .SetProperty(t => t.UpdatedAt, DateTime.UtcNow), cancellationToken);
+
+        await _dataContext.Transactions
+            .Where(t => t.Status != PaymentStatus.Overdue &&
+                t.InstallmentId != null &&
+                _dataContext.Installments.Any(i =>
+                    i.Id == t.InstallmentId &&
+                    i.Status == PaymentStatus.Overdue)
+            )
+            .ExecuteUpdateAsync(calls =>
+                calls.SetProperty(t => t.Status, PaymentStatus.Overdue)
+                    .SetProperty(t => t.UpdatedAt, DateTime.UtcNow), cancellationToken);
     }
 }

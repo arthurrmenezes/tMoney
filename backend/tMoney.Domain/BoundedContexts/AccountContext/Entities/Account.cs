@@ -4,7 +4,7 @@ namespace tMoney.Domain.BoundedContexts.AccountContext.Entities;
 
 public class Account
 {
-    public IdValueObject AccountId { get; private set; }
+    public IdValueObject Id { get; private set; }
     public FirstNameValueObject FirstName { get; private set; }
     public LastNameValueObject LastName { get; private set; }
     public EmailValueObject Email { get; private set; }
@@ -16,7 +16,7 @@ public class Account
 
     public Account(FirstNameValueObject firstName, LastNameValueObject lastName, EmailValueObject email)
     {
-        AccountId = IdValueObject.New();
+        Id = IdValueObject.New();
         FirstName = firstName;
         LastName = lastName;
         Email = email;

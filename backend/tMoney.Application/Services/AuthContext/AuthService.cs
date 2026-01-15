@@ -64,7 +64,7 @@ public class AuthService : IAuthService
             {
                 UserName = input.Email,
                 Email = input.Email,
-                AccountId = account.AccountId,
+                AccountId = account.Id,
                 EmailConfirmed = false
             };
 
@@ -79,7 +79,7 @@ public class AuthService : IAuthService
             var defaultCategory = new Category(
                 title: "Outros",
                 type: CategoryType.Both,
-                accountId: account.AccountId,
+                accountId: account.Id,
                 isDefault: true);
 
             await _categoryRepository.AddAsync(defaultCategory, cancellationToken);
@@ -107,7 +107,7 @@ public class AuthService : IAuthService
             await _unitOfWork.CommitTransactionAsync(cancellationToken);
 
             var output = RegisterAccountServiceOutput.Factory(
-                accountId: account.AccountId,
+                accountId: account.Id,
                 firstName: account.FirstName,
                 lastName: account.LastName,
                 email: account.Email,

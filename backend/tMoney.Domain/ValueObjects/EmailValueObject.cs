@@ -28,6 +28,7 @@ public sealed class EmailValueObject : ValueObject<EmailValueObject>
 
         return new EmailValueObject(email.ToLowerInvariant());
     }
+    
     public override string ToString() => Email!;
 
     public static implicit operator string(EmailValueObject email) => email.Email!;

@@ -23,9 +23,9 @@ public sealed class UpdateOverdueTransactionsUseCase : IUseCase
 
         try
         {
-            await _transactionRepository.UpdateOverdueTransactionsAsync(cancellationToken);
-
             await _installmentRepository.UpdateOverdueInstallmentsAsync(cancellationToken);
+
+            await _transactionRepository.UpdateOverdueTransactionsAsync(cancellationToken);
 
             await _unitOfWork.CommitTransactionAsync(cancellationToken);
         }

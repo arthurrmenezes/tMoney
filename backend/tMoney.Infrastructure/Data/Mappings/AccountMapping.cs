@@ -11,12 +11,13 @@ public sealed class AccountMapping : IEntityTypeConfiguration<Account>
     {
         builder.ToTable("accounts");
 
-        builder.HasKey(a => a.AccountId);
+        builder.HasKey(a => a.Id);
 
         #region Properties Configuration
 
-        builder.Property(a => a.AccountId)
+        builder.Property(a => a.Id)
             .IsRequired()
+            .HasColumnName("id")
             .HasConversion(
                 a => a.Id, 
                 a => IdValueObject.Factory(a));

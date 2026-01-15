@@ -31,7 +31,7 @@ public class Category
         if (title is not null)
             Title = title;
 
-        if (type is not null)
+        if (type is not null && Enum.IsDefined(typeof(CategoryType), type.Value))
             Type = (CategoryType)type;
 
         UpdatedAt = DateTime.UtcNow;

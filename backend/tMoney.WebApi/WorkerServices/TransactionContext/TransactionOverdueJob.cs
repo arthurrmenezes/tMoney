@@ -14,7 +14,7 @@ public class TransactionOverdueJob : BackgroundService
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         var now = DateTime.UtcNow;
-        var nextRun = now.Date.AddMinutes(1);
+        var nextRun = now.Date.AddHours(4);
 
         if (now > nextRun)
             nextRun = nextRun.AddDays(1);

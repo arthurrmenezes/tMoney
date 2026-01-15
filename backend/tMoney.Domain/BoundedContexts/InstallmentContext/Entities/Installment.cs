@@ -19,8 +19,6 @@ public class Installment
 
     public Installment(IdValueObject accountId, int totalInstallments, decimal totalAmount, DateTime firstPaymentDate, PaymentStatus status)
     {
-        ValidateDomain(totalInstallments, totalAmount, status);
-
         Id = IdValueObject.New();
         AccountId = accountId;
         TotalInstallments = totalInstallments;
@@ -30,17 +28,22 @@ public class Installment
         Installments = new List<InstallmentItem>(); ;
         UpdatedAt = null;
         CreatedAt = DateTime.UtcNow;
+
+        ValidateDomain();
     }
 
-    private void ValidateDomain(int totalInstallments, decimal totalAmount, PaymentStatus status)
+    private void ValidateDomain()
     {
-        if (totalInstallments <= 0 || totalInstallments > 480)
+        if (TotalInstallments <= 0 || TotalInstallments > 480)
             throw new ArgumentException("Número de parcelas inválido.");
 
-        if (totalAmount <= 0)
+        if (TotalAmount <= 0)
             throw new ArgumentException("Valor inválido.");
 
-        if (!Enum.IsDefined(typeof(PaymentStatus), status))
+        if (FirstPaymentDate < DateTime.Today.AddYears(-100))
+            throw new ArgumentException("Data inválida.");
+
+        if (!Enum.IsDefined(typeof(PaymentStatus), Status))
             throw new ArgumentException("Status da parcela inválido.");
     }
 

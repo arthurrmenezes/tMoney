@@ -109,7 +109,7 @@ public sealed class GoogleAuthUseCase : IUseCase<GoogleAuthUseCaseInput, GoogleA
             {
                 UserName = googleResult.Email,
                 Email = googleResult.Email,
-                AccountId = account.AccountId,
+                AccountId = account.Id,
                 EmailConfirmed = true
             };
 
@@ -124,7 +124,7 @@ public sealed class GoogleAuthUseCase : IUseCase<GoogleAuthUseCaseInput, GoogleA
             var defaultCategory = new Category(
                 title: "Outros",
                 type: CategoryType.Both,
-                accountId: account.AccountId,
+                accountId: account.Id,
                 isDefault: true);
 
             await _categoryRepository.AddAsync(defaultCategory, cancellationToken);
@@ -165,7 +165,7 @@ public sealed class GoogleAuthUseCase : IUseCase<GoogleAuthUseCaseInput, GoogleA
                 cancellationToken: cancellationToken);
 
             var output = GoogleAuthUseCaseOutput.Factory(
-                accountId: account.AccountId.ToString(),
+                accountId: account.Id.ToString(),
                 firstName: account.FirstName,
                 lastName: account.LastName,
                 email: account.Email,
