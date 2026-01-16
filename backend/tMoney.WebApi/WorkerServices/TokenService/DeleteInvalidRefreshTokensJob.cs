@@ -1,12 +1,12 @@
-﻿using tMoney.Application.UseCases.TransactionContext.UpdateOverdueTransactionsUseCase;
+﻿using tMoney.Infrastructure.Services.TokenService.Interfaces;
 
-namespace tMoney.WebApi.WorkerServices.TransactionContext;
+namespace tMoney.WebApi.WorkerServices.TokenService;
 
-public class TransactionOverdueJob : BackgroundService
+public class DeleteInvalidRefreshTokensJob : BackgroundService
 {
     private readonly IServiceScopeFactory _serviceScopeFactory;
 
-    public TransactionOverdueJob(IServiceScopeFactory serviceScopeFactory)
+    public DeleteInvalidRefreshTokensJob(IServiceScopeFactory serviceScopeFactory)
     {
         _serviceScopeFactory = serviceScopeFactory;
     }
@@ -27,10 +27,10 @@ public class TransactionOverdueJob : BackgroundService
 
         do
         {
-            using var scope = _serviceScopeFactory.CreateScope();
-            var useCase = scope.ServiceProvider.GetRequiredService<UpdateOverdueTransactionsUseCase>();
+            using var service = _serviceScopeFactory.CreateScope();
+            var tokenService = service.ServiceProvider.GetRequiredService<ITokenService>();
 
-            await useCase.ExecuteUseCaseAsync(stoppingToken);
+            await tokenService.DeleteInvalidRefreshTokensAsync(stoppingToken);
         }
         while (await timer.WaitForNextTickAsync(stoppingToken));
     }

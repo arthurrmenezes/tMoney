@@ -8,4 +8,5 @@ public interface ITokenService
     public string GenerateRefreshToken();
     public int GetAccessTokenExpiration();
     public int GetRefreshTokenExpiration();
+    public Task DeleteInvalidRefreshTokensAsync(CancellationToken cancellationToken);
 }

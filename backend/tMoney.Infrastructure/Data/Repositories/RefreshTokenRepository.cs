@@ -25,4 +25,12 @@ public sealed class RefreshTokenRepository : BaseRepository<RefreshToken>, IRefr
                 u.ReplacedByToken == null)
             .ExecuteUpdateAsync(calls => calls.SetProperty(r => r.RevokedAt, DateTime.UtcNow), cancellationToken);
     }
+
+    public async Task DeleteInvalidRefreshTokensAsync(CancellationToken cancellationToken)
+    {
+        await _dataContext.RefreshTokens
+            .Where(r => r.ExpiresAt < DateTime.UtcNow.AddDays(-15) ||
+                (r.RevokedAt != null && r.RevokedAt < DateTime.UtcNow.AddDays(-15)))
+            .ExecuteDeleteAsync(cancellationToken);
+    }
 }
