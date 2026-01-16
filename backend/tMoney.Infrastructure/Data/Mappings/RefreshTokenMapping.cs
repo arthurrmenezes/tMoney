@@ -13,8 +13,14 @@ public sealed class RefreshTokenMapping : IEntityTypeConfiguration<RefreshToken>
 
         builder.HasKey(r => r.Id);
 
+        #region Index Key Configuration
+
         builder.HasIndex(r => r.Token)
             .IsUnique();
+
+        builder.HasIndex(r => r.UserId);
+
+        #endregion
 
         #region Properties Configuration
 

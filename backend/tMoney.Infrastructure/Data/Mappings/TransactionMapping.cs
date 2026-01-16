@@ -39,6 +39,16 @@ public sealed class TransactionMapping : IEntityTypeConfiguration<Transaction>
             t => t.Id,
             t => IdValueObject.Factory(t));
 
+        #region Index Key Configuration
+
+        builder.HasIndex(t => new { t.AccountId, t.CreatedAt });
+
+        builder.HasIndex(t => new { t.AccountId, t.Status, t.Date });
+
+        builder.HasIndex(t => new { t.Status, t.Date });
+
+        #endregion
+
         #region Properties Configuration
 
         builder.Property(t => t.Id)
