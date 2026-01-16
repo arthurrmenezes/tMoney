@@ -210,4 +210,41 @@ public class AuthController : ControllerBase
 
         return Ok(useCaseResult);
     }
+
+    [HttpPost]
+    [Route("change-email")]
+    [Authorize]
+    public async Task<IActionResult> ChangeEmailAsync(
+        [FromBody] ChangeEmailPayload input, 
+        CancellationToken cancellationToken)
+    {
+        var currentEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+        if (string.IsNullOrEmpty(currentEmail))
+            return Unauthorized();
+
+        await _authService.ChangeEmailServiceAsync(
+            currentEmail: currentEmail,
+            newEmail: input.NewEmail,
+            cancellationToken: cancellationToken);
+
+        return NoContent();
+    }
+
+    [HttpGet]
+    [Route("change-email")]
+    [AllowAnonymous]
+    public async Task<IActionResult> ConfirmarEmailChangeAsync(
+        [FromQuery] string email,
+        [FromQuery] string newEmail,
+        [FromQuery] string token,
+        CancellationToken cancellationToken)
+    {
+        await _authService.ConfirmEmailChangeServiceAsync(
+            currentEmail: email,
+            newEmail: newEmail,
+            emailToken: token,
+            cancellationToken: cancellationToken);
+
+        return NoContent();
+    }
 }

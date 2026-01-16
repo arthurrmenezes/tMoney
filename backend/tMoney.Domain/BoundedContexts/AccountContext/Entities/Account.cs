@@ -40,4 +40,10 @@ public class Account
     {
         LastLoginAt = DateTime.UtcNow;
     }
+
+    public void UpdateEmail(EmailValueObject newEmail)
+    {
+        Email = newEmail;
+        UpdatedAt = DateTime.UtcNow;
+    }
 }

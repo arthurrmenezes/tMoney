@@ -394,4 +394,100 @@ public class AuthService : IAuthService
             throw;
         }
     }
+
+    public async Task ChangeEmailServiceAsync(string currentEmail, string newEmail, CancellationToken cancellationToken)
+    {
+        var user = await _userManager.FindByEmailAsync(currentEmail);
+        if (user is null)
+            throw new KeyNotFoundException("E-mail inválido.");
+
+        if (await _userManager.FindByEmailAsync(newEmail) is not null)
+            throw new InvalidOperationException("Este e-mail já está em uso.");
+
+        if (!await _userManager.IsEmailConfirmedAsync(user))
+            throw new InvalidOperationException("O e-mail ainda não foi confirmado.");
+
+        var changeEmailToken = await _userManager.GenerateChangeEmailTokenAsync(user, newEmail);
+
+        var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(changeEmailToken));
+
+        var emailLink = $"{_baseUrl}/change-email?email={currentEmail}&newEmail={newEmail}&token={encodedToken}";
+
+        var account = await _accountRepository.GetAccountByIdAsync(user.AccountId.Id, cancellationToken);
+        if (account is null)
+            throw new KeyNotFoundException("Conta não encontrada.");
+
+        var emailMessage = EmailTemplates.ChangeEmailTemplateMessageBody(account.FirstName, emailLink);
+        var emailSubject = EmailTemplates.ChangeEmailTemplateSubject();
+
+        var emailInput = SendEmailServiceInput.Factory(
+            to: [
+                new SendEmailServiceInputTo(
+                        name: account.FirstName,
+                        email: account.Email),
+                ],
+            htmlContent: emailMessage,
+            subject: emailSubject);
+
+        await _emailService.SendEmailAsync(
+            input: emailInput,
+            cancellationToken: cancellationToken);
+    }
+
+    public async Task ConfirmEmailChangeServiceAsync(string currentEmail, string newEmail, string emailToken, CancellationToken cancellationToken)
+    {
+        var user = await _userManager.FindByEmailAsync(currentEmail);
+        if (user is null)
+            throw new KeyNotFoundException("E-mail inválido.");
+
+        if (!await _userManager.IsEmailConfirmedAsync(user))
+            throw new InvalidOperationException("O e-mail ainda não foi confirmado.");
+
+        var decodedToken = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(emailToken));
+
+        await _unitOfWork.BeginTransactionAsync(cancellationToken);
+
+        try
+        {
+            var result = await _userManager.ChangeEmailAsync(user, newEmail, decodedToken);
+            if (!result.Succeeded)
+            {
+                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                throw new InvalidOperationException($"Não foi possível alterar o e-mail: {errors}");
+            }
+
+            var account = await _accountRepository.GetAccountByIdAsync(user.AccountId.Id, cancellationToken);
+            if (account is null)
+                throw new KeyNotFoundException("Conta não encontrada.");
+
+            account.UpdateEmail(newEmail);
+
+            _accountRepository.Update(account);
+
+            await _refreshTokenRepository.RevokeAllByUserIdAsync(user.Id, cancellationToken);
+
+            var emailMessage = EmailTemplates.ConfirmChangeEmailTemplateMessageBody(account.FirstName);
+            var emailSubject = EmailTemplates.ConfirmChangeEmailTemplateSubject();
+
+            var emailInput = SendEmailServiceInput.Factory(
+                to: [
+                    new SendEmailServiceInputTo(
+                        name: account.FirstName,
+                        email: account.Email),
+                    ],
+                htmlContent: emailMessage,
+                subject: emailSubject);
+
+            await _emailService.SendEmailAsync(
+                input: emailInput,
+                cancellationToken: cancellationToken);
+
+            await _unitOfWork.CommitTransactionAsync(cancellationToken);
+        }
+        catch (Exception)
+        {
+            await _unitOfWork.RollbackTransactionAsync(cancellationToken);
+            throw;
+        }
+    }
 }

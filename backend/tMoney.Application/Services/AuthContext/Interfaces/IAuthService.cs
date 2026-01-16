@@ -40,4 +40,15 @@ public interface IAuthService
     public Task ResetPasswordServiceAsync(
         ResetPasswordServiceInput input,
         CancellationToken cancellationToken);
+
+    public Task ChangeEmailServiceAsync(
+        string currentEmail,
+        string newEmail,
+        CancellationToken cancellationToken);
+
+    public Task ConfirmEmailChangeServiceAsync(
+        string currentEmail,
+        string newEmail,
+        string emailToken,
+        CancellationToken cancellationToken);
 }

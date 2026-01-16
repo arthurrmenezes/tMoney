@@ -27,9 +27,6 @@ public class InstallmentService : IInstallmentService
             totalAmount: input.TotalAmount,
             firstPaymentDate: input.FirstPaymentDate,
             status: input.Status);
-        
-        if (installment.TotalInstallments <= 1)
-            throw new ArgumentException("O número total de parcelas deve ser maior que 1 para criar um parcelamento.");
 
         installment.GenerateInstallments();
 

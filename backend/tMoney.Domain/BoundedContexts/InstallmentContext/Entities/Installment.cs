@@ -34,7 +34,7 @@ public class Installment
 
     private void ValidateDomain()
     {
-        if (TotalInstallments <= 0 || TotalInstallments > 480)
+        if (TotalInstallments <= 1 || TotalInstallments > 480)
             throw new ArgumentException("Número de parcelas inválido.");
 
         if (TotalAmount <= 0)
