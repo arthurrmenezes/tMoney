@@ -6,6 +6,7 @@ namespace tMoney.Application.UseCases.TransactionContext.CreateTransactionUseCas
 public sealed class CreateTransactionUseCaseInput
 {
     public IdValueObject AccountId { get; }
+    public IdValueObject CardId { get; }
     public IdValueObject CategoryId { get; }
     public string Title { get; }
     public string? Description { get; }
@@ -17,11 +18,12 @@ public sealed class CreateTransactionUseCaseInput
     public string? Destination { get; }
     public CreateTransactionUseCaseInputInstallment? HasInstallment { get; }
 
-    private CreateTransactionUseCaseInput(IdValueObject accountId, IdValueObject categoryId, string title, string? description, decimal amount, 
-        DateTime date, TransactionType transactionType, PaymentMethod paymentMethod, PaymentStatus status, string? destination, 
+    private CreateTransactionUseCaseInput(IdValueObject accountId, IdValueObject cardId, IdValueObject categoryId, string title, string? description, 
+        decimal amount, DateTime date, TransactionType transactionType, PaymentMethod paymentMethod, PaymentStatus status, string? destination, 
         CreateTransactionUseCaseInputInstallment? hasInstallment)
     {
         AccountId = accountId;
+        CardId = cardId;
         CategoryId = categoryId;
         Title = title;
         Description = description;
@@ -34,10 +36,10 @@ public sealed class CreateTransactionUseCaseInput
         HasInstallment = hasInstallment;
     }
 
-    public static CreateTransactionUseCaseInput Factory(IdValueObject accountId, IdValueObject categoryId, string title, string? description, decimal amount,
-        DateTime date, TransactionType transactionType, PaymentMethod paymentMethod, PaymentStatus status, string? destination, 
-        CreateTransactionUseCaseInputInstallment? hasInstallment)
-        => new(accountId, categoryId, title, description, amount, date, transactionType, paymentMethod, status, destination, hasInstallment);
+    public static CreateTransactionUseCaseInput Factory(IdValueObject accountId, IdValueObject cardId, IdValueObject categoryId, string title, 
+        string? description, decimal amount, DateTime date, TransactionType transactionType, PaymentMethod paymentMethod, PaymentStatus status, 
+        string? destination, CreateTransactionUseCaseInputInstallment? hasInstallment)
+        => new(accountId, cardId, categoryId, title, description, amount, date, transactionType, paymentMethod, status, destination, hasInstallment);
 }
 
 public sealed class CreateTransactionUseCaseInputInstallment

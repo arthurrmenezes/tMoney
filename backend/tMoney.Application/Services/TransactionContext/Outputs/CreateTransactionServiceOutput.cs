@@ -4,6 +4,7 @@ public sealed class CreateTransactionServiceOutput
 {
     public string Id { get; }
     public string AccountId { get; }
+    public string CardId { get; }
     public string CategoryId { get; }
     public string? InstallmentId { get; }
     public string Title { get; }
@@ -17,12 +18,13 @@ public sealed class CreateTransactionServiceOutput
     public DateTime? UpdatedAt { get; }
     public DateTime CreatedAt { get; }
 
-    private CreateTransactionServiceOutput(string id, string accountId, string categoryId, string? installmentId, string title, string? description,
-        decimal amount, DateTime date, string transactionType, string paymentMethod, string status, string? destination, DateTime? updatedAt, 
-        DateTime createdAt)
+    private CreateTransactionServiceOutput(string id, string accountId, string cardId, string categoryId, string? installmentId, string title, 
+        string? description, decimal amount, DateTime date, string transactionType, string paymentMethod, string status, string? destination, 
+        DateTime? updatedAt, DateTime createdAt)
     {
         Id = id;
         AccountId = accountId;
+        CardId = cardId;
         CategoryId = categoryId;
         InstallmentId = installmentId;
         Title = title;
@@ -37,9 +39,9 @@ public sealed class CreateTransactionServiceOutput
         CreatedAt = createdAt;
     }
 
-    public static CreateTransactionServiceOutput Factory(string id, string accountId, string categoryId, string? installmentId, string title, 
+    public static CreateTransactionServiceOutput Factory(string id, string accountId, string cardId, string categoryId, string? installmentId, string title, 
         string? description, decimal amount, DateTime date, string transactionType, string paymentMethod, string status, string? destination, 
         DateTime? updatedAt, DateTime createdAt)
-        => new(id, accountId, categoryId, installmentId, title, description, amount, date, transactionType, paymentMethod, status, destination,
+        => new(id, accountId, cardId, categoryId, installmentId, title, description, amount, date, transactionType, paymentMethod, status, destination,
             updatedAt, createdAt);
 }

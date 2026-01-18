@@ -37,6 +37,9 @@ public class TransactionController : ControllerBase
     {
         var accountId = User.GetAccountId();
 
+        if (!Guid.TryParse(input.CategoryId, out var cardId))
+            throw new ArgumentException("Card ID inválido.");
+
         if (!Guid.TryParse(input.CategoryId, out var categoryId))
             throw new ArgumentException("Category ID inválido.");
 
@@ -47,6 +50,7 @@ public class TransactionController : ControllerBase
         var useCaseResult = await useCase.ExecuteUseCaseAsync(
             input: CreateTransactionUseCaseInput.Factory(
                 accountId: IdValueObject.Factory(accountId),
+                cardId: IdValueObject.Factory(cardId),
                 categoryId: IdValueObject.Factory(categoryId),
                 title: input.Title,
                 description: input.Description,
