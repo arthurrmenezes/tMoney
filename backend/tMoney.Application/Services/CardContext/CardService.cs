@@ -76,4 +76,38 @@ public class CardService : ICardService
             throw;
         }
     }
+
+    public async Task<GetCardByIdServiceOutput> GetCardByIdServiceAsync(
+        IdValueObject cardId, 
+        IdValueObject accountId, 
+        CancellationToken cancellationToken)
+    {
+        var card = await _cardRepository.GetByIdAsync(cardId.Id, accountId.Id, cancellationToken);
+        if (card is null)
+            throw new ArgumentException("Cartão não foi encontrado");
+
+        var cardType = "Debit";
+        
+        GetCardByIdServiceOutputCreditCard? creditCardOutput = null;
+        if (card is CreditCard creditCardEntity)
+        {
+            creditCardOutput = GetCardByIdServiceOutputCreditCard.Factory(
+                limit: creditCardEntity.Limit,
+                closeDay: creditCardEntity.CloseDay,
+                dueDay: creditCardEntity.DueDay);
+
+            cardType = "Credit";
+        }
+
+        var output = GetCardByIdServiceOutput.Factory(
+            id: card.Id.ToString(),
+            accountId: card.AccountId.ToString(),
+            name: card.Name,
+            cardType: cardType,
+            creditCard: creditCardOutput,
+            updatedAt: card.UpdatedAt,
+            createdAt: card.CreatedAt);
+
+        return output;
+    }
 }

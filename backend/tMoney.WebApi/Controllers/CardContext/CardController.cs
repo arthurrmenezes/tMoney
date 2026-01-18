@@ -40,7 +40,23 @@ public class CardController : ControllerBase
                 creditCard: creditCard),
             cancellationToken: cancellationToken);
 
+        return CreatedAtAction("GetCardById", new { cardId = serviceResult.Id }, serviceResult);
+    }
+
+    [HttpGet]
+    [Route("{cardId}")]
+    [Authorize]
+    public async Task<IActionResult> GetCardByIdAsync(
+        [FromRoute] Guid cardId,
+        CancellationToken cancellationToken)
+    {
+        var accountId = User.GetAccountId();
+
+        var serviceResult = await _cardService.GetCardByIdServiceAsync(
+            cardId: IdValueObject.Factory(cardId),
+            accountId: IdValueObject.Factory(accountId),
+            cancellationToken: cancellationToken);
+
         return Ok(serviceResult);
-        //return CreatedAtAction("GetCardById", new { cardId = serviceResult.Id }, serviceResult);
     }
 }

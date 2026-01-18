@@ -10,4 +10,9 @@ public interface ICardService
         IdValueObject accountId,
         CreateCardServiceInput input,
         CancellationToken cancellationToken);
+
+    public Task<GetCardByIdServiceOutput> GetCardByIdServiceAsync(
+        IdValueObject cardId,
+        IdValueObject accountId,
+        CancellationToken cancellationToken);
 }
