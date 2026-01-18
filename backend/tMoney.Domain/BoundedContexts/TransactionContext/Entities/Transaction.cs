@@ -7,6 +7,7 @@ public class Transaction
 {
     public IdValueObject Id { get; private set; }
     public IdValueObject AccountId { get; private set; }
+    public IdValueObject CardId { get; private set; }
     public IdValueObject CategoryId { get; private set; }
     public IdValueObject? InstallmentId { get; private set; }
     public string Title { get; private set; }
@@ -20,11 +21,13 @@ public class Transaction
     public DateTime? UpdatedAt { get; private set; }
     public DateTime CreatedAt { get; private set; }
 
-    public Transaction(IdValueObject accountId, IdValueObject categoryId, IdValueObject? installmentId, string title, string? description, decimal amount, 
-        DateTime date, TransactionType transactionType, PaymentMethod paymentMethod, PaymentStatus status, string? destination)
+    public Transaction(IdValueObject accountId, IdValueObject cardId, IdValueObject categoryId, IdValueObject? installmentId, string title, 
+        string? description, decimal amount, DateTime date, TransactionType transactionType, PaymentMethod paymentMethod, PaymentStatus status, 
+        string? destination)
     {
         Id = IdValueObject.New();
         AccountId = accountId;
+        CardId = cardId;
         CategoryId = categoryId;
         InstallmentId = installmentId;
         Title = title;
