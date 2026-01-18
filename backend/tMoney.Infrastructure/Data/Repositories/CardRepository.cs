@@ -19,4 +19,29 @@ public class CardRepository : BaseRepository<Card>, ICardRepository
             .AsNoTracking()
             .FirstOrDefaultAsync(c => c.Id == voCardId && c.AccountId == voAccountId, cancellationToken);
     }
+
+    public async Task<Card[]> GetAllByAccountId(Guid accountId, int pageNumber, int pageSize, CancellationToken cancellationToken)
+    {
+        var skip = (pageNumber - 1) * pageSize;
+
+        var voAccountId = IdValueObject.Factory(accountId);
+
+        return await _dataContext.Cards
+            .AsNoTracking()
+            .Where(c => c.AccountId == voAccountId)
+            .OrderByDescending(c => c.CreatedAt)
+            .Skip(skip)
+            .Take(pageSize)
+            .ToArrayAsync(cancellationToken);
+    }
+
+    public async Task<int> GetTotalCardsNumberAsync(Guid accountId, CancellationToken cancellationToken)
+    {
+        var voAccountId = IdValueObject.Factory(accountId);
+
+        return await _dataContext.Cards
+            .AsNoTracking()
+            .Where(c => c.AccountId == voAccountId)
+            .CountAsync(cancellationToken);
+    }
 }

@@ -59,4 +59,26 @@ public class CardController : ControllerBase
 
         return Ok(serviceResult);
     }
+
+    [HttpGet]
+    [Authorize]
+    public async Task<IActionResult> GetAllCardsByAccountIdAsync(
+        [FromQuery] int? pageNumber,
+        [FromQuery] int? pageSize,
+        CancellationToken cancellationToken)
+    {
+        if (pageNumber < 1 || pageNumber is null) pageNumber = 1;
+        if (pageSize < 1 || pageSize is null) pageSize = 10;
+        if (pageSize > 50) pageSize = 50;
+
+        var accountId = User.GetAccountId();
+
+        var serviceResult = await _cardService.GetAllCardsByAccountIdServiceAsync(
+            accountId: IdValueObject.Factory(accountId),
+            pageNumber: pageNumber.Value,
+            pageSize: pageSize.Value,
+            cancellationToken: cancellationToken);
+
+        return Ok(serviceResult);
+    }
 }

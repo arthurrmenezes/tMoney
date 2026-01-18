@@ -15,4 +15,10 @@ public interface ICardService
         IdValueObject cardId,
         IdValueObject accountId,
         CancellationToken cancellationToken);
+
+    public Task<GetAllCardsByAccountIdServiceOutput> GetAllCardsByAccountIdServiceAsync(
+        IdValueObject accountId,
+        int pageNumber,
+        int pageSize,
+        CancellationToken cancellationToken);
 }

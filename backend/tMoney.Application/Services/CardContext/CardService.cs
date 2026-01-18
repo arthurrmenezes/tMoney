@@ -103,10 +103,57 @@ public class CardService : ICardService
             id: card.Id.ToString(),
             accountId: card.AccountId.ToString(),
             name: card.Name,
-            cardType: cardType,
+            type: cardType,
             creditCard: creditCardOutput,
             updatedAt: card.UpdatedAt,
             createdAt: card.CreatedAt);
+
+        return output;
+    }
+
+    public async Task<GetAllCardsByAccountIdServiceOutput> GetAllCardsByAccountIdServiceAsync(
+        IdValueObject accountId, 
+        int pageNumber, 
+        int pageSize, 
+        CancellationToken cancellationToken)
+    {
+        var cards = await _cardRepository.GetAllByAccountId(accountId.Id, pageNumber, pageSize, cancellationToken);
+
+        var totalCards = await _cardRepository.GetTotalCardsNumberAsync(accountId.Id, cancellationToken);
+
+        var cardsOutput = cards.Select(c =>
+        {
+            if (c is CreditCard creditCard)
+                return GetAllCardsByAccountIdServiceOutputCards.Factory(
+                    id: c.Id.ToString(),
+                    accountId: c.AccountId.ToString(),
+                    name: c.Name,
+                    type: "CreditCard",
+                    creditCard: GetAllCardsByAccountIdServiceOutputCreditCard.Factory(
+                        limit: creditCard.Limit,
+                        closeDay: creditCard.CloseDay,
+                        dueDay: creditCard.DueDay),
+                    updatedAt: c.UpdatedAt,
+                    createdAt: c.CreatedAt);
+            else
+                return GetAllCardsByAccountIdServiceOutputCards.Factory(
+                    id: c.Id.ToString(),
+                    accountId: c.AccountId.ToString(),
+                    name: c.Name,
+                    type: "DebitCard",
+                    creditCard: null,
+                    updatedAt: c.UpdatedAt,
+                    createdAt: c.CreatedAt);
+        }).ToArray();
+
+        var totalPages = (int)Math.Ceiling((double)totalCards / pageSize);
+
+        var output = GetAllCardsByAccountIdServiceOutput.Factory(
+            totalCards: totalCards,
+            pageNumber: pageNumber,
+            pageSize: pageSize,
+            totalPages: totalPages,
+            cards: cardsOutput);
 
         return output;
     }

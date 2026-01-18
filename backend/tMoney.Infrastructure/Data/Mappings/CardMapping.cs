@@ -10,7 +10,7 @@ public sealed class CardMapping : IEntityTypeConfiguration<Card>
 {
     public void Configure(EntityTypeBuilder<Card> builder)
     {
-        builder.ToTable("card");
+        builder.ToTable("cards");
 
         builder.HasKey(c => c.Id);
 
