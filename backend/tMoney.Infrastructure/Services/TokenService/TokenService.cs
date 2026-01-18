@@ -5,6 +5,7 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using tMoney.Infrastructure.Auth.Entities;
+using tMoney.Infrastructure.Data.Repositories.Interfaces;
 using tMoney.Infrastructure.Services.TokenService.Interfaces;
 
 namespace tMoney.Infrastructure.Services.TokenService;
@@ -12,10 +13,12 @@ namespace tMoney.Infrastructure.Services.TokenService;
 public class TokenService : ITokenService
 {
     private readonly IConfiguration _configuration;
+    private readonly IRefreshTokenRepository _refreshTokenRepository;
 
-    public TokenService(IConfiguration configuration)
+    public TokenService(IConfiguration configuration, IRefreshTokenRepository refreshTokenRepository)
     {
         _configuration = configuration;
+        _refreshTokenRepository = refreshTokenRepository;
     }
 
     public string GenerateAccessToken(User user)
@@ -59,4 +62,9 @@ public class TokenService : ITokenService
     public int GetAccessTokenExpiration() => _configuration.GetValue<int>("JwtSettings:AccessTokenExpirationInSeconds");
 
     public int GetRefreshTokenExpiration() => _configuration.GetValue<int>("JwtSettings:RefreshTokenExpirationInDays");
+
+    public async Task DeleteInvalidRefreshTokensAsync(CancellationToken cancellationToken)
+    {
+        await _refreshTokenRepository.DeleteInvalidRefreshTokensAsync(cancellationToken);
+    }
 }

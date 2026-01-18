@@ -100,6 +100,7 @@ public static class DependencyInjection
         serviceCollection.AddScoped<ICategoryRepository, CategoryRepository>();
         serviceCollection.AddScoped<ITransactionRepository, TransactionRepository>();
         serviceCollection.AddScoped<IInstallmentRepository, InstallmentRepository>();
+        serviceCollection.AddScoped<ICardRepository, CardRepository>();
 
         #endregion
 

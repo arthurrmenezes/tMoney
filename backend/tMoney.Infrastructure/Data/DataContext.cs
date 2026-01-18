@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using tMoney.Domain.BoundedContexts.AccountContext.Entities;
+using tMoney.Domain.BoundedContexts.CardContext.Entities;
 using tMoney.Domain.BoundedContexts.CategoryContext.Entities;
 using tMoney.Domain.BoundedContexts.InstallmentContext.Entities;
 using tMoney.Domain.BoundedContexts.TransactionContext.Entities;
@@ -17,6 +18,8 @@ public sealed class DataContext : IdentityDbContext<User>
     public DbSet<Transaction> Transactions { get; set; }
     public DbSet<Installment> Installments { get; set; }
     public DbSet<InstallmentItem> InstallmentItems { get; set; }
+    public DbSet<Card> Cards { get; set; }
+    public DbSet<CreditCardInvoice> CreditCardInvoices { get; set; }
 
     public DataContext(DbContextOptions<DataContext> options) : base(options) { }
 
@@ -29,6 +32,9 @@ public sealed class DataContext : IdentityDbContext<User>
         builder.ApplyConfiguration(new TransactionMapping());
         builder.ApplyConfiguration(new InstallmentMapping());
         builder.ApplyConfiguration(new InstallmentItemMapping());
+        builder.ApplyConfiguration(new CardMapping());
+        builder.ApplyConfiguration(new CreditCardMapping());
+        builder.ApplyConfiguration(new CreditCardInvoiceMapping());
         base.OnModelCreating(builder);
     }
 }

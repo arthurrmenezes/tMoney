@@ -7,4 +7,5 @@ public interface IRefreshTokenRepository : IBaseRepository<RefreshToken>
 {
     public Task<RefreshToken?> GetByTokenAsync(string accesstoken, CancellationToken cancellationToken);
     public Task RevokeAllByUserIdAsync(string userId, CancellationToken cancellationToken);
+    public Task DeleteInvalidRefreshTokensAsync(CancellationToken cancellationToken);
 }

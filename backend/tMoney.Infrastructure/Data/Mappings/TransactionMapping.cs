@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using tMoney.Domain.BoundedContexts.AccountContext.Entities;
+using tMoney.Domain.BoundedContexts.CardContext.Entities;
 using tMoney.Domain.BoundedContexts.CategoryContext.Entities;
 using tMoney.Domain.BoundedContexts.InstallmentContext.Entities;
 using tMoney.Domain.BoundedContexts.TransactionContext.Entities;
@@ -20,6 +21,12 @@ public sealed class TransactionMapping : IEntityTypeConfiguration<Transaction>
         builder.HasOne<Account>()
             .WithMany()
             .HasForeignKey(t => t.AccountId)
+            .IsRequired()
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasOne<Card>()
+            .WithMany()
+            .HasForeignKey(t => t.CardId)
             .IsRequired()
             .OnDelete(DeleteBehavior.Cascade);
 
@@ -58,6 +65,11 @@ public sealed class TransactionMapping : IEntityTypeConfiguration<Transaction>
         builder.Property(t => t.AccountId)
             .IsRequired()
             .HasColumnName("account_id")
+            .HasConversion(idConverter);
+
+        builder.Property(t => t.CardId)
+            .IsRequired()
+            .HasColumnName("card_id")
             .HasConversion(idConverter);
 
         builder.Property(t => t.CategoryId)

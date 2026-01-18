@@ -3,6 +3,8 @@ using tMoney.Application.Services.AccountContext;
 using tMoney.Application.Services.AccountContext.Interfaces;
 using tMoney.Application.Services.AuthContext;
 using tMoney.Application.Services.AuthContext.Interfaces;
+using tMoney.Application.Services.CardContext;
+using tMoney.Application.Services.CardContext.Interfaces;
 using tMoney.Application.Services.CategoryContext;
 using tMoney.Application.Services.CategoryContext.Interface;
 using tMoney.Application.Services.InstallmentContext;
@@ -42,6 +44,7 @@ public static class DependencyInjection
         serviceCollection.AddScoped<ICategoryService, CategoryService>();
         serviceCollection.AddScoped<ITransactionService, TransactionService>();
         serviceCollection.AddScoped<IInstallmentService, InstallmentService>();
+        serviceCollection.AddScoped<ICardService, CardService>();
 
         #endregion
 

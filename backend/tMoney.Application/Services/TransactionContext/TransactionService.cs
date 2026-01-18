@@ -37,6 +37,7 @@ public class TransactionService : ITransactionService
 
         var transaction = new Transaction(
             accountId: input.AccountId,
+            cardId: input.CardId,
             categoryId: input.CategoryId,
             installmentId: input.InstallmentId,
             title: input.Title,
@@ -53,6 +54,7 @@ public class TransactionService : ITransactionService
             var output = CreateTransactionServiceOutput.Factory(
                 id: transaction.Id.ToString(),
                 accountId: transaction.AccountId.ToString(),
+                cardId: transaction.CardId.ToString(),
                 categoryId: transaction.CategoryId.ToString(),
                 installmentId: transaction.InstallmentId is null ? null : transaction.InstallmentId.ToString(),
                 title: transaction.Title,

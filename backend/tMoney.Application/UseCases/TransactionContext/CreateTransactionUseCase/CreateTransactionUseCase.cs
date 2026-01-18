@@ -53,6 +53,7 @@ public sealed class CreateTransactionUseCase : IUseCase<CreateTransactionUseCase
             var transactionServiceOutput = await _transactionService.CreateTransactionServiceAsync(
                 CreateTransactionServiceInput.Factory(
                     accountId: input.AccountId,
+                    cardId: input.CardId,
                     categoryId: input.CategoryId,
                     installmentId: voInstallmentId,
                     title: input.Title,
