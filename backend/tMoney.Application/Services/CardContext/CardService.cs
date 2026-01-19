@@ -12,11 +12,13 @@ public class CardService : ICardService
 {
     private readonly ICardRepository _cardRepository;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly ICreditCardInvoiceRepository _creditCardInvoiceRepository;
 
-    public CardService(ICardRepository cardRepository, IUnitOfWork unitOfWork)
+    public CardService(ICardRepository cardRepository, IUnitOfWork unitOfWork, ICreditCardInvoiceRepository creditCardInvoiceRepository)
     {
         _cardRepository = cardRepository;
         _unitOfWork = unitOfWork;
+        _creditCardInvoiceRepository = creditCardInvoiceRepository;
     }
 
     public async Task<CreateCardServiceOutput> CreateCardServiceAsync(
@@ -82,9 +84,9 @@ public class CardService : ICardService
         IdValueObject accountId, 
         CancellationToken cancellationToken)
     {
-        var card = await _cardRepository.GetByIdAsync(cardId.Id, accountId.Id, cancellationToken);
+        var card = await _cardRepository.GetByIdAsync(cardId.Id, accountId.Id, false, cancellationToken);
         if (card is null)
-            throw new ArgumentException("Cartão não foi encontrado");
+            throw new ArgumentException("Cartão não foi encontrado.");
 
         var cardType = "Debit";
         
@@ -156,5 +158,79 @@ public class CardService : ICardService
             cards: cardsOutput);
 
         return output;
+    }
+
+    public async Task<UpdateCardByIdServiceOutput> UpdateCardByIdServiceAsync(
+        IdValueObject cardId,
+        IdValueObject accountId, 
+        UpdateCardByIdServiceInput input, 
+        CancellationToken cancellationToken)
+    {
+        var card = await _cardRepository.GetByIdAsync(cardId.Id, accountId.Id, true, cancellationToken);
+        if (card is null)
+            throw new ArgumentException("Cartão não foi encontrado.");
+
+        await _unitOfWork.BeginTransactionAsync(cancellationToken);
+
+        try
+        {
+            card.UpdateCardDetails(input.Name);
+
+            if (card is CreditCard creditCard)
+            { 
+                if (input.CreditCard is not null)
+                {
+                    creditCard.UpdateCreditCardDetails(
+                        limit: input.CreditCard.Limit,
+                        closeDay: input.CreditCard.CloseDay,
+                        dueDay: input.CreditCard.DueDay);
+
+                    var currentInvoice = await _creditCardInvoiceRepository.GetOpenInvoiceAsync(card.Id.Id, cancellationToken);
+
+                    if (currentInvoice is not null && input.CreditCard.Limit.HasValue)
+                    {
+                        currentInvoice.UpdateLimit(input.CreditCard.Limit.Value);
+
+                        _creditCardInvoiceRepository.Update(currentInvoice);
+                    }                        
+                }
+            }
+            else
+                if (input.CreditCard is not null)
+                    throw new ArgumentException("Não é possível alterar o tipo do cartão.");
+
+            _cardRepository.Update(card);
+
+            await _unitOfWork.CommitTransactionAsync(cancellationToken);
+
+            UpdateCardByIdServiceOutputCreditCard? creditCardOutput = null;
+            var cardType = "DebitCard";
+
+            if (card is CreditCard c)
+            {
+                creditCardOutput = UpdateCardByIdServiceOutputCreditCard.Factory(
+                    limit: c.Limit,
+                    closeDay: c.CloseDay,
+                    dueDay: c.DueDay);
+
+                cardType = "CreditCard";
+            }
+
+            var output = UpdateCardByIdServiceOutput.Factory(
+                id: card.Id.ToString(),
+                accountId: card.AccountId.ToString(),
+                name: card.Name,
+                type: cardType,
+                creditCard: creditCardOutput,
+                updatedAt: card.UpdatedAt,
+                createdAt: card.CreatedAt);
+
+            return output;
+        }
+        catch
+        {
+            await _unitOfWork.RollbackTransactionAsync(cancellationToken);
+            throw;
+        }
     }
 }

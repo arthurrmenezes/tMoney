@@ -21,4 +21,10 @@ public interface ICardService
         int pageNumber,
         int pageSize,
         CancellationToken cancellationToken);
+
+    public Task<UpdateCardByIdServiceOutput> UpdateCardByIdServiceAsync(
+        IdValueObject cardId,
+        IdValueObject accountId,
+        UpdateCardByIdServiceInput input,
+        CancellationToken cancellationToken);
 }

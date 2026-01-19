@@ -22,13 +22,26 @@ public class CreditCard : Card
         if (Limit <= 0)
             throw new ArgumentException("O valor do limite deve ser maior que 0.");
 
-        var firstDay = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
-        var lastDayOfMonth = firstDay.AddMonths(1).AddDays(-1).Day;
-
         if (CloseDay < 1 || CloseDay > 31)
-            throw new ArgumentException($"O dia de fechamento deve estar entre 1 e {lastDayOfMonth}.");
+            throw new ArgumentException($"O dia de fechamento deve estar entre 1 e 31.");
 
         if (DueDay < 1 || DueDay > 31)
-            throw new ArgumentException($"O dia de vencimento deve estar entre 1 e {lastDayOfMonth}.");
+            throw new ArgumentException($"O dia de vencimento deve estar entre 1 e 31.");
+    }
+
+    public void UpdateCreditCardDetails(decimal? limit, int? closeDay, int? dueDay)
+    {
+        if (limit is not null)
+            Limit = limit.Value;
+
+        if (closeDay is not null)
+            CloseDay = closeDay.Value;
+
+        if (dueDay is not null)
+            DueDay = dueDay.Value;
+
+        UpdatedAt = DateTime.UtcNow;
+
+        ValidateDomain();
     }
 }

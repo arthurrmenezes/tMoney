@@ -11,6 +11,7 @@ public class CreditCardInvoice
     public int Year { get; private set; }
     public DateTime CloseDay { get; private set; }
     public DateTime DueDay { get; private set; }
+    public decimal LimitTotal { get; private set; }
     public decimal AmountPaid { get; private set; }
     public InvoiceStatus Status { get; private set; }
     public DateTime? UpdatedAt { get; private set; }
@@ -18,7 +19,7 @@ public class CreditCardInvoice
 
     private CreditCardInvoice() { }
 
-    public CreditCardInvoice(IdValueObject creditCardId, int month, int year, DateTime closeDay, DateTime dueDay, decimal amountPaid, InvoiceStatus status)
+    public CreditCardInvoice(IdValueObject creditCardId, int month, int year, DateTime closeDay, DateTime dueDay, decimal limitTotal)
     {
         Id = IdValueObject.New();
         CreditCardId = creditCardId;
@@ -26,8 +27,9 @@ public class CreditCardInvoice
         Year = year;
         CloseDay = closeDay;
         DueDay = dueDay;
-        AmountPaid = amountPaid;
-        Status = status;
+        LimitTotal = limitTotal;
+        AmountPaid = 0;
+        Status = InvoiceStatus.Open;
         UpdatedAt = null;
         CreatedAt = DateTime.UtcNow;
 
@@ -54,10 +56,27 @@ public class CreditCardInvoice
         if (CloseDay >= DueDay)
             throw new ArgumentException("O dia de fechamento deve ser anterior ao dia de vencimento.");
 
+        if (LimitTotal < 0)
+            throw new ArgumentException("O valor do limite não pode ser negativo.");
+
         if (AmountPaid < 0)
             throw new ArgumentException("O valor pago não pode ser negativo.");
 
         if (!Enum.IsDefined(typeof(InvoiceStatus), Status))
             throw new ArgumentException("O status da fatura é inválido.");
+    }
+
+    public void UpdateLimit(decimal amount)
+    {
+        if (amount < 0)
+            throw new ArgumentException("O valor do limite não pode ser negativo.");
+
+        if (amount < AmountPaid)
+            throw new ArgumentException("O valor do limite não pode ser menor que o valor já pago.");
+
+        LimitTotal = amount;
+        UpdatedAt = DateTime.UtcNow;
+
+        ValidateDomain();
     }
 }

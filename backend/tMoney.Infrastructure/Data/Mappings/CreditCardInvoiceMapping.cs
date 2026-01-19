@@ -55,6 +55,12 @@ public sealed class CreditCardInvoiceMapping : IEntityTypeConfiguration<CreditCa
             .HasColumnName("due_day")
             .ValueGeneratedNever();
 
+        builder.Property(i => i.LimitTotal)
+            .IsRequired()
+            .HasColumnName("limit_total")
+            .HasPrecision(18, 2)
+            .ValueGeneratedNever();
+
         builder.Property(i => i.AmountPaid)
             .IsRequired()
             .HasColumnName("amount_paid")

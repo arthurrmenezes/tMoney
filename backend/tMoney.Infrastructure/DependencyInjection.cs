@@ -101,6 +101,7 @@ public static class DependencyInjection
         serviceCollection.AddScoped<ITransactionRepository, TransactionRepository>();
         serviceCollection.AddScoped<IInstallmentRepository, InstallmentRepository>();
         serviceCollection.AddScoped<ICardRepository, CardRepository>();
+        serviceCollection.AddScoped<ICreditCardInvoiceRepository, CreditCardInvoiceRepository>();
 
         #endregion
 

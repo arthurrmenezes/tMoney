@@ -81,4 +81,35 @@ public class CardController : ControllerBase
 
         return Ok(serviceResult);
     }
+
+    [HttpPatch]
+    [Route("{cardId}")]
+    [Authorize]
+    public async Task<IActionResult> UpdateCardByIdAsync(
+        [FromRoute] Guid cardId,
+        [FromBody] UpdateCardByIdPayload input,
+        CancellationToken cancellationToken)
+    {
+        if (input.Name is null &&
+            input.CreditCard is null)
+            throw new ArgumentException("Informe pelo menos um campo para atualizar.");
+
+        var accountId = User.GetAccountId();
+
+        var creditCard = input.CreditCard is null ? null :
+            UpdateCardByIdServiceInputCreditCard.Factory(
+                limit: input.CreditCard.Limit,
+                closeDay: input.CreditCard.CloseDay,
+                dueDay: input.CreditCard.DueDay);
+
+        var serviceResult = await _cardService.UpdateCardByIdServiceAsync(
+            cardId: IdValueObject.Factory(cardId),
+            accountId: IdValueObject.Factory(accountId),
+            input: UpdateCardByIdServiceInput.Factory(
+                name: input.Name,
+                creditCard: creditCard),
+            cancellationToken: cancellationToken);
+
+        return Ok(serviceResult);
+    }
 }
