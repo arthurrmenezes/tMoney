@@ -1,4 +1,5 @@
-﻿using tMoney.Domain.ValueObjects;
+﻿using tMoney.Domain.BoundedContexts.CardContext.ENUMs;
+using tMoney.Domain.ValueObjects;
 
 namespace tMoney.Domain.BoundedContexts.CardContext.Entities;
 
@@ -10,6 +11,7 @@ public class CreditCard : Card
 
     public CreditCard(IdValueObject accountId, string name, decimal limit, int closeDay, int dueDay) : base(accountId, name)
     {
+        Type = CardType.CreditCard;
         Limit = limit;
         CloseDay = closeDay;
         DueDay = dueDay;

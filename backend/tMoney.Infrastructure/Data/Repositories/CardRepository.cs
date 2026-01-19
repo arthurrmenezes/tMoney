@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using tMoney.Domain.BoundedContexts.CardContext.Entities;
+using tMoney.Domain.BoundedContexts.CardContext.ENUMs;
 using tMoney.Domain.ValueObjects;
 using tMoney.Infrastructure.Data.Repositories.Base;
 using tMoney.Infrastructure.Data.Repositories.Interfaces;
@@ -24,16 +25,20 @@ public class CardRepository : BaseRepository<Card>, ICardRepository
             .FirstOrDefaultAsync(c => c.Id == voCardId && c.AccountId == voAccountId, cancellationToken);
     }
 
-    public async Task<Card[]> GetAllByAccountId(Guid accountId, int pageNumber, int pageSize, CancellationToken cancellationToken)
+    public async Task<Card[]> GetAllByAccountId(Guid accountId, int pageNumber, int pageSize, CardType? cardType, CancellationToken cancellationToken)
     {
         var skip = (pageNumber - 1) * pageSize;
 
         var voAccountId = IdValueObject.Factory(accountId);
 
-        return await _dataContext.Cards
+        var query = _dataContext.Cards
             .AsNoTracking()
-            .Where(c => c.AccountId == voAccountId)
-            .OrderByDescending(c => c.CreatedAt)
+            .Where(c => c.AccountId == voAccountId);
+
+        if (cardType.HasValue)
+            query = query.Where(c => c.Type == cardType);
+
+        return await query.OrderByDescending(c => c.CreatedAt)
             .Skip(skip)
             .Take(pageSize)
             .ToArrayAsync(cancellationToken);

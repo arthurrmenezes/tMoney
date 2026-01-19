@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using tMoney.Domain.BoundedContexts.CardContext.Entities;
+using tMoney.Domain.BoundedContexts.CardContext.ENUMs;
 using tMoney.Domain.ValueObjects;
 
 namespace tMoney.Infrastructure.Data.Mappings;
@@ -14,9 +15,9 @@ public sealed class CardMapping : IEntityTypeConfiguration<Card>
 
         builder.HasKey(c => c.Id);
 
-        builder.HasDiscriminator<string>("card_type")
-            .HasValue<DebitCard>("Debit")
-            .HasValue<CreditCard>("Credit");
+        builder.HasDiscriminator(c => c.Type)
+            .HasValue<DebitCard>(CardType.DebitCard)
+            .HasValue<CreditCard>(CardType.CreditCard);
 
         var idConverter = new ValueConverter<IdValueObject, Guid>(
             i => i.Id,
@@ -37,6 +38,11 @@ public sealed class CardMapping : IEntityTypeConfiguration<Card>
             .IsRequired()
             .HasColumnName("name")
             .HasMaxLength(50)
+            .ValueGeneratedNever();
+
+        builder.Property(c => c.Type)
+            .IsRequired()
+            .HasColumnName("card_type")
             .ValueGeneratedNever();
 
         builder.Property(c => c.UpdatedAt)

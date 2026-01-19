@@ -5,24 +5,26 @@ public sealed class CreateCardServiceOutput
     public string Id { get; }
     public string AccountId { get; }
     public string Name { get; }
+    public string Type { get; }
     public CreateCardServiceOutputCreditCard? CreditCard { get; }
     public DateTime? UpdatedAt { get; }
     public DateTime CreatedAt { get; }
 
-    private CreateCardServiceOutput(string id, string accountId, string name, CreateCardServiceOutputCreditCard? creditCard, DateTime? updatedAt, 
-        DateTime createdAt)
+    private CreateCardServiceOutput(string id, string accountId, string name, string type, CreateCardServiceOutputCreditCard? creditCard, 
+        DateTime? updatedAt, DateTime createdAt)
     {
         Id = id;
         AccountId = accountId;
         Name = name;
+        Type = type;
         CreditCard = creditCard;
         UpdatedAt = updatedAt;
         CreatedAt = createdAt;
     }
 
-    public static CreateCardServiceOutput Factory(string id, string accountId, string name, CreateCardServiceOutputCreditCard? creditCard, DateTime? updatedAt,
-        DateTime createdAt)
-        => new(id, accountId, name, creditCard, updatedAt, createdAt);
+    public static CreateCardServiceOutput Factory(string id, string accountId, string name, string type, CreateCardServiceOutputCreditCard? creditCard, 
+        DateTime? updatedAt, DateTime createdAt)
+        => new(id, accountId, name, type, creditCard, updatedAt, createdAt);
 }
 
 public sealed class CreateCardServiceOutputCreditCard

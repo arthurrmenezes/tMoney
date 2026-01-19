@@ -18,8 +18,7 @@ public interface ICardService
 
     public Task<GetAllCardsByAccountIdServiceOutput> GetAllCardsByAccountIdServiceAsync(
         IdValueObject accountId,
-        int pageNumber,
-        int pageSize,
+        GetAllCardsByAccountIdServiceInput input,
         CancellationToken cancellationToken);
 
     public Task<UpdateCardByIdServiceOutput> UpdateCardByIdServiceAsync(

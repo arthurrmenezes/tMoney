@@ -2,6 +2,7 @@
 using tMoney.Application.Services.CardContext.Interfaces;
 using tMoney.Application.Services.CardContext.Outputs;
 using tMoney.Domain.BoundedContexts.CardContext.Entities;
+using tMoney.Domain.BoundedContexts.CardContext.ENUMs;
 using tMoney.Domain.ValueObjects;
 using tMoney.Infrastructure.Data.Repositories.Interfaces;
 using tMoney.Infrastructure.Data.UnitOfWork.Interfaces;
@@ -22,19 +23,28 @@ public class CardService : ICardService
     }
 
     public async Task<CreateCardServiceOutput> CreateCardServiceAsync(
-        IdValueObject accountId, 
-        CreateCardServiceInput input, 
+        IdValueObject accountId,
+        CreateCardServiceInput input,
         CancellationToken cancellationToken)
     {
-        await _unitOfWork.BeginTransactionAsync(cancellationToken);
+        Card card;
+        CreateCardServiceOutputCreditCard? creditCardOutput = null;
 
-        try
+        switch (input.CardType)
         {
-            Card card;
-            CreateCardServiceOutputCreditCard? createCardServiceOutputCreditCard = null;
+            case CardType.DebitCard:
+                if (input.CreditCard is not null)
+                    throw new ArgumentException("Cartão de débito não deve ter limite ou datas.");
 
-            if (input.CreditCard is not null)
-            {
+                card = new DebitCard(
+                    accountId: accountId,
+                    name: input.Name);
+                break;
+
+            case CardType.CreditCard:
+                if (input.CreditCard is null)
+                    throw new ArgumentException("Dados do cartão de crédito são obrigatórios.");
+
                 var creditCard = new CreditCard(
                     accountId: accountId,
                     name: input.Name,
@@ -42,70 +52,55 @@ public class CardService : ICardService
                     closeDay: input.CreditCard.CloseDay,
                     dueDay: input.CreditCard.DueDay);
 
-                await _cardRepository.AddAsync(creditCard, cancellationToken);
-
                 card = creditCard;
 
-                createCardServiceOutputCreditCard = CreateCardServiceOutputCreditCard.Factory(
+                creditCardOutput = CreateCardServiceOutputCreditCard.Factory(
                     limit: creditCard.Limit,
                     closeDay: creditCard.CloseDay,
                     dueDay: creditCard.DueDay);
-            }
-            else
-            {
-                card = new DebitCard(
-                    accountId: accountId,
-                    name: input.Name);
+                break;
 
-                await _cardRepository.AddAsync(card, cancellationToken);
-            }
-
-            await _unitOfWork.CommitTransactionAsync(cancellationToken);
-
-            var output = CreateCardServiceOutput.Factory(
-                id: card.Id.ToString(),
-                accountId: card.AccountId.ToString(),
-                name: card.Name,
-                creditCard: createCardServiceOutputCreditCard,
-                updatedAt: card.UpdatedAt,
-                createdAt: card.CreatedAt);
-
-            return output;
+            default:
+                throw new ArgumentException("Tipo de cartão inválido.");
         }
-        catch (Exception)
-        {
-            await _unitOfWork.RollbackTransactionAsync(cancellationToken);
-            throw;
-        }
+
+        await _cardRepository.AddAsync(card, cancellationToken);
+
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        var output = CreateCardServiceOutput.Factory(
+            id: card.Id.ToString(),
+            accountId: card.AccountId.ToString(),
+            name: card.Name,
+            type: card.Type.ToString(),
+            creditCard: creditCardOutput,
+            updatedAt: card.UpdatedAt,
+            createdAt: card.CreatedAt);
+
+        return output;
     }
 
     public async Task<GetCardByIdServiceOutput> GetCardByIdServiceAsync(
-        IdValueObject cardId, 
-        IdValueObject accountId, 
+        IdValueObject cardId,
+        IdValueObject accountId,
         CancellationToken cancellationToken)
     {
         var card = await _cardRepository.GetByIdAsync(cardId.Id, accountId.Id, false, cancellationToken);
         if (card is null)
             throw new ArgumentException("Cartão não foi encontrado.");
 
-        var cardType = "Debit";
-        
         GetCardByIdServiceOutputCreditCard? creditCardOutput = null;
         if (card is CreditCard creditCardEntity)
-        {
             creditCardOutput = GetCardByIdServiceOutputCreditCard.Factory(
                 limit: creditCardEntity.Limit,
                 closeDay: creditCardEntity.CloseDay,
                 dueDay: creditCardEntity.DueDay);
 
-            cardType = "Credit";
-        }
-
         var output = GetCardByIdServiceOutput.Factory(
             id: card.Id.ToString(),
             accountId: card.AccountId.ToString(),
             name: card.Name,
-            type: cardType,
+            type: card.Type.ToString(),
             creditCard: creditCardOutput,
             updatedAt: card.UpdatedAt,
             createdAt: card.CreatedAt);
@@ -114,12 +109,11 @@ public class CardService : ICardService
     }
 
     public async Task<GetAllCardsByAccountIdServiceOutput> GetAllCardsByAccountIdServiceAsync(
-        IdValueObject accountId, 
-        int pageNumber, 
-        int pageSize, 
+        IdValueObject accountId,
+        GetAllCardsByAccountIdServiceInput input,
         CancellationToken cancellationToken)
     {
-        var cards = await _cardRepository.GetAllByAccountId(accountId.Id, pageNumber, pageSize, cancellationToken);
+        var cards = await _cardRepository.GetAllByAccountId(accountId.Id, input.PageNumber, input.PageSize, input.CardType, cancellationToken);
 
         var totalCards = await _cardRepository.GetTotalCardsNumberAsync(accountId.Id, cancellationToken);
 
@@ -130,7 +124,7 @@ public class CardService : ICardService
                     id: c.Id.ToString(),
                     accountId: c.AccountId.ToString(),
                     name: c.Name,
-                    type: "CreditCard",
+                    type: c.Type.ToString(),
                     creditCard: GetAllCardsByAccountIdServiceOutputCreditCard.Factory(
                         limit: creditCard.Limit,
                         closeDay: creditCard.CloseDay,
@@ -142,18 +136,18 @@ public class CardService : ICardService
                     id: c.Id.ToString(),
                     accountId: c.AccountId.ToString(),
                     name: c.Name,
-                    type: "DebitCard",
+                    type: c.Type.ToString(),
                     creditCard: null,
                     updatedAt: c.UpdatedAt,
                     createdAt: c.CreatedAt);
         }).ToArray();
 
-        var totalPages = (int)Math.Ceiling((double)totalCards / pageSize);
+        var totalPages = (int)Math.Ceiling((double)totalCards / input.PageSize);
 
         var output = GetAllCardsByAccountIdServiceOutput.Factory(
             totalCards: totalCards,
-            pageNumber: pageNumber,
-            pageSize: pageSize,
+            pageNumber: input.PageNumber,
+            pageSize: input.PageSize,
             totalPages: totalPages,
             cards: cardsOutput);
 
@@ -162,8 +156,8 @@ public class CardService : ICardService
 
     public async Task<UpdateCardByIdServiceOutput> UpdateCardByIdServiceAsync(
         IdValueObject cardId,
-        IdValueObject accountId, 
-        UpdateCardByIdServiceInput input, 
+        IdValueObject accountId,
+        UpdateCardByIdServiceInput input,
         CancellationToken cancellationToken)
     {
         var card = await _cardRepository.GetByIdAsync(cardId.Id, accountId.Id, true, cancellationToken);
@@ -177,7 +171,7 @@ public class CardService : ICardService
             card.UpdateCardDetails(input.Name);
 
             if (card is CreditCard creditCard)
-            { 
+            {
                 if (input.CreditCard is not null)
                 {
                     creditCard.UpdateCreditCardDetails(
@@ -192,7 +186,7 @@ public class CardService : ICardService
                         currentInvoice.UpdateLimit(input.CreditCard.Limit.Value);
 
                         _creditCardInvoiceRepository.Update(currentInvoice);
-                    }                        
+                    }
                 }
             }
             else
@@ -204,23 +198,18 @@ public class CardService : ICardService
             await _unitOfWork.CommitTransactionAsync(cancellationToken);
 
             UpdateCardByIdServiceOutputCreditCard? creditCardOutput = null;
-            var cardType = "DebitCard";
 
             if (card is CreditCard c)
-            {
                 creditCardOutput = UpdateCardByIdServiceOutputCreditCard.Factory(
                     limit: c.Limit,
                     closeDay: c.CloseDay,
                     dueDay: c.DueDay);
 
-                cardType = "CreditCard";
-            }
-
             var output = UpdateCardByIdServiceOutput.Factory(
                 id: card.Id.ToString(),
                 accountId: card.AccountId.ToString(),
                 name: card.Name,
-                type: cardType,
+                type: card.Type.ToString(),
                 creditCard: creditCardOutput,
                 updatedAt: card.UpdatedAt,
                 createdAt: card.CreatedAt);
@@ -235,8 +224,8 @@ public class CardService : ICardService
     }
 
     public async Task DeleteCardByIdServiceAsync(
-        IdValueObject cardId, 
-        IdValueObject accountId, 
+        IdValueObject cardId,
+        IdValueObject accountId,
         CancellationToken cancellationToken)
     {
         var card = await _cardRepository.GetByIdAsync(cardId.Id, accountId.Id, true, cancellationToken);

@@ -1,4 +1,5 @@
-﻿using tMoney.Domain.ValueObjects;
+﻿using tMoney.Domain.BoundedContexts.CardContext.ENUMs;
+using tMoney.Domain.ValueObjects;
 
 namespace tMoney.Domain.BoundedContexts.CardContext.Entities;
 
@@ -7,6 +8,7 @@ public abstract class Card
     public IdValueObject Id { get; private set; }
     public IdValueObject AccountId { get; private set; }
     public string Name { get; private set; }
+    public CardType Type { get; protected set; }
     public DateTime? UpdatedAt { get; protected set; }
     public DateTime CreatedAt { get; private set; }
 

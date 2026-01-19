@@ -4,8 +4,8 @@ namespace tMoney.WebApi.Controllers.TransactionContext.Payloads;
 
 public sealed class CreateTransactionPayload
 {
-    public string CardId { get; init; }
-    public string CategoryId { get; init; }
+    public Guid CardId { get; init; }
+    public Guid CategoryId { get; init; }
     public string Title { get; init; }
     public string? Description { get; init; }
     public decimal Amount { get; init; }
@@ -16,7 +16,7 @@ public sealed class CreateTransactionPayload
     public string? Destination { get; init; }
     public CreateTransactionPayloadInstallment? HasInstallment { get; init; }
 
-    public CreateTransactionPayload(string cardId, string categoryId, string title, string? description, decimal amount, DateTime date, 
+    public CreateTransactionPayload(Guid cardId, Guid categoryId, string title, string? description, decimal amount, DateTime date, 
         TransactionType transactionType, PaymentMethod paymentMethod, PaymentStatus status, string? destination, 
         CreateTransactionPayloadInstallment? hasInstallment)
     {
