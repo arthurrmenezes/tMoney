@@ -233,4 +233,18 @@ public class CardService : ICardService
             throw;
         }
     }
+
+    public async Task DeleteCardByIdServiceAsync(
+        IdValueObject cardId, 
+        IdValueObject accountId, 
+        CancellationToken cancellationToken)
+    {
+        var card = await _cardRepository.GetByIdAsync(cardId.Id, accountId.Id, true, cancellationToken);
+        if (card is null)
+            throw new ArgumentException("Cartão não foi encontrado.");
+
+        _cardRepository.Delete(card);
+
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+    }
 }

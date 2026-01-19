@@ -27,4 +27,9 @@ public interface ICardService
         IdValueObject accountId,
         UpdateCardByIdServiceInput input,
         CancellationToken cancellationToken);
+
+    public Task DeleteCardByIdServiceAsync(
+        IdValueObject cardId,
+        IdValueObject accountId,
+        CancellationToken cancellationToken);
 }

@@ -112,4 +112,21 @@ public class CardController : ControllerBase
 
         return Ok(serviceResult);
     }
+
+    [HttpDelete]
+    [Route("{cardId}")]
+    [Authorize]
+    public async Task<IActionResult> DeleteCardByIdAsync(
+        [FromRoute] Guid cardId,
+        CancellationToken cancellationToken)
+    {
+        var accountId = User.GetAccountId();
+
+        await _cardService.DeleteCardByIdServiceAsync(
+            cardId: IdValueObject.Factory(cardId),
+            accountId: IdValueObject.Factory(accountId),
+            cancellationToken: cancellationToken);
+
+        return NoContent();
+    }
 }
