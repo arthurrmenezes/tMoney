@@ -398,7 +398,7 @@ public class AuthService : IAuthService
     public async Task ChangeEmailServiceAsync(string currentEmail, string newEmail, CancellationToken cancellationToken)
     {
         var user = await _userManager.FindByEmailAsync(currentEmail);
-        if (user is null)
+         if (user is null)
             throw new KeyNotFoundException("E-mail inválido.");
 
         if (await _userManager.FindByEmailAsync(newEmail) is not null)
@@ -463,6 +463,10 @@ public class AuthService : IAuthService
             account.UpdateEmail(newEmail);
 
             _accountRepository.Update(account);
+
+            await _userManager.SetUserNameAsync(user, newEmail);
+            _userManager.NormalizeName(newEmail);
+            _userManager.NormalizeEmail(newEmail);
 
             await _refreshTokenRepository.RevokeAllByUserIdAsync(user.Id, cancellationToken);
 
