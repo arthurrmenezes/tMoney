@@ -39,8 +39,9 @@ public sealed class GetTransactionUseCase : IUseCase<GetTransactionUseCaseInput,
                 cancellationToken: cancellationToken);
         }
 
-        var installmentItemsOutput = installmentServiceOutput?.Installments.Select(i => new GetTransactionUseCaseOutputInstallmentItem(
+        var installmentItemsOutput = installmentServiceOutput?.Installments.Select(i => GetTransactionUseCaseOutputInstallmentItem.Factory(
             id: i.Id,
+            invoiceId: i.InvoiceId,
             number: i.Number,
             amount: i.Amount,
             dueDate: i.DueDate,
@@ -51,7 +52,7 @@ public sealed class GetTransactionUseCase : IUseCase<GetTransactionUseCaseInput,
             .ToArray();
 
         var installmentOutput = installmentServiceOutput is null ? null :
-            new GetTransactionUseCaseOutputInstallment(
+            GetTransactionUseCaseOutputInstallment.Factory(
                 id: installmentServiceOutput.Id,
                 totalInstallments: installmentServiceOutput.TotalInstallments,
                 totalAmount: installmentServiceOutput.TotalAmount,
@@ -62,6 +63,7 @@ public sealed class GetTransactionUseCase : IUseCase<GetTransactionUseCaseInput,
         var output = GetTransactionUseCaseOutput.Factory(
             id: transactionServiceOutput.Id,
             accountId: transactionServiceOutput.AccountId,
+            cardId: transactionServiceOutput.CardId,
             categoryId: transactionServiceOutput.CategoryId,
             title: transactionServiceOutput.Title,
             description: transactionServiceOutput.Description,

@@ -105,7 +105,6 @@ public sealed class CreateTransactionUseCase : IUseCase<CreateTransactionUseCase
                 installmentServiceOutput = await _installmentService.CreateInstallmentServiceAsync(
                     input: CreateInstallmentServiceInput.Factory(
                         accountId: input.AccountId,
-                        invoiceIds: invoiceIds,
                         totalInstallments: input.HasInstallment.TotalInstallments,
                         totalAmount: input.Amount,
                         firstPaymentDate: input.Date,

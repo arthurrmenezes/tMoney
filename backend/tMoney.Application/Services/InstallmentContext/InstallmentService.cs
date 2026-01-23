@@ -27,7 +27,7 @@ public class InstallmentService : IInstallmentService
             firstPaymentDate: input.FirstPaymentDate,
             status: input.Status);
 
-        installment.GenerateInstallments(input.InvoiceIds, input.Status);
+        //installment.GenerateInstallments(input.InvoiceIds, input.Status);
 
         await _installmentRepository.AddAsync(installment, cancellationToken);
 
@@ -67,9 +67,10 @@ public class InstallmentService : IInstallmentService
 
         var installmentItemsOutput = installment.Installments
             .OrderBy(i => i.Number)
-            .Select(i => new GetInstallmentServiceOutputInstallmentItem(
+            .Select(i => GetInstallmentServiceOutputInstallmentItem.Factory(
                 id: i.Id.ToString(),
                 installmentId: i.InstallmentId.ToString(),
+                invoiceId: i.InvoiceId?.ToString(),
                 number: i.Number,
                 amount: i.Amount,
                 dueDate: i.DueDate,

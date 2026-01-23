@@ -75,8 +75,10 @@ public class TransactionService : ITransactionService
         var output = GetTransactionByIdServiceOutput.Factory(
             id: transaction.Id.ToString(),
             accountId: transaction.AccountId.ToString(),
+            cardId: transaction.CardId.ToString(),
             categoryId: transaction.CategoryId.ToString(),
             installmentId: installmentId,
+            invoiceId: transaction.InvoiceId?.ToString(),
             title: transaction.Title,
             description: transaction.Description,
             amount: transaction.Amount,

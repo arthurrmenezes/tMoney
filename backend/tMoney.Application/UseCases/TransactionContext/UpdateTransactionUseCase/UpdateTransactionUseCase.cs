@@ -25,7 +25,9 @@ public sealed class UpdateTransactionUseCase : IUseCase<UpdateTransactionUseCase
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<UpdateTransactionUseCaseOutput> ExecuteUseCaseAsync(UpdateTransactionUseCaseInput input, CancellationToken cancellationToken)
+    public async Task<UpdateTransactionUseCaseOutput> ExecuteUseCaseAsync(
+        UpdateTransactionUseCaseInput input, 
+        CancellationToken cancellationToken)
     {
         await _unitOfWork.BeginTransactionAsync(cancellationToken);
 

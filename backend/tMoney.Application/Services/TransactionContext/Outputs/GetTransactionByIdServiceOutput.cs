@@ -4,8 +4,10 @@ public sealed class GetTransactionByIdServiceOutput
 {
     public string Id { get; }
     public string AccountId { get; }
+    public string CardId { get; }
     public string CategoryId { get; }
     public string? InstallmentId { get; }
+    public string? InvoiceId { get; }
     public string Title { get; }
     public string? Description { get; }
     public decimal Amount { get; }
@@ -17,14 +19,16 @@ public sealed class GetTransactionByIdServiceOutput
     public DateTime? UpdatedAt { get; }
     public DateTime CreatedAt { get; }
 
-    private GetTransactionByIdServiceOutput(string id, string accountId, string categoryId, string? installmentId, string title, string? description,
-        decimal amount, DateTime date, string transactionType, string paymentMethod, string status, string? destination,
+    public GetTransactionByIdServiceOutput(string id, string accountId, string cardId, string categoryId, string? installmentId, string? invoiceId, string title, 
+        string? description, decimal amount, DateTime date, string transactionType, string paymentMethod, string status, string? destination, 
         DateTime? updatedAt, DateTime createdAt)
     {
         Id = id;
         AccountId = accountId;
+        CardId = cardId;
         CategoryId = categoryId;
         InstallmentId = installmentId;
+        InvoiceId = invoiceId;
         Title = title;
         Description = description;
         Amount = amount;
@@ -37,9 +41,9 @@ public sealed class GetTransactionByIdServiceOutput
         CreatedAt = createdAt;
     }
 
-    public static GetTransactionByIdServiceOutput Factory(string id, string accountId, string categoryId, string? installmentId, string title, 
-        string? description, decimal amount, DateTime date, string transactionType, string paymentMethod, string status, string? destination,
-        DateTime? updatedAt, DateTime createdAt)
-        => new(id, accountId, categoryId, installmentId, title, description, amount, date, transactionType, paymentMethod, status, destination, updatedAt, 
-            createdAt);
+    public static GetTransactionByIdServiceOutput Factory(string id, string accountId, string cardId, string categoryId, string? installmentId, 
+        string? invoiceId, string title, string? description, decimal amount, DateTime date, string transactionType, string paymentMethod, string status, 
+        string? destination, DateTime? updatedAt, DateTime createdAt)
+        => new(id, accountId, cardId, categoryId, installmentId, invoiceId, title, description, amount, date, transactionType, paymentMethod, status, 
+            destination, updatedAt, createdAt);
 }
