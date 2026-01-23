@@ -2,7 +2,6 @@
 using tMoney.Application.Services.InstallmentContext.Interfaces;
 using tMoney.Application.Services.InstallmentContext.Outputs;
 using tMoney.Domain.BoundedContexts.InstallmentContext.Entities;
-using tMoney.Domain.BoundedContexts.TransactionContext.ENUMs;
 using tMoney.Domain.ValueObjects;
 using tMoney.Infrastructure.Data.Repositories.Interfaces;
 
@@ -28,15 +27,13 @@ public class InstallmentService : IInstallmentService
             firstPaymentDate: input.FirstPaymentDate,
             status: input.Status);
 
-        installment.GenerateInstallments();
-
-        if (installment.Status == PaymentStatus.Paid)
-            installment.PayAllInstallments();
+        installment.GenerateInstallments(input.InvoiceIds, input.Status);
 
         await _installmentRepository.AddAsync(installment, cancellationToken);
 
-        var installmentItemOutput = installment.Installments.Select(i => new CreateInstallmentServiceOutputInstallmentItem(
+        var installmentItemOutput = installment.Installments.Select(i => CreateInstallmentServiceOutputInstallmentItem.Factory(
             id: i.Id.ToString(),
+            invoiceId: i.InvoiceId is null ? null : i.InvoiceId.ToString(),
             number: i.Number,
             amount: i.Amount,
             dueDate: i.DueDate,

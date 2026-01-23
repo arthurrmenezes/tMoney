@@ -46,4 +46,55 @@ public class CreditCard : Card
 
         ValidateDomain();
     }
+
+    public CreditCardInvoice GenerateInvoice(DateTime referenceDate)
+    {
+        var month = referenceDate.Month;
+        var year = referenceDate.Year;
+
+        if (referenceDate.Day >= CloseDay)
+        {
+            if (month == 12)
+            {
+                month = 1;
+                year++;
+            }
+            else
+            {
+                month++;
+            }
+        }
+
+        var daysInCloseMonth = DateTime.DaysInMonth(year, month);
+        var closeDay = Math.Min(CloseDay, daysInCloseMonth);
+        var closeDate = new DateTime(year, month, closeDay, 0, 0, 0, DateTimeKind.Utc);
+
+        var dueMonth = month;
+        var dueYear = year;
+
+        if (DueDay < CloseDay)
+        {
+            if (dueMonth == 12)
+            {
+                dueMonth = 1;
+                dueYear++;
+            }
+            else
+            {
+                dueMonth++;
+            }
+        }
+
+        var daysInDueMonth = DateTime.DaysInMonth(dueYear, dueMonth);
+        var dueDay = Math.Min(DueDay, daysInDueMonth);
+        var dueDate = new DateTime(dueYear, dueMonth, dueDay, 0, 0, 0, DateTimeKind.Utc);
+
+        return new CreditCardInvoice(
+            creditCardId: Id,
+            month: month,
+            year: year,
+            closeDay: closeDate,
+            dueDay: dueDate,
+            limitTotal: Limit);
+    }
 }

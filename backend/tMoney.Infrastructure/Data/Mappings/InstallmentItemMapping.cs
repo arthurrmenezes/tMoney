@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using tMoney.Domain.BoundedContexts.CardContext.Entities;
 using tMoney.Domain.BoundedContexts.InstallmentContext.Entities;
 using tMoney.Domain.ValueObjects;
 
@@ -13,6 +14,12 @@ public sealed class InstallmentItemMapping : IEntityTypeConfiguration<Installmen
         builder.ToTable("installment_items");
 
         builder.HasKey(i => i.Id);
+
+        builder.HasOne<CreditCardInvoice>()
+            .WithMany()
+            .HasForeignKey(i => i.InvoiceId)
+            .IsRequired(false)
+            .OnDelete(DeleteBehavior.Cascade);
 
         var idConverter = new ValueConverter<IdValueObject, Guid>(
             i => i.Id,
@@ -27,6 +34,11 @@ public sealed class InstallmentItemMapping : IEntityTypeConfiguration<Installmen
         builder.Property(i => i.InstallmentId)
             .IsRequired()
             .HasColumnName("installment_id")
+            .HasConversion(idConverter);
+
+        builder.Property(i => i.InvoiceId)
+            .IsRequired(false)
+            .HasColumnName("invoice_id")
             .HasConversion(idConverter);
 
         builder.Property(i => i.Number)

@@ -6,4 +6,6 @@ namespace tMoney.Infrastructure.Data.Repositories.Interfaces;
 public interface ICreditCardInvoiceRepository : IBaseRepository<CreditCardInvoice>
 {
     public Task<CreditCardInvoice?> GetOpenInvoiceAsync(Guid creditCardId, CancellationToken cancellationToken);
+
+    public Task<CreditCardInvoice?> GetByDate(Guid creditCardId, int year, int month, CancellationToken cancellationToken);
 }

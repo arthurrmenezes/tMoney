@@ -87,7 +87,7 @@ public class CardService : ICardService
     {
         var card = await _cardRepository.GetByIdAsync(cardId.Id, accountId.Id, false, cancellationToken);
         if (card is null)
-            throw new ArgumentException("Cartão não foi encontrado.");
+            throw new KeyNotFoundException("Cartão não foi encontrado.");
 
         GetCardByIdServiceOutputCreditCard? creditCardOutput = null;
         if (card is CreditCard creditCardEntity)
@@ -235,5 +235,62 @@ public class CardService : ICardService
         _cardRepository.Delete(card);
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task<CreateInvoiceByCardIdServiceOutput> CreateInvoiceByCardIdServiceAsync(
+        IdValueObject cardId, 
+        IdValueObject accountId,
+        DateTime firstPaymentDate,
+        int totalInstallments,
+        CancellationToken cancellationToken)
+    {
+        var card = await _cardRepository.GetByIdAsync(cardId.Id, accountId.Id, false, cancellationToken);
+        if (card is null)
+            throw new KeyNotFoundException("Cartão não foi encontrado.");
+
+        if (card is not CreditCard)
+            throw new ArgumentException("Não é possível criar uma fatura com o cartão de débito.");
+
+        var invoices = new List<CreditCardInvoice>();
+        var creditCard = (CreditCard)card;
+
+        for (int i = 0; i < totalInstallments; i++)
+        {
+            var referenceDate = firstPaymentDate.AddMonths(i);
+
+            var tempInvoice = creditCard.GenerateInvoice(referenceDate);
+
+            var existingInvoice = await _creditCardInvoiceRepository.GetByDate(
+                card.Id.Id,
+                tempInvoice.Year,
+                tempInvoice.Month,
+                cancellationToken);
+
+            if (existingInvoice is null)
+            {
+                await _creditCardInvoiceRepository.AddAsync(tempInvoice, cancellationToken);
+                invoices.Add(tempInvoice);
+            }
+            else
+                invoices.Add(existingInvoice);
+        }
+
+        var output = CreateInvoiceByCardIdServiceOutput.Factory(
+            invoices: invoices.Select(i => CreateInvoiceByCardIdServiceOutputInvoices.Factory(
+                invoiceId: i.Id.ToString(),
+                cardId: i.CreditCardId.ToString(),
+                accountId: card.AccountId.ToString(),
+                cardName: card.Name,
+                month: i.Month,
+                year: i.Year,
+                closeDay: i.CloseDay,
+                dueDay: i.DueDay,
+                amountPaid: i.AmountPaid,
+                limit: i.LimitTotal,
+                status: i.Status.ToString(),
+                updatedAt: i.UpdatedAt,
+                createdAt: i.CreatedAt)).ToArray());
+
+        return output;
     }
 }

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using tMoney.Infrastructure.Data;
@@ -11,9 +12,11 @@ using tMoney.Infrastructure.Data;
 namespace tMoney.Infrastructure.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20260120183949_add_invoice_id_property_to_installment_item_table")]
+    partial class add_invoice_id_property_to_installment_item_table
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -386,7 +389,7 @@ namespace tMoney.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("installment_id");
 
-                    b.Property<Guid?>("InvoiceId")
+                    b.Property<Guid>("InvoiceId")
                         .HasColumnType("uuid")
                         .HasColumnName("invoice_id");
 
@@ -458,10 +461,6 @@ namespace tMoney.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("installment_id");
 
-                    b.Property<Guid?>("InvoiceId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("invoice_id");
-
                     b.Property<int>("PaymentMethod")
                         .HasColumnType("integer")
                         .HasColumnName("payment_method");
@@ -492,8 +491,6 @@ namespace tMoney.Infrastructure.Migrations
 
                     b.HasIndex("InstallmentId")
                         .IsUnique();
-
-                    b.HasIndex("InvoiceId");
 
                     b.HasIndex("AccountId", "CreatedAt");
 
@@ -732,7 +729,8 @@ namespace tMoney.Infrastructure.Migrations
                     b.HasOne("tMoney.Domain.BoundedContexts.CardContext.Entities.CreditCardInvoice", null)
                         .WithMany()
                         .HasForeignKey("InvoiceId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("tMoney.Domain.BoundedContexts.TransactionContext.Entities.Transaction", b =>
@@ -759,11 +757,6 @@ namespace tMoney.Infrastructure.Migrations
                         .WithOne()
                         .HasForeignKey("tMoney.Domain.BoundedContexts.TransactionContext.Entities.Transaction", "InstallmentId")
                         .OnDelete(DeleteBehavior.SetNull);
-
-                    b.HasOne("tMoney.Domain.BoundedContexts.CardContext.Entities.CreditCardInvoice", null)
-                        .WithMany()
-                        .HasForeignKey("InvoiceId")
-                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("tMoney.Infrastructure.Auth.Entities.RefreshToken", b =>

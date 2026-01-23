@@ -1,4 +1,6 @@
-﻿using tMoney.Application.Services.InstallmentContext.Inputs;
+﻿using tMoney.Application.Services.CardContext.Interfaces;
+using tMoney.Application.Services.CategoryContext.Interface;
+using tMoney.Application.Services.InstallmentContext.Inputs;
 using tMoney.Application.Services.InstallmentContext.Interfaces;
 using tMoney.Application.Services.InstallmentContext.Outputs;
 using tMoney.Application.Services.TransactionContext.Inputs;
@@ -6,6 +8,9 @@ using tMoney.Application.Services.TransactionContext.Interfaces;
 using tMoney.Application.UseCases.Interfaces;
 using tMoney.Application.UseCases.TransactionContext.CreateTransactionUseCase.Inputs;
 using tMoney.Application.UseCases.TransactionContext.CreateTransactionUseCase.Outputs;
+using tMoney.Domain.BoundedContexts.CardContext.ENUMs;
+using tMoney.Domain.BoundedContexts.CategoryContext.ENUMs;
+using tMoney.Domain.BoundedContexts.TransactionContext.ENUMs;
 using tMoney.Domain.ValueObjects;
 using tMoney.Infrastructure.Data.UnitOfWork.Interfaces;
 
@@ -16,12 +21,17 @@ public sealed class CreateTransactionUseCase : IUseCase<CreateTransactionUseCase
     private readonly ITransactionService _transactionService;
     private readonly IInstallmentService _installmentService;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly ICardService _cardService;
+    private readonly ICategoryService _categoryService;
 
-    public CreateTransactionUseCase(ITransactionService transactionService, IInstallmentService installmentService, IUnitOfWork unitOfWork)
+    public CreateTransactionUseCase(ITransactionService transactionService, IInstallmentService installmentService, IUnitOfWork unitOfWork, 
+        ICardService cardService, ICategoryService categoryService)
     {
         _transactionService = transactionService;
         _installmentService = installmentService;
         _unitOfWork = unitOfWork;
+        _cardService = cardService;
+        _categoryService = categoryService;
     }
 
     public async Task<CreateTransactionUseCaseOutput> ExecuteUseCaseAsync(CreateTransactionUseCaseInput input, CancellationToken cancellationToken)
@@ -30,14 +40,72 @@ public sealed class CreateTransactionUseCase : IUseCase<CreateTransactionUseCase
 
         try
         {
+            var card = await _cardService.GetCardByIdServiceAsync(
+                cardId: input.CardId,
+                accountId: input.AccountId,
+                cancellationToken: cancellationToken);
+            if (card is null)
+                throw new KeyNotFoundException("Cartão não encontrado.");
+
+            if (card.Type == CardType.CreditCard.ToString())
+            {
+                if (input.TransactionType == TransactionType.Income)
+                    throw new ArgumentException("Não é possível criar transações de entrada em cartões de crédito.");
+
+                if (input.PaymentMethod != PaymentMethod.Credit)
+                    throw new ArgumentException("Método de pagamento inválido para cartão de crédito.");
+            }
+            else
+            {
+                if (input.PaymentMethod == PaymentMethod.Credit)
+                    throw new ArgumentException($"O método de pagamento 'Cartão de Crédito' só pode ser utilizado em cartões de crédito.");
+            }
+
+            var category = await _categoryService.GetCategoryByIdServiceAsync(input.CategoryId, input.AccountId, cancellationToken);
+            if (category is null)
+                throw new KeyNotFoundException("Categoria não encontrada");
+
+            if (input.TransactionType == TransactionType.Income && category.Type == CategoryType.Expense.ToString() ||
+                input.TransactionType == TransactionType.Expense && category.Type == CategoryType.Income.ToString())
+                throw new ArgumentException($"A categoria '{category.Title}' ({category.Type.ToString()}) não pode ser usada para uma transação do tipo {input.TransactionType.ToString()}.");
+
             CreateInstallmentServiceOutput? installmentServiceOutput = null;
+            IdValueObject? firstInvoiceId = null;
             IdValueObject? voInstallmentId = null;
+            IdValueObject[]? invoiceIds = null;
+
+            if (input.PaymentMethod == PaymentMethod.Credit)
+            {
+                var totalInstallments = input.HasInstallment?.TotalInstallments ?? 1;
+
+                var invoiceServiceOutput = await _cardService.CreateInvoiceByCardIdServiceAsync(
+                    cardId: input.CardId,
+                    accountId: input.AccountId,
+                    firstPaymentDate: input.Date,
+                    totalInstallments: totalInstallments,
+                    cancellationToken: cancellationToken);
+
+                invoiceIds = invoiceServiceOutput.Invoices
+                    .OrderBy(i => i.DueDay)
+                    .Select(i =>
+                    {
+                        if (!Guid.TryParse(i.InvoiceId, out var invoiceId))
+                            throw new ArgumentException("Invoice ID inválido.");
+
+                        return IdValueObject.Factory(invoiceId);
+                    })
+                    .ToArray();
+
+                if (input.HasInstallment is null)
+                    firstInvoiceId = invoiceIds.First();
+            }
 
             if (input.HasInstallment is not null)
             {
                 installmentServiceOutput = await _installmentService.CreateInstallmentServiceAsync(
                     input: CreateInstallmentServiceInput.Factory(
                         accountId: input.AccountId,
+                        invoiceIds: invoiceIds,
                         totalInstallments: input.HasInstallment.TotalInstallments,
                         totalAmount: input.Amount,
                         firstPaymentDate: input.Date,
@@ -56,6 +124,7 @@ public sealed class CreateTransactionUseCase : IUseCase<CreateTransactionUseCase
                     cardId: input.CardId,
                     categoryId: input.CategoryId,
                     installmentId: voInstallmentId,
+                    invoiceId: firstInvoiceId,
                     title: input.Title,
                     description: input.Description,
                     amount: input.Amount,
@@ -69,13 +138,14 @@ public sealed class CreateTransactionUseCase : IUseCase<CreateTransactionUseCase
             await _unitOfWork.CommitTransactionAsync(cancellationToken);
 
             var installmentOutput = installmentServiceOutput is null ? null :
-                new CreateTransactionUseCaseOutputInstallment(
-                        id: installmentServiceOutput.Id.ToString(),
+                CreateTransactionUseCaseOutputInstallment.Factory(
+                        id: installmentServiceOutput.Id,
                         totalInstallments: installmentServiceOutput.TotalInstallments,
                         totalAmount: installmentServiceOutput.TotalAmount,
                         items: installmentServiceOutput.InstallmentItems
-                            .Select(item => new CreateTransactionUseCaseOutputInstallmentItem(
-                                id: item.Id.ToString(),
+                            .Select(item => CreateTransactionUseCaseOutputInstallmentItem.Factory(
+                                id: item.Id,
+                                invoiceId: item.InvoiceId,
                                 number: item.Number,
                                 amount: item.Amount,
                                 dueDate: item.DueDate,
@@ -90,6 +160,7 @@ public sealed class CreateTransactionUseCase : IUseCase<CreateTransactionUseCase
             var output = CreateTransactionUseCaseOutput.Factory(
                     id: transactionServiceOutput.Id,
                     accountId: transactionServiceOutput.AccountId,
+                    cardId: card.Id,
                     categoryId: transactionServiceOutput.CategoryId,
                     title: transactionServiceOutput.Title,
                     description: transactionServiceOutput.Description,

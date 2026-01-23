@@ -31,4 +31,11 @@ public interface ICardService
         IdValueObject cardId,
         IdValueObject accountId,
         CancellationToken cancellationToken);
+
+    public Task<CreateInvoiceByCardIdServiceOutput> CreateInvoiceByCardIdServiceAsync(
+        IdValueObject cardId,
+        IdValueObject accountId,
+        DateTime firstPaymentDate,
+        int totalInstallments,
+        CancellationToken cancellationToken);
 }

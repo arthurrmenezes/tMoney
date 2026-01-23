@@ -1,7 +1,6 @@
 ﻿using tMoney.Application.Services.TransactionContext.Inputs;
 using tMoney.Application.Services.TransactionContext.Interfaces;
 using tMoney.Application.Services.TransactionContext.Outputs;
-using tMoney.Domain.BoundedContexts.CategoryContext.ENUMs;
 using tMoney.Domain.BoundedContexts.TransactionContext.Entities;
 using tMoney.Domain.BoundedContexts.TransactionContext.ENUMs;
 using tMoney.Domain.ValueObjects;
@@ -13,33 +12,23 @@ public class TransactionService : ITransactionService
 {
     private readonly ITransactionRepository _transactionRepository;
     private readonly IAccountRepository _accountRepository;
-    private readonly ICategoryRepository _categoryRepository;
 
-    public TransactionService(ITransactionRepository transactionRepository, IAccountRepository accountRepository, 
-        ICategoryRepository categoryRepository)
+    public TransactionService(ITransactionRepository transactionRepository, IAccountRepository accountRepository)
     {
         _transactionRepository = transactionRepository;
         _accountRepository = accountRepository;
-        _categoryRepository = categoryRepository;
     }
 
     public async Task<CreateTransactionServiceOutput> CreateTransactionServiceAsync(
         CreateTransactionServiceInput input, 
         CancellationToken cancellationToken)
     {
-        var category = await _categoryRepository.GetByIdAsync(input.CategoryId.Id, input.AccountId.Id, cancellationToken);
-        if (category is null)
-            throw new KeyNotFoundException("Categoria não encontrada");
-
-        if (input.TransactionType == TransactionType.Income && category.Type == CategoryType.Expense ||
-            input.TransactionType == TransactionType.Expense && category.Type == CategoryType.Income)
-            throw new ArgumentException($"A categoria '{category.Title}' ({category.Type.ToString()}) não pode ser usada para uma transação do tipo {input.TransactionType.ToString()}.");
-
         var transaction = new Transaction(
             accountId: input.AccountId,
             cardId: input.CardId,
             categoryId: input.CategoryId,
             installmentId: input.InstallmentId,
+            invoiceId: input.InvoiceId,
             title: input.Title,
             description: input.Description,
             amount: input.Amount,
@@ -57,6 +46,7 @@ public class TransactionService : ITransactionService
                 cardId: transaction.CardId.ToString(),
                 categoryId: transaction.CategoryId.ToString(),
                 installmentId: transaction.InstallmentId is null ? null : transaction.InstallmentId.ToString(),
+                invoiceId: transaction.InvoiceId is null ? null : transaction.InvoiceId.ToString(),
                 title: transaction.Title,
                 description: transaction.Description,
                 amount: transaction.Amount,

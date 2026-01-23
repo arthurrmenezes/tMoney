@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using tMoney.Application.Services.CardContext.Inputs;
 using tMoney.Application.Services.CardContext.Interfaces;
+using tMoney.Domain.BoundedContexts.CardContext.ENUMs;
 using tMoney.Domain.ValueObjects;
 using tMoney.WebApi.Controllers.CardContext.Payloads;
 using tMoney.WebApi.Extensions;
@@ -37,6 +38,7 @@ public class CardController : ControllerBase
             accountId: IdValueObject.Factory(accountId),
             input: CreateCardServiceInput.Factory(
                 name: input.Name,
+                cardType: input.CardType,
                 creditCard: creditCard),
             cancellationToken: cancellationToken);
 
@@ -65,6 +67,7 @@ public class CardController : ControllerBase
     public async Task<IActionResult> GetAllCardsByAccountIdAsync(
         [FromQuery] int? pageNumber,
         [FromQuery] int? pageSize,
+        [FromQuery] CardType? cardType,
         CancellationToken cancellationToken)
     {
         if (pageNumber < 1 || pageNumber is null) pageNumber = 1;
@@ -75,8 +78,10 @@ public class CardController : ControllerBase
 
         var serviceResult = await _cardService.GetAllCardsByAccountIdServiceAsync(
             accountId: IdValueObject.Factory(accountId),
-            pageNumber: pageNumber.Value,
-            pageSize: pageSize.Value,
+            input: GetAllCardsByAccountIdServiceInput.Factory(
+                pageNumber: pageNumber.Value,
+                pageSize: pageSize.Value,
+                cardType: cardType),
             cancellationToken: cancellationToken);
 
         return Ok(serviceResult);

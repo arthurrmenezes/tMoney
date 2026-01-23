@@ -47,8 +47,10 @@ public class Installment
             throw new ArgumentException("Status da parcela inválido.");
     }
 
-    public void GenerateInstallments()
+    public void GenerateInstallments(IdValueObject[]? invoiceIds, PaymentStatus status)
     {
+        Installments.Clear();
+
         var amount = Math.Floor(TotalAmount / TotalInstallments * 100) / 100;
 
         var amountDifference = TotalAmount - (amount * TotalInstallments);
@@ -59,14 +61,25 @@ public class Installment
 
             var dueDate = FirstPaymentDate.AddMonths(i - 1);
 
+            IdValueObject? invoiceId = null;
+            if (invoiceIds is not null && invoiceIds.Count() >= i)
+                invoiceId = invoiceIds[i - 1];
+
             var installmentItem = new InstallmentItem(
                 installmentId: Id,
+                invoiceId: invoiceId,
                 number: i,
                 amount: finalAmount,
                 dueDate: dueDate);
 
+            if (status == PaymentStatus.Paid)
+                installmentItem.PayInstallment();
+
             Installments.Add(installmentItem);
         }
+
+        Status = status;
+        UpdatedAt = DateTime.UtcNow;
     }
 
     public void PayAllInstallments()
@@ -78,7 +91,7 @@ public class Installment
 
         UpdatedAt = DateTime.UtcNow;
     }
-    
+
     public void UpdateInstallmentDetails(int? totalInstallments, decimal? totalAmount, DateTime? firstPaymentDate, PaymentStatus? status)
     {
         if (Status == PaymentStatus.Paid && status.HasValue && status != PaymentStatus.Paid)
@@ -109,7 +122,7 @@ public class Installment
         if (isStructuralChange)
         {
             Installments.Clear();
-            GenerateInstallments();
+            GenerateInstallments(new IdValueObject[1], status.Value);
         }
 
         if ((status.HasValue && status.Value == PaymentStatus.Paid) || 

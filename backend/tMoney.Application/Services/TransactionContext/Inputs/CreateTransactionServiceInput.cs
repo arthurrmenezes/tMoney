@@ -9,6 +9,7 @@ public sealed class CreateTransactionServiceInput
     public IdValueObject CardId { get; }
     public IdValueObject CategoryId { get; }
     public IdValueObject? InstallmentId { get; }
+    public IdValueObject? InvoiceId { get; }
     public string Title { get; }
     public string? Description { get; }
     public decimal Amount { get; }
@@ -18,14 +19,15 @@ public sealed class CreateTransactionServiceInput
     public PaymentStatus Status { get; }
     public string? Destination { get; }
 
-    private CreateTransactionServiceInput(IdValueObject accountId, IdValueObject cardId, IdValueObject categoryId, IdValueObject? installmentId, string title, 
-        string? description, decimal amount, DateTime date, TransactionType transactionType, PaymentMethod paymentMethod, PaymentStatus status, 
-        string? destination)
+    private CreateTransactionServiceInput(IdValueObject accountId, IdValueObject cardId, IdValueObject categoryId, IdValueObject? installmentId, 
+        IdValueObject? invoiceId, string title, string? description, decimal amount, DateTime date, TransactionType transactionType, PaymentMethod paymentMethod, 
+        PaymentStatus status, string? destination)
     {
         AccountId = accountId;
         CardId = cardId;
         CategoryId = categoryId;
         InstallmentId = installmentId;
+        InvoiceId = invoiceId;
         Title = title;
         Description = description;
         Amount = amount;
@@ -36,8 +38,8 @@ public sealed class CreateTransactionServiceInput
         Destination = destination;
     }
 
-    public static CreateTransactionServiceInput Factory(IdValueObject accountId, IdValueObject cardId, IdValueObject categoryId, IdValueObject? installmentId, 
-        string title, string? description, decimal amount, DateTime date, TransactionType transactionType, PaymentMethod paymentMethod, PaymentStatus status, 
-        string? destination)
-        => new(accountId, cardId, categoryId, installmentId, title, description, amount, date, transactionType, paymentMethod, status, destination);
+    public static CreateTransactionServiceInput Factory(IdValueObject accountId, IdValueObject cardId, IdValueObject categoryId, IdValueObject? installmentId,
+        IdValueObject? invoiceId, string title, string? description, decimal amount, DateTime date, TransactionType transactionType, PaymentMethod paymentMethod, 
+        PaymentStatus status, string? destination)
+        => new(accountId, cardId, categoryId, installmentId, invoiceId, title, description, amount, date, transactionType, paymentMethod, status, destination);
 }

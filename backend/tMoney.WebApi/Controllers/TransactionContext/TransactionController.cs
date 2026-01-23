@@ -35,6 +35,12 @@ public class TransactionController : ControllerBase
         [FromBody] CreateTransactionPayload input,
         CancellationToken cancellationToken)
     {
+        if (input.CardId == Guid.Empty)
+            throw new ArgumentException("CardId é obrigatório.");
+
+        if (input.CategoryId == Guid.Empty)
+            throw new ArgumentException("CategoryId é obrigatório.");
+
         var accountId = User.GetAccountId();
 
         var hasInstallment = input.HasInstallment is null ? null :

@@ -4,6 +4,7 @@ public sealed class CreateTransactionUseCaseOutput
 {
     public string Id { get; }
     public string AccountId { get; }
+    public string CardId { get; }
     public string CategoryId { get; }
     public string Title { get; }
     public string? Description { get; }
@@ -13,16 +14,17 @@ public sealed class CreateTransactionUseCaseOutput
     public string PaymentMethod { get; }
     public string Status { get; }
     public string? Destination { get; }
+    public CreateTransactionUseCaseOutputInstallment? Installment { get; }
     public DateTime? UpdatedAt { get; }
     public DateTime CreatedAt { get; }
-    public CreateTransactionUseCaseOutputInstallment? Installment { get; }
 
-    private CreateTransactionUseCaseOutput(string id, string accountId, string categoryId, string title, string? description, decimal amount, 
-        DateTime date, string transactionType, string paymentMethod, string status, string? destination, DateTime? updatedAt, DateTime createdAt, 
-        CreateTransactionUseCaseOutputInstallment? installment)
+    private CreateTransactionUseCaseOutput(string id, string accountId, string cardId, string categoryId, string title, string? description, decimal amount, 
+        DateTime date, string transactionType, string paymentMethod, string status, string? destination, CreateTransactionUseCaseOutputInstallment? installment, 
+        DateTime? updatedAt, DateTime createdAt)
     {
         Id = id;
         AccountId = accountId;
+        CardId = cardId;
         CategoryId = categoryId;
         Title = title;
         Description = description;
@@ -32,16 +34,16 @@ public sealed class CreateTransactionUseCaseOutput
         PaymentMethod = paymentMethod;
         Status = status;
         Destination = destination;
+        Installment = installment;
         UpdatedAt = updatedAt;
         CreatedAt = createdAt;
-        Installment = installment;
     }
 
-    public static CreateTransactionUseCaseOutput Factory(string id, string accountId, string categoryId, string title, string? description, decimal amount, 
-        DateTime date, string transactionType, string paymentMethod, string status, string? destination, DateTime? updatedAt, DateTime createdAt, 
-        CreateTransactionUseCaseOutputInstallment? installment)
-        => new(id, accountId, categoryId, title, description, amount, date, transactionType, paymentMethod, status, destination, updatedAt, 
-            createdAt, installment);
+    public static CreateTransactionUseCaseOutput Factory(string id, string accountId, string cardId, string categoryId, string title, string? description, 
+        decimal amount, DateTime date, string transactionType, string paymentMethod, string status, string? destination, 
+        CreateTransactionUseCaseOutputInstallment? installment, DateTime? updatedAt, DateTime createdAt)
+        => new(id, accountId, cardId, categoryId, title, description, amount, date, transactionType, paymentMethod, status, destination, installment, updatedAt, 
+            createdAt);
 }
 
 public sealed class CreateTransactionUseCaseOutputInstallment
@@ -53,7 +55,7 @@ public sealed class CreateTransactionUseCaseOutputInstallment
     public DateTime? UpdatedAt { get; }
     public DateTime CreatedAt { get; }
 
-    public CreateTransactionUseCaseOutputInstallment(string id, int totalInstallments, decimal totalAmount, 
+    private CreateTransactionUseCaseOutputInstallment(string id, int totalInstallments, decimal totalAmount, 
         CreateTransactionUseCaseOutputInstallmentItem[] items, DateTime? updatedAt, DateTime createdAt)
     {
         Id = id;
@@ -63,11 +65,16 @@ public sealed class CreateTransactionUseCaseOutputInstallment
         UpdatedAt = updatedAt;
         CreatedAt = createdAt;
     }
+
+    public static CreateTransactionUseCaseOutputInstallment Factory(string id, int totalInstallments, decimal totalAmount,
+        CreateTransactionUseCaseOutputInstallmentItem[] items, DateTime? updatedAt, DateTime createdAt)
+        => new(id, totalInstallments, totalAmount, items, updatedAt, createdAt);
 }
 
 public sealed class CreateTransactionUseCaseOutputInstallmentItem
 {
     public string Id { get; }
+    public string? InvoiceId { get; }
     public int Number { get; }
     public decimal Amount { get; }
     public DateTime DueDate { get; }
@@ -76,10 +83,11 @@ public sealed class CreateTransactionUseCaseOutputInstallmentItem
     public DateTime? UpdatedAt { get; }
     public DateTime CreatedAt { get; }
 
-    public CreateTransactionUseCaseOutputInstallmentItem(string id, int number, decimal amount, DateTime dueDate, string status, DateTime? paidAt, 
-        DateTime? updatedAt, DateTime createdAt)
+    private CreateTransactionUseCaseOutputInstallmentItem(string id, string? invoiceId, int number, decimal amount, DateTime dueDate, string status, 
+        DateTime? paidAt, DateTime? updatedAt, DateTime createdAt)
     {
         Id = id;
+        InvoiceId = invoiceId;
         Number = number;
         Amount = amount;
         DueDate = dueDate;
@@ -88,4 +96,8 @@ public sealed class CreateTransactionUseCaseOutputInstallmentItem
         UpdatedAt = updatedAt;
         CreatedAt = createdAt;
     }
+
+    public static CreateTransactionUseCaseOutputInstallmentItem Factory(string id, string? invoiceId, int number, decimal amount, DateTime dueDate,
+        string status, DateTime? paidAt, DateTime? updatedAt, DateTime createdAt)
+        => new(id, invoiceId, number, amount, dueDate, status, paidAt, updatedAt, createdAt);
 }

@@ -34,6 +34,7 @@ public sealed class CreateInstallmentServiceOutput
 public sealed class CreateInstallmentServiceOutputInstallmentItem
 {
     public string Id { get; }
+    public string? InvoiceId { get; }
     public int Number { get; }
     public decimal Amount { get; }
     public DateTime DueDate { get; }
@@ -42,10 +43,11 @@ public sealed class CreateInstallmentServiceOutputInstallmentItem
     public DateTime? UpdatedAt { get; }
     public DateTime CreatedAt { get; }
 
-    public CreateInstallmentServiceOutputInstallmentItem(string id, int number, decimal amount, DateTime dueDate, string status, DateTime? paidAt, 
-        DateTime? updatedAt, DateTime createdAt)
+    private CreateInstallmentServiceOutputInstallmentItem(string id, string? invoiceId, int number, decimal amount, DateTime dueDate, string status, 
+        DateTime? paidAt, DateTime? updatedAt, DateTime createdAt)
     {
         Id = id;
+        InvoiceId = invoiceId;
         Number = number;
         Amount = amount;
         DueDate = dueDate;
@@ -54,4 +56,8 @@ public sealed class CreateInstallmentServiceOutputInstallmentItem
         UpdatedAt = updatedAt;
         CreatedAt = createdAt;
     }
+
+    public static CreateInstallmentServiceOutputInstallmentItem Factory(string id, string? invoiceId, int number, decimal amount, DateTime dueDate, 
+        string status, DateTime? paidAt, DateTime? updatedAt, DateTime createdAt)
+        => new(id, invoiceId, number, amount, dueDate, status, paidAt, updatedAt, createdAt);
 }

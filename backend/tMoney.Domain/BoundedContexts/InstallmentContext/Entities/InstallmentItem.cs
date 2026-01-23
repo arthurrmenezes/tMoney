@@ -7,6 +7,7 @@ public class InstallmentItem
 {
     public IdValueObject Id { get; private set; }
     public IdValueObject InstallmentId { get; private set; }
+    public IdValueObject? InvoiceId { get; private set; }
     public int Number { get; private set; }
     public decimal Amount { get; private set; }
     public DateTime DueDate { get; private set; }
@@ -17,14 +18,16 @@ public class InstallmentItem
 
     protected InstallmentItem() { }
 
-    public InstallmentItem(IdValueObject installmentId, int number, decimal amount, DateTime dueDate)
+    public InstallmentItem(IdValueObject installmentId, IdValueObject? invoiceId, int number, decimal amount, DateTime dueDate, 
+        PaymentStatus status = PaymentStatus.Pending)
     {
         Id = IdValueObject.New();
+        InvoiceId = invoiceId;
         InstallmentId = installmentId;
         Number = number;
         Amount = amount;
         DueDate = dueDate;
-        Status = PaymentStatus.Pending;
+        Status = status;
         PaidAt = null;
         UpdatedAt = null;
         CreatedAt = DateTime.UtcNow;
@@ -33,5 +36,8 @@ public class InstallmentItem
     public void PayInstallment()
     {
         Status = PaymentStatus.Paid;
+
+        PaidAt = DateTime.UtcNow;
+        UpdatedAt = DateTime.UtcNow;
     }
 }

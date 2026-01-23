@@ -19,4 +19,15 @@ public class CreditCardInvoiceRepository : BaseRepository<CreditCardInvoice>, IC
             .Where(c => c.CreditCardId == voCreditCardId && c.Status == InvoiceStatus.Open)
             .FirstOrDefaultAsync(cancellationToken);
     }
+
+    public async Task<CreditCardInvoice?> GetByDate(Guid creditCardId, int year, int month, CancellationToken cancellationToken)
+    {
+        var voCreditCardId = IdValueObject.Factory(creditCardId);
+
+        return await _dataContext.CreditCardInvoices
+            .Where(c => c.CreditCardId == voCreditCardId && 
+                c.Year == year && 
+                c.Month == month)
+            .FirstOrDefaultAsync(cancellationToken);
+    }
 }

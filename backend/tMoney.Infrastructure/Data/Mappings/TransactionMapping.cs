@@ -42,6 +42,12 @@ public sealed class TransactionMapping : IEntityTypeConfiguration<Transaction>
             .IsRequired(false)
             .OnDelete(DeleteBehavior.SetNull);
 
+        builder.HasOne<CreditCardInvoice>()
+            .WithMany()
+            .HasForeignKey(t => t.InvoiceId)
+            .IsRequired(false)
+            .OnDelete(DeleteBehavior.Cascade);
+
         var idConverter = new ValueConverter<IdValueObject, Guid>(
             t => t.Id,
             t => IdValueObject.Factory(t));
@@ -80,6 +86,13 @@ public sealed class TransactionMapping : IEntityTypeConfiguration<Transaction>
         builder.Property(t => t.InstallmentId)
             .IsRequired(false)
             .HasColumnName("installment_id")
+            .HasConversion(
+                valueObject => valueObject! != null! ? valueObject.Id : (Guid?)null,
+                dbValue => dbValue.HasValue ? IdValueObject.Factory(dbValue.Value) : null);
+
+        builder.Property(t => t.InvoiceId)
+            .IsRequired(false)
+            .HasColumnName("invoice_id")
             .HasConversion(
                 valueObject => valueObject! != null! ? valueObject.Id : (Guid?)null,
                 dbValue => dbValue.HasValue ? IdValueObject.Factory(dbValue.Value) : null);
