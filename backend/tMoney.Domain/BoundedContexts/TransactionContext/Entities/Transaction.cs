@@ -62,8 +62,9 @@ public class Transaction
 
         if (Date >= DateTime.UtcNow.AddDays(1) && (Status == PaymentStatus.Paid || Status == PaymentStatus.Overdue))
             throw new ArgumentException($"Uma transação futura não pode ter o status '{Status}'.");
-        if (Date < DateTime.Today && Status == PaymentStatus.Pending)
-            throw new ArgumentException("Uma transação passada não pode ter o status 'Pendente'.");
+        if (InstallmentId is null && InvoiceId is null)
+            if (Date < DateTime.Today && Status == PaymentStatus.Pending)
+                throw new ArgumentException("Uma transação à vista passada não pode ter o status 'Pendente'.");
 
         if (!Enum.IsDefined(typeof(TransactionType), TransactionType))
             throw new ArgumentException("Tipo de transação inválido.");

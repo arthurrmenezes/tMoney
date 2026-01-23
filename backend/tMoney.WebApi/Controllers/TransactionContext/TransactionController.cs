@@ -100,15 +100,17 @@ public class TransactionController : ControllerBase
 
         var accountId = User.GetAccountId();
 
-        var category = input.CategoryId is not null ? IdValueObject.Factory(input.CategoryId.Id) : null;
+        var cardId = input.CardId is not null ? IdValueObject.Factory(input.CardId.Value) : null;
+        var categoryId = input.CategoryId is not null ? IdValueObject.Factory(input.CategoryId.Value) : null;
 
         var useCaseResult = await useCase.ExecuteUseCaseAsync(
             input: GetAllTransactionsUseCaseInput.Factory(
                 accountId: IdValueObject.Factory(accountId),
                 pageNumber: pageNumber is not null ? pageNumber.Value : 0,
                 pageSize: pageSize is not null ? pageSize.Value : 0,
+                cardId: cardId,
                 transactionType: input.TransactionType,
-                categoryId: category,
+                categoryId: categoryId,
                 paymentMethod: input.PaymentMethod,
                 paymentStatus: input.PaymentStatus,
                 startDate: input.StartDate,

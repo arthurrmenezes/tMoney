@@ -26,6 +26,7 @@ public class GetAllTransactionsUseCase : IUseCase<GetAllTransactionsUseCaseInput
             input: GetAllTransactionsByAccountIdServiceInput.Factory(
                 pageNumber: input.PageNumber,
                 pageSize: input.PageSize,
+                cardId: input.CardId,
                 transactionType: input.TransactionType,
                 categoryId: input.CategoryId,
                 paymentMethod: input.PaymentMethod,
@@ -60,8 +61,9 @@ public class GetAllTransactionsUseCase : IUseCase<GetAllTransactionsUseCaseInput
                     totalAmount: i.TotalAmount,
                     firstPaymentDate: i.FirstPaymentDate,
                     status: i.Status,
-                    installmentItems: i.Installments.Select(ii => new GetAllTransactionsUseCaseOutputInstallmentItem(
+                    installmentItems: i.Installments.Select(ii => GetAllTransactionsUseCaseOutputInstallmentItem.Factory(
                         id: ii.Id,
+                        invoiceId: ii.InvoiceId,
                         number: ii.Number,
                         amount: ii.Amount,
                         dueDate: ii.DueDate,
@@ -86,10 +88,13 @@ public class GetAllTransactionsUseCase : IUseCase<GetAllTransactionsUseCaseInput
 
             var installmentList = match is not null ? new[] { match } : null;
 
-            return new GetAllTransactionsUseCaseOutputTransaction(
+            return GetAllTransactionsUseCaseOutputTransaction.Factory(
                 id: t.Id,
                 accountId: t.AccountId,
+                cardId: t.CardId,
                 categoryId: t.CategoryId,
+                installmentId: t.InstallmentId,
+                invoiceId: t.InvoiceId,
                 title: t.Title,
                 description: t.Description,
                 amount: t.Amount,

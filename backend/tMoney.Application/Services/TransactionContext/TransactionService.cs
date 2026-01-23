@@ -105,6 +105,7 @@ public class TransactionService : ITransactionService
             accountId: accountId.Id,
             pageNumber: input.PageNumber,
             pageSize: input.PageSize,
+            cardId: input.CardId?.Id,
             transactionType: input.TransactionType,
             categoryId: input.CategoryId is null ? null : input.CategoryId.Id,
             paymentMethod: input.PaymentMethod,
@@ -118,11 +119,13 @@ public class TransactionService : ITransactionService
             cancellationToken: cancellationToken);
 
         var transactionOutput = transactions
-            .Select(t => new GetAllTransactionsByAccountIdServiceOutputTransaction(
+            .Select(t => GetAllTransactionsByAccountIdServiceOutputTransaction.Factory(
                 id: t.Id.ToString(),
                 accountId: t.AccountId.ToString(),
+                cardId: t.CardId.ToString(),
                 categoryId: t.CategoryId.ToString(),
                 installmentId: t.InstallmentId is null ? null : t.InstallmentId.ToString(),
+                invoiceId: t.InvoiceId?.ToString(),
                 title: t.Title,
                 description: t.Description,
                 amount: t.Amount,
@@ -137,6 +140,7 @@ public class TransactionService : ITransactionService
 
         var totalTransactions = await _transactionRepository.GetTransactionsCountAsync(
             accountId: accountId.Id,
+            cardId: input.CardId?.Id,
             transactionType: input.TransactionType,
             categoryId: input.CategoryId is null ? null : input.CategoryId.Id,
             paymentMethod: input.PaymentMethod,

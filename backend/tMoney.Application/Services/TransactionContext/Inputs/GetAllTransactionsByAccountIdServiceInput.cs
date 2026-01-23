@@ -7,6 +7,7 @@ public sealed class GetAllTransactionsByAccountIdServiceInput
 {
     public int PageNumber { get; }
     public int PageSize { get; }
+    public IdValueObject? CardId { get; }
     public TransactionType? TransactionType { get; }
     public IdValueObject? CategoryId { get; }
     public PaymentMethod? PaymentMethod { get; }
@@ -18,12 +19,13 @@ public sealed class GetAllTransactionsByAccountIdServiceInput
     public string? TextSearch { get; }
     public bool? HasInstallment { get; }
 
-    private GetAllTransactionsByAccountIdServiceInput(int pageNumber, int pageSize, TransactionType? transactionType, IdValueObject? categoryId, 
-        PaymentMethod? paymentMethod, PaymentStatus? paymentStatus, DateTime? startDate, DateTime? endDate, decimal? minValue, decimal? maxValue, 
-        string? textSearch, bool? hasInstallment)
+    private GetAllTransactionsByAccountIdServiceInput(int pageNumber, int pageSize, IdValueObject? cardId, TransactionType? transactionType, 
+        IdValueObject? categoryId, PaymentMethod? paymentMethod, PaymentStatus? paymentStatus, DateTime? startDate, DateTime? endDate, decimal? minValue, 
+        decimal? maxValue, string? textSearch, bool? hasInstallment)
     {
         PageNumber = pageNumber;
         PageSize = pageSize;
+        CardId = cardId;
         TransactionType = transactionType;
         CategoryId = categoryId;
         PaymentMethod = paymentMethod;
@@ -36,9 +38,9 @@ public sealed class GetAllTransactionsByAccountIdServiceInput
         HasInstallment = hasInstallment;
     }
 
-    public static GetAllTransactionsByAccountIdServiceInput Factory(int pageNumber, int pageSize, TransactionType? transactionType, IdValueObject? categoryId,
-        PaymentMethod? paymentMethod, PaymentStatus? paymentStatus, DateTime? startDate, DateTime? endDate, decimal? minValue, decimal? maxValue,
-        string? textSearch, bool? hasInstallment)
-        => new(pageNumber, pageSize, transactionType, categoryId, paymentMethod, paymentStatus, startDate, endDate, minValue, maxValue, textSearch, 
+    public static GetAllTransactionsByAccountIdServiceInput Factory(int pageNumber, int pageSize, IdValueObject? cardId, TransactionType? transactionType, 
+        IdValueObject? categoryId, PaymentMethod? paymentMethod, PaymentStatus? paymentStatus, DateTime? startDate, DateTime? endDate, decimal? minValue, 
+        decimal? maxValue, string? textSearch, bool? hasInstallment)
+        => new(pageNumber, pageSize, cardId, transactionType, categoryId, paymentMethod, paymentStatus, startDate, endDate, minValue, maxValue, textSearch, 
             hasInstallment);
 }

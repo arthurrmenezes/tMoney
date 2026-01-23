@@ -18,7 +18,7 @@ public sealed class GetTransactionUseCaseOutput
     public DateTime? UpdatedAt { get; }
     public DateTime CreatedAt { get; }
 
-    public GetTransactionUseCaseOutput(string id, string accountId, string cardId, string categoryId, string title, string? description, decimal amount, 
+    private GetTransactionUseCaseOutput(string id, string accountId, string cardId, string categoryId, string title, string? description, decimal amount, 
         DateTime date, string transactionType, string paymentMethod, string status, string? destination, GetTransactionUseCaseOutputInstallment? installment, 
         DateTime? updatedAt, DateTime createdAt)
     {

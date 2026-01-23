@@ -112,8 +112,9 @@ public class InstallmentService : IInstallmentService
             status: i.Status.ToString(),
             installments: i.Installments
             .OrderBy(ii => ii.Number)
-            .Select(ii => new GetAllInstallmentsByAccountIdServiceOutputInstallmentItem(
+            .Select(ii => GetAllInstallmentsByAccountIdServiceOutputInstallmentItem.Factory(
                 id: ii.Id.ToString(),
+                invoiceId: ii.InvoiceId?.ToString(),
                 number: ii.Number,
                 amount: ii.Amount,
                 dueDate: ii.DueDate,

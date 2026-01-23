@@ -27,8 +27,10 @@ public class GetAllTransactionsByAccountIdServiceOutputTransaction
 {
     public string Id { get; }
     public string AccountId { get; }
+    public string CardId { get; }
     public string CategoryId { get; }
     public string? InstallmentId { get; }
+    public string? InvoiceId { get; }
     public string Title { get; }
     public string? Description { get; }
     public decimal Amount { get; }
@@ -40,14 +42,16 @@ public class GetAllTransactionsByAccountIdServiceOutputTransaction
     public DateTime? UpdatedAt { get; }
     public DateTime CreatedAt { get; }
 
-    public GetAllTransactionsByAccountIdServiceOutputTransaction(string id, string accountId, string categoryId, string? installmentId, string title, 
-        string? description, decimal amount, DateTime date, string transactionType, string paymentMethod, string status, string? destination, 
-        DateTime? updatedAt, DateTime createdAt)
+    private GetAllTransactionsByAccountIdServiceOutputTransaction(string id, string accountId, string cardId, string categoryId, string? installmentId, 
+        string? invoiceId, string title, string? description, decimal amount, DateTime date, string transactionType, string paymentMethod, string status, 
+        string? destination, DateTime? updatedAt, DateTime createdAt)
     {
         Id = id;
         AccountId = accountId;
+        CardId = cardId;
         CategoryId = categoryId;
         InstallmentId = installmentId;
+        InvoiceId = invoiceId;
         Title = title;
         Description = description;
         Amount = amount;
@@ -59,4 +63,10 @@ public class GetAllTransactionsByAccountIdServiceOutputTransaction
         UpdatedAt = updatedAt;
         CreatedAt = createdAt;
     }
+
+    public static GetAllTransactionsByAccountIdServiceOutputTransaction Factory(string id, string accountId, string cardId, string categoryId,
+        string? installmentId, string? invoiceId, string title, string? description, decimal amount, DateTime date, string transactionType,
+        string paymentMethod, string status, string? destination, DateTime? updatedAt, DateTime createdAt)
+        => new(id, accountId, cardId, categoryId, installmentId, invoiceId, title, description, amount, date, transactionType, paymentMethod, status,
+            destination, updatedAt, createdAt);
 }

@@ -5,8 +5,9 @@ namespace tMoney.WebApi.Controllers.TransactionContext.Payloads;
 
 public class GetAllTransactionsPayload
 {
+    public Guid? CardId { get; init; }
     public TransactionType? TransactionType { get; init; }
-    public IdValueObject? CategoryId { get; init; }
+    public Guid? CategoryId { get; init; }
     public PaymentMethod? PaymentMethod { get; init; }
     public PaymentStatus? PaymentStatus { get; init; }
     public DateTime? StartDate { get; init; }
@@ -18,9 +19,10 @@ public class GetAllTransactionsPayload
 
     public GetAllTransactionsPayload() { }
 
-    public GetAllTransactionsPayload(TransactionType? transactionType, IdValueObject? categoryId, PaymentMethod? paymentMethod, PaymentStatus? paymentStatus, 
-        DateTime? startDate, DateTime? endDate, decimal? minValue, decimal? maxValue, string? textSearch, bool? hasInstallment)
+    public GetAllTransactionsPayload(Guid? cardId, TransactionType? transactionType, Guid? categoryId, PaymentMethod? paymentMethod, 
+        PaymentStatus? paymentStatus, DateTime? startDate, DateTime? endDate, decimal? minValue, decimal? maxValue, string? textSearch, bool? hasInstallment)
     {
+        CardId = cardId;
         TransactionType = transactionType;
         CategoryId = categoryId;
         PaymentMethod = paymentMethod;

@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using tMoney.Domain.BoundedContexts.CardContext.ENUMs;
 using tMoney.Domain.BoundedContexts.TransactionContext.Entities;
 using tMoney.Domain.BoundedContexts.TransactionContext.ENUMs;
 using tMoney.Domain.ValueObjects;
@@ -32,9 +33,9 @@ public class TransactionRepository : BaseRepository<Transaction>, ITransactionRe
                 t => t.Id == voTransactionId && t.AccountId == voAccountId, cancellationToken);
     }
 
-    public async Task<Transaction[]> GetAllByAccountIdAsync(Guid accountId, int pageNumber, int pageSize, TransactionType? transactionType, Guid? categoryId,
-        PaymentMethod? paymentMethod, PaymentStatus? paymentStatus, DateTime? startDate, DateTime? endDate, decimal? minValue, decimal? maxValue,
-        string? textSearch, bool? hasInstallment, CancellationToken cancellationToken)
+    public async Task<Transaction[]> GetAllByAccountIdAsync(Guid accountId, int pageNumber, int pageSize, Guid? cardId, TransactionType? transactionType, 
+        Guid? categoryId, PaymentMethod? paymentMethod, PaymentStatus? paymentStatus, DateTime? startDate, DateTime? endDate, decimal? minValue, 
+        decimal? maxValue, string? textSearch, bool? hasInstallment, CancellationToken cancellationToken)
     {
         var skip = (pageNumber - 1) * pageSize;
         var voAccountId = IdValueObject.Factory(accountId);
@@ -48,6 +49,12 @@ public class TransactionRepository : BaseRepository<Transaction>, ITransactionRe
         var query = _dataContext.Transactions
             .AsNoTracking()
             .Where(t => t.AccountId == voAccountId);
+
+        if (cardId.HasValue)
+        {
+            var voCardId = IdValueObject.Factory(cardId.Value);
+            query = query.Where(t => t.CardId == voCardId);
+        }
 
         if (transactionType.HasValue)
             query = query.Where(t => t.TransactionType == transactionType);
@@ -104,9 +111,9 @@ public class TransactionRepository : BaseRepository<Transaction>, ITransactionRe
             .ToArrayAsync(cancellationToken);
     }
 
-    public async Task<int> GetTransactionsCountAsync(Guid accountId, TransactionType? transactionType, Guid? categoryId, PaymentMethod? paymentMethod,
-        PaymentStatus? paymentStatus, DateTime? startDate, DateTime? endDate, decimal? minValue, decimal? maxValue, string? textSearch, bool? hasInstallment,
-        CancellationToken cancellationToken)
+    public async Task<int> GetTransactionsCountAsync(Guid accountId, Guid? cardId, TransactionType? transactionType, Guid? categoryId, 
+        PaymentMethod? paymentMethod, PaymentStatus? paymentStatus, DateTime? startDate, DateTime? endDate, decimal? minValue, decimal? maxValue, 
+        string? textSearch, bool? hasInstallment, CancellationToken cancellationToken)
     {
         var voAccountId = IdValueObject.Factory(accountId);
 
@@ -119,6 +126,12 @@ public class TransactionRepository : BaseRepository<Transaction>, ITransactionRe
         var query = _dataContext.Transactions
             .AsNoTracking()
             .Where(t => t.AccountId == voAccountId);
+
+        if (cardId.HasValue)
+        {
+            var voCardId = IdValueObject.Factory(cardId.Value);
+            query = query.Where(t => t.CardId == voCardId);
+        }
 
         if (transactionType.HasValue)
             query = query.Where(t => t.TransactionType == transactionType);
