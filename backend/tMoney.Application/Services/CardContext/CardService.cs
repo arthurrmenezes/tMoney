@@ -293,4 +293,49 @@ public class CardService : ICardService
 
         return output;
     }
+
+    public async Task<GetAllInvoiceByCardIdServiceOutput> GetAllInvoiceByCardIdServiceAsync(
+        IdValueObject cardId, 
+        IdValueObject accountId,
+        int pageNumber, 
+        int pageSize, 
+        CancellationToken cancellationToken)
+    {
+        var card = await _cardRepository.GetByIdAsync(cardId.Id, accountId.Id, false, cancellationToken);
+        if (card is null)
+            throw new KeyNotFoundException("Cartão não foi encontrado.");
+
+        if (card.Type != CardType.CreditCard)
+            throw new ArgumentException("Apenas cartões de crédito possuem fatura.");
+
+        var invoices = await _creditCardInvoiceRepository.GetAllByCardIdAsync(cardId.Id, pageNumber, pageSize, cancellationToken);
+
+        var totalInvoices = await _creditCardInvoiceRepository.GetTotalInvoicesNumberAsync(cardId.Id, cancellationToken);
+
+        var invoiceOuput = invoices.Select(c => GetAllInvoiceByCardIdServiceOutputInvoice.Factory(
+            id: c.Id,
+            cardId: c.CardId,
+            month: c.Month,
+            year: c.Year,
+            closeDay: c.CloseDay,
+            dueDay: c.DueDay,
+            totalAmount: c.TotalAmount,
+            limitTotal: c.LimitTotal,
+            amountPaid: c.AmountPaid,
+            status: c.Status,
+            updatedAt: c.UpdatedAt,
+            createdAt: c.CreatedAt))
+            .ToArray();
+
+        var totalPages = (int)Math.Ceiling((double)totalInvoices / pageSize);
+
+        var output = GetAllInvoiceByCardIdServiceOutput.Factory(
+            totalInvoices: totalInvoices,
+            pageNumber: pageNumber,
+            pageSize: pageSize,
+            totalPages: totalPages,
+            invoices: invoiceOuput);
+
+        return output;
+    }
 }

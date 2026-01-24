@@ -2,14 +2,16 @@
 
 public sealed class GetFinancialSummaryServiceOutput
 {
+    public string CardId { get; }
     public decimal PeriodIncome { get; }
     public decimal PeriodExpense { get; }
     public decimal Balance { get; }
     public DateTime StartDate { get; }
     public DateTime EndDate { get; }
 
-    private GetFinancialSummaryServiceOutput(decimal periodIncome, decimal periodExpense, decimal balance, DateTime startDate, DateTime endDate)
+    private GetFinancialSummaryServiceOutput(string cardId, decimal periodIncome, decimal periodExpense, decimal balance, DateTime startDate, DateTime endDate)
     {
+        CardId = cardId;
         PeriodIncome = periodIncome;
         PeriodExpense = periodExpense;
         Balance = balance;
@@ -17,6 +19,7 @@ public sealed class GetFinancialSummaryServiceOutput
         EndDate = endDate;
     }
 
-    public static GetFinancialSummaryServiceOutput Factory(decimal periodIncome, decimal periodExpense, decimal balance, DateTime startDate, DateTime endDate)
-        => new(periodIncome, periodExpense, balance, startDate, endDate);
+    public static GetFinancialSummaryServiceOutput Factory(string cardId, decimal periodIncome, decimal periodExpense, decimal balance, DateTime startDate, 
+        DateTime endDate)
+        => new(cardId, periodIncome, periodExpense, balance, startDate, endDate);
 }

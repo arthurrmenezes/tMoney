@@ -238,6 +238,7 @@ public class TransactionService : ITransactionService
         var balance = await _transactionRepository.GetTotalBalanceAsync(accountId.Id, cardId.Id, cancellationToken);
 
         var output = GetFinancialSummaryServiceOutput.Factory(
+            cardId: cardId.ToString(),
             periodIncome: periodIncome,
             periodExpense: periodExpense,
             balance: balance,

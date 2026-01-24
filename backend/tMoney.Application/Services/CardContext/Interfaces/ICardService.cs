@@ -38,4 +38,11 @@ public interface ICardService
         DateTime firstPaymentDate,
         int totalInstallments,
         CancellationToken cancellationToken);
+
+    public Task<GetAllInvoiceByCardIdServiceOutput> GetAllInvoiceByCardIdServiceAsync(
+        IdValueObject cardId,
+        IdValueObject accountId,
+        int pageNumber,
+        int pageSize,
+        CancellationToken cancellationToken);
 }

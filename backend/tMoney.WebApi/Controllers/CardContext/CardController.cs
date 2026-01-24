@@ -134,4 +134,29 @@ public class CardController : ControllerBase
 
         return NoContent();
     }
+
+    [HttpGet]
+    [Route("{cardId}/invoices")]
+    [Authorize]
+    public async Task<IActionResult> GetAllInvoicesByCardIdAsync(
+        [FromRoute] Guid cardId,
+        [FromQuery] int? pageNumber,
+        [FromQuery] int? pageSize,
+        CancellationToken cancellationToken)
+    {
+        if (pageNumber < 1 || pageNumber is null) pageNumber = 1;
+        if (pageSize < 1 || pageSize is null) pageSize = 12;
+        if (pageSize > 24) pageSize = 24;
+
+        var accountId = User.GetAccountId();
+
+        var serviceResult = await _cardService.GetAllInvoiceByCardIdServiceAsync(
+            cardId: IdValueObject.Factory(cardId),
+            accountId: IdValueObject.Factory(accountId),
+            pageNumber: pageNumber.Value,
+            pageSize: pageSize.Value,
+            cancellationToken: cancellationToken);
+
+        return Ok(serviceResult);
+    }
 }
