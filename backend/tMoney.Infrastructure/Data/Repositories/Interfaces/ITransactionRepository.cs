@@ -18,10 +18,10 @@ public interface ITransactionRepository : IBaseRepository<Transaction>
         PaymentMethod? paymentMethod, PaymentStatus? paymentStatus, DateTime? startDate, DateTime? endDate, decimal? minValue, decimal? maxValue, 
         string? textSearch, bool? hasInstallment, CancellationToken cancellationToken);
     
-    public Task<(decimal totalIncome, decimal totalExpense)> GetFinancialSummaryAsync(Guid accountId, DateTime startDate, DateTime endDate,
+    public Task<(decimal totalIncome, decimal totalExpense)> GetFinancialSummaryAsync(Guid accountId, Guid cardId, DateTime startDate, DateTime endDate,
         CancellationToken cancellationToken);
 
-    public Task<decimal> GetTotalBalanceAsync(Guid accountId, CancellationToken cancellationToken);
+    public Task<decimal> GetTotalBalanceAsync(Guid accountId, Guid cardId, CancellationToken cancellationToken);
 
     public Task UpdateOverdueTransactionsAsync(CancellationToken cancellationToken);
 }

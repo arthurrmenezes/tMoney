@@ -179,7 +179,7 @@ public class TransactionRepository : BaseRepository<Transaction>, ITransactionRe
         return await query.CountAsync(cancellationToken);
     }
 
-    public async Task<(decimal totalIncome, decimal totalExpense)> GetFinancialSummaryAsync(Guid accountId, DateTime startDate, DateTime endDate,
+    public async Task<(decimal totalIncome, decimal totalExpense)> GetFinancialSummaryAsync(Guid accountId, Guid cardId, DateTime startDate, DateTime endDate,
         CancellationToken cancellationToken)
     {
         if (startDate.Kind == DateTimeKind.Unspecified)
@@ -189,10 +189,12 @@ public class TransactionRepository : BaseRepository<Transaction>, ITransactionRe
             endDate = DateTime.SpecifyKind(endDate, DateTimeKind.Utc);
 
         var voAccountId = IdValueObject.Factory(accountId);
+        var voCardId = IdValueObject.Factory(cardId);
 
         var query = await _dataContext.Transactions
             .AsNoTracking()
             .Where(t => t.AccountId == voAccountId &&
+                t.CardId == voCardId &&
                 t.Date >= startDate &&
                 t.Date <= endDate &&
                 t.Status == PaymentStatus.Paid)
@@ -209,13 +211,16 @@ public class TransactionRepository : BaseRepository<Transaction>, ITransactionRe
         return (query?.Income ?? 0, query?.Expense ?? 0);
     }
 
-    public async Task<decimal> GetTotalBalanceAsync(Guid accountId, CancellationToken cancellationToken)
+    public async Task<decimal> GetTotalBalanceAsync(Guid accountId, Guid cardId, CancellationToken cancellationToken)
     {
         var voAccountId = IdValueObject.Factory(accountId);
+        var voCardId = IdValueObject.Factory(cardId);
 
         return await _dataContext.Transactions
             .AsNoTracking()
-            .Where(t => t.AccountId == voAccountId && t.Status == PaymentStatus.Paid)
+            .Where(t => t.AccountId == voAccountId && 
+                t.CardId == voCardId &&
+                t.Status == PaymentStatus.Paid)
             .SumAsync(t => t.TransactionType == TransactionType.Income 
                 ? t.Amount
                 : t.TransactionType == TransactionType.Expense

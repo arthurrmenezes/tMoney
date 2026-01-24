@@ -225,6 +225,7 @@ public class TransactionService : ITransactionService
 
     public async Task<GetFinancialSummaryServiceOutput> GetFinancialSummaryServiceAsync(
         IdValueObject accountId, 
+        IdValueObject cardId,
         DateTime? startDate, 
         DateTime? endDate, 
         CancellationToken cancellationToken)
@@ -232,9 +233,9 @@ public class TransactionService : ITransactionService
         var start = startDate ?? new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1);
         var end = endDate ?? start.AddMonths(1).AddDays(-1);
 
-        var (periodIncome, periodExpense) = await _transactionRepository.GetFinancialSummaryAsync(accountId.Id, start, end, cancellationToken);
+        var (periodIncome, periodExpense) = await _transactionRepository.GetFinancialSummaryAsync(accountId.Id, cardId.Id, start, end, cancellationToken);
 
-        var balance = await _transactionRepository.GetTotalBalanceAsync(accountId.Id, cancellationToken);
+        var balance = await _transactionRepository.GetTotalBalanceAsync(accountId.Id, cardId.Id, cancellationToken);
 
         var output = GetFinancialSummaryServiceOutput.Factory(
             periodIncome: periodIncome,

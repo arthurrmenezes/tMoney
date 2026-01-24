@@ -33,6 +33,7 @@ public interface ITransactionService
 
     public Task<GetFinancialSummaryServiceOutput> GetFinancialSummaryServiceAsync(
         IdValueObject accountId,
+        IdValueObject cardId,
         DateTime? startDate,
         DateTime? endDate,
         CancellationToken cancellationToken);

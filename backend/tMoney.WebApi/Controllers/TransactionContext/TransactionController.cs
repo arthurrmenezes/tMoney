@@ -182,9 +182,10 @@ public class TransactionController : ControllerBase
     }
 
     [HttpGet]
-    [Route("financial-summary")]
+    [Route("financial-summary/{cardId}")]
     [Authorize]
     public async Task<IActionResult> GetFinancialSummaryAsync(
+        [FromRoute] Guid cardId,
         CancellationToken cancellationToken,
         [FromQuery] DateTime? startDate,
         [FromQuery] DateTime? endDate)
@@ -193,6 +194,7 @@ public class TransactionController : ControllerBase
 
         var serviceResult = await _transactionService.GetFinancialSummaryServiceAsync(
             accountId: IdValueObject.Factory(accountId),
+            cardId: IdValueObject.Factory(cardId),
             startDate: startDate,
             endDate: endDate,
             cancellationToken: cancellationToken);
