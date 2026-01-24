@@ -2,7 +2,6 @@
 using tMoney.Application.Services.TransactionContext.Interfaces;
 using tMoney.Application.Services.TransactionContext.Outputs;
 using tMoney.Domain.BoundedContexts.TransactionContext.Entities;
-using tMoney.Domain.BoundedContexts.TransactionContext.ENUMs;
 using tMoney.Domain.ValueObjects;
 using tMoney.Infrastructure.Data.Repositories.Interfaces;
 
@@ -11,12 +10,10 @@ namespace tMoney.Application.Services.TransactionContext;
 public class TransactionService : ITransactionService
 {
     private readonly ITransactionRepository _transactionRepository;
-    private readonly IAccountRepository _accountRepository;
 
     public TransactionService(ITransactionRepository transactionRepository, IAccountRepository accountRepository)
     {
         _transactionRepository = transactionRepository;
-        _accountRepository = accountRepository;
     }
 
     public async Task<CreateTransactionServiceOutput> CreateTransactionServiceAsync(
@@ -165,44 +162,34 @@ public class TransactionService : ITransactionService
         return output;
     }
 
-    public async Task<UpdateTransactionDetailsByIdServiceOutput> UpdateTransactionDetailsByIdServiceAsync(IdValueObject transactionId, 
-        IdValueObject accountId, UpdateTransactionDetailsByIdServiceInput input, CancellationToken cancellationToken)
+    public async Task<UpdateTransactionDetailsByIdServiceOutput> UpdateTransactionDetailsByIdServiceAsync(
+        IdValueObject transactionId, 
+        IdValueObject accountId, 
+        UpdateTransactionDetailsByIdServiceInput input, 
+        CancellationToken cancellationToken)
     {
         var transaction = await _transactionRepository.GetByIdAsync(transactionId.Id, accountId.Id, cancellationToken);
         if (transaction is null)
             throw new KeyNotFoundException("Transação não encontrada");
 
-        var account = await _accountRepository.GetAccountByIdAsync(accountId.Id, cancellationToken);
-        if (account is null)
-            throw new KeyNotFoundException("Conta não encontrada");
-
-        var validateDestination = input.TransactionType == TransactionType.Income ? null : input.Destination;
-
-        var oldAmount = transaction.Amount;
-        var oldTransactionType = transaction.TransactionType;
-        var oldStatus = transaction.Status;
-
         transaction.UpdateTransactionDetails(
             categoryId: input.CategoryId,
-            installmentId: input.InstallmentId,
             title: input.Title,
             description: input.Description,
             amount: input.Amount,
             date: input.Date,
-            transactionType: input.TransactionType,
-            paymentMethod: input.PaymentMethod,
             status: input.Status,
-            destination: validateDestination);
+            destination: input.Destination);
 
         _transactionRepository.Update(transaction);
-
-        _accountRepository.Update(account);
 
         var output = UpdateTransactionDetailsByIdServiceOutput.Factory(
             id: transaction.Id.ToString(),
             accountId: transaction.AccountId.ToString(),
+            cardId: transaction.CardId.ToString(),
             categoryId: transaction.CategoryId.ToString(),
             installmentId: transaction.InstallmentId is null ? null : transaction.InstallmentId.ToString(),
+            invoiceId: transaction.InvoiceId?.ToString(),
             title: transaction.Title,
             description: transaction.Description,
             amount: transaction.Amount,

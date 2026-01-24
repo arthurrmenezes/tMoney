@@ -1,5 +1,4 @@
 ﻿using tMoney.Domain.BoundedContexts.TransactionContext.ENUMs;
-using tMoney.Domain.ValueObjects;
 
 namespace tMoney.WebApi.Controllers.TransactionContext.Payloads;
 

@@ -260,7 +260,7 @@ public class CardService : ICardService
 
             var tempInvoice = creditCard.GenerateInvoice(referenceDate);
 
-            var existingInvoice = await _creditCardInvoiceRepository.GetByDate(
+            var existingInvoice = await _creditCardInvoiceRepository.GetByDateAsync(
                 card.Id.Id,
                 tempInvoice.Year,
                 tempInvoice.Month,

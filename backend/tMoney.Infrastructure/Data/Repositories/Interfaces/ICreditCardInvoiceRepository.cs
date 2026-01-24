@@ -7,5 +7,5 @@ public interface ICreditCardInvoiceRepository : IBaseRepository<CreditCardInvoic
 {
     public Task<CreditCardInvoice?> GetOpenInvoiceAsync(Guid creditCardId, CancellationToken cancellationToken);
 
-    public Task<CreditCardInvoice?> GetByDate(Guid creditCardId, int year, int month, CancellationToken cancellationToken);
+    public Task<CreditCardInvoice?> GetByDateAsync(Guid creditCardId, int year, int month, CancellationToken cancellationToken);
 }

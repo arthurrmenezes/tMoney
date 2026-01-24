@@ -138,43 +138,25 @@ public class TransactionController : ControllerBase
             input.Description is null &&
             input.Amount is null &&
             input.Date is null &&
-            input.TransactionType is null &&
-            input.PaymentMethod is null &&
             input.Status is null &&
-            input.Destination is null &&
-            input.Installment is null)
+            input.Destination is null)
             throw new ArgumentException("Informe pelo menos um campo para atualizar.");
 
         var accountId = User.GetAccountId();
 
-        Guid? categoryId = null;
-        if (input.CategoryId is not null)
-        {
-            if (!Guid.TryParse(input.CategoryId, out var parsedCategory))
-                throw new ArgumentException("Category ID inválido.");
-
-            categoryId = parsedCategory;
-        }
-
-        UpdateTransactionUseCaseInputInstallment? installmentUseCaseInput = null;
-        if (input.Installment is not null)
-            installmentUseCaseInput = new UpdateTransactionUseCaseInputInstallment(
-                totalInstallments: input.Installment.TotalInstallments);
+        var categoryId = input.CategoryId is null ? null : IdValueObject.Factory(input.CategoryId.Value);
 
         var useCaseResult = await useCase.ExecuteUseCaseAsync(
             input: UpdateTransactionUseCaseInput.Factory(
                 transactionId: IdValueObject.Factory(transactionId),
                 accountId: IdValueObject.Factory(accountId),
-                categoryId: categoryId is null ? null : IdValueObject.Factory(categoryId.Value),
+                categoryId: categoryId,
                 title: input.Title,
                 description: input.Description,
                 amount: input.Amount,
                 date: input.Date,
-                transactionType: input.TransactionType,
-                paymentMethod: input.PaymentMethod,
                 status: input.Status,
-                destination: input.Destination,
-                installment: installmentUseCaseInput),
+                destination: input.Destination),
             cancellationToken: cancellationToken);
 
         return Ok(useCaseResult);

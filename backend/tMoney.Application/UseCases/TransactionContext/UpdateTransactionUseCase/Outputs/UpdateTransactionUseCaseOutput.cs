@@ -4,7 +4,10 @@ public sealed class UpdateTransactionUseCaseOutput
 {
     public string Id { get; }
     public string AccountId { get; }
+    public string CardId { get; }
     public string CategoryId { get; }
+    public string? InstallmentId { get; }
+    public string? InvoiceId { get; }
     public string Title { get; }
     public string? Description { get; }
     public decimal Amount { get; }
@@ -13,17 +16,19 @@ public sealed class UpdateTransactionUseCaseOutput
     public string PaymentMethod { get; }
     public string Status { get; }
     public string? Destination { get; }
-    public UpdateTransactionUseCaseOutputInstallment? Installment { get; }
     public DateTime? UpdatedAt { get; }
     public DateTime CreatedAt { get; }
 
-    private UpdateTransactionUseCaseOutput(string id, string accountId, string categoryId, string title, string? description, decimal amount, DateTime date, 
-        string transactionType, string paymentMethod, string status, string? destination, UpdateTransactionUseCaseOutputInstallment? installment,
+    private UpdateTransactionUseCaseOutput(string id, string accountId, string cardId, string categoryId, string? installmentId, string? invoiceId, string title, 
+        string? description, decimal amount, DateTime date, string transactionType, string paymentMethod, string status, string? destination, 
         DateTime? updatedAt, DateTime createdAt)
     {
         Id = id;
         AccountId = accountId;
+        CardId = cardId;
         CategoryId = categoryId;
+        InstallmentId = installmentId;
+        InvoiceId = invoiceId;
         Title = title;
         Description = description;
         Amount = amount;
@@ -32,53 +37,13 @@ public sealed class UpdateTransactionUseCaseOutput
         PaymentMethod = paymentMethod;
         Status = status;
         Destination = destination;
-        Installment = installment;
         UpdatedAt = updatedAt;
         CreatedAt = createdAt;
     }
 
-    public static UpdateTransactionUseCaseOutput Factory(string id, string accountId, string categoryId, string title, string? description, decimal amount, 
-        DateTime date, string transactionType, string paymentMethod, string status, string? destination, UpdateTransactionUseCaseOutputInstallment? installment, 
+    public static UpdateTransactionUseCaseOutput Factory(string id, string accountId, string cardId, string categoryId, string? installmentId, string? invoiceId,
+        string title, string? description, decimal amount, DateTime date, string transactionType, string paymentMethod, string status, string? destination,
         DateTime? updatedAt, DateTime createdAt)
-        => new(id, accountId, categoryId, title, description, amount, date, transactionType, paymentMethod, status, destination, installment, updatedAt, 
-            createdAt);
-}
-
-public sealed class UpdateTransactionUseCaseOutputInstallment
-{
-    public string Id { get; }
-    public int TotalInstallments { get; }
-    public UpdateTransactionUseCaseOutputInstallmentItem[] Installments { get; }
-
-    public UpdateTransactionUseCaseOutputInstallment(string id, int totalInstallments, UpdateTransactionUseCaseOutputInstallmentItem[] installments)
-    {
-        Id = id;
-        TotalInstallments = totalInstallments;
-        Installments = installments;
-    }
-}
-
-public sealed class UpdateTransactionUseCaseOutputInstallmentItem
-{
-    public string Id { get; }
-    public int Number { get; }
-    public decimal Amount { get; }
-    public DateTime DueDate { get; }
-    public string Status { get; }
-    public DateTime? PaidAt { get; }
-    public DateTime? UpdatedAt { get; }
-    public DateTime CreatedAt { get; }
-
-    public UpdateTransactionUseCaseOutputInstallmentItem(string id, int number, decimal amount, DateTime dueDate, string status, DateTime? paidAt,
-        DateTime? updatedAt, DateTime createdAt)
-    {
-        Id = id;
-        Number = number;
-        Amount = amount;
-        DueDate = dueDate;
-        Status = status;
-        PaidAt = paidAt;
-        UpdatedAt = updatedAt;
-        CreatedAt = createdAt;
-    }
+        => new(id, accountId, cardId, categoryId, installmentId, invoiceId, title, description, amount, date, transactionType, paymentMethod, status,
+            destination, updatedAt, createdAt);
 }

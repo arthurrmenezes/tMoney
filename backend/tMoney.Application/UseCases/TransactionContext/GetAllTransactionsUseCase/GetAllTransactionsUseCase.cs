@@ -55,7 +55,7 @@ public class GetAllTransactionsUseCase : IUseCase<GetAllTransactionsUseCaseInput
                     installmentIds: installmentIds,
                     cancellationToken: cancellationToken);
 
-                installmentOutput = installmentServiceOutput.Select(i => new GetAllTransactionsUseCaseOutputInstallment(
+                installmentOutput = installmentServiceOutput.Select(i => GetAllTransactionsUseCaseOutputInstallment.Factory(
                     id: i.Id,
                     totalInstallments: i.TotalInstallments,
                     totalAmount: i.TotalAmount,

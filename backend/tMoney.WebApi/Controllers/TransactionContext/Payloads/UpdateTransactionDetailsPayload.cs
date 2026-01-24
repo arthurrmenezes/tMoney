@@ -4,40 +4,23 @@ namespace tMoney.WebApi.Controllers.TransactionContext.Payloads;
 
 public sealed class UpdateTransactionDetailsPayload
 {
-    public string? CategoryId { get; init; }
+    public Guid? CategoryId { get; init; }
     public string? Title { get; init; }
     public string? Description { get; init; }
     public decimal? Amount { get; init; }
     public DateTime? Date { get; init; }
-    public TransactionType? TransactionType { get; init; }
-    public PaymentMethod? PaymentMethod { get; init; }
     public PaymentStatus? Status { get; init; }
     public string? Destination { get; init; }
-    public UpdateTransactionDetailsPayloadInstallment? Installment { get; init; }
 
-    public UpdateTransactionDetailsPayload(string? categoryId, string? title, string? description, decimal? amount,
-        DateTime? date, TransactionType? transactionType, PaymentMethod? paymentMethod, PaymentStatus? status, string? destination,
-        UpdateTransactionDetailsPayloadInstallment? installment)
+    public UpdateTransactionDetailsPayload(Guid? categoryId, string? title, string? description, decimal? amount, DateTime? date, PaymentStatus? status, 
+        string? destination)
     {
         CategoryId = categoryId;
         Title = title;
         Description = description;
         Amount = amount;
         Date = date;
-        TransactionType = transactionType;
-        PaymentMethod = paymentMethod;
         Status = status;
         Destination = destination;
-        Installment = installment;
-    }
-}
-
-public sealed class UpdateTransactionDetailsPayloadInstallment
-{
-    public int? TotalInstallments { get; }
-
-    public UpdateTransactionDetailsPayloadInstallment(int? totalInstallments)
-    {
-        TotalInstallments = totalInstallments;
     }
 }

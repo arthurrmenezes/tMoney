@@ -91,45 +91,4 @@ public class Installment
 
         UpdatedAt = DateTime.UtcNow;
     }
-
-    public void UpdateInstallmentDetails(int? totalInstallments, decimal? totalAmount, DateTime? firstPaymentDate, PaymentStatus? status)
-    {
-        if (Status == PaymentStatus.Paid && status.HasValue && status != PaymentStatus.Paid)
-            throw new InvalidOperationException("Não é possível reabrir um parcelamento já quitado.");
-
-        var isStructuralChange =
-            (totalInstallments.HasValue && totalInstallments != TotalInstallments) ||
-            (totalAmount.HasValue && totalAmount != TotalAmount) ||
-            (firstPaymentDate.HasValue && firstPaymentDate != FirstPaymentDate);
-
-        var hasPaidItems = Installments.Any(i => i.Status == PaymentStatus.Paid);
-
-        if (isStructuralChange && hasPaidItems)
-            throw new ArgumentException("Não foi possível alterar os dados pois já existem parcelas pagas.");
-
-        if (totalInstallments.HasValue)
-            TotalInstallments = totalInstallments.Value;
-
-        if (totalAmount.HasValue)
-            TotalAmount = totalAmount.Value;
-
-        if (firstPaymentDate.HasValue)
-            FirstPaymentDate = firstPaymentDate.Value;
-
-        if (status.HasValue && Enum.IsDefined(typeof(PaymentStatus), status))
-            Status = status.Value;
-
-        if (isStructuralChange)
-        {
-            Installments.Clear();
-            GenerateInstallments(new IdValueObject[1], status.Value);
-        }
-
-        if ((status.HasValue && status.Value == PaymentStatus.Paid) || 
-            Status == PaymentStatus.Paid || 
-            (isStructuralChange && Status == PaymentStatus.Paid))
-            PayAllInstallments();
-
-        UpdatedAt = DateTime.UtcNow;
-    }
 }

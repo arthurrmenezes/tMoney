@@ -13,9 +13,13 @@ public class CategoryRepository : BaseRepository<Category>, ICategoryRepository
 
     public async Task<Category?> GetByIdAsync(Guid categoryId, Guid accountId, CancellationToken cancellationToken)
     {
+        var voCategoryId = IdValueObject.Factory(categoryId);
+        var voAccountId = IdValueObject.Factory(accountId);
+
         return await _dataContext.Categories
             .AsNoTracking()
-            .FirstOrDefaultAsync(c => c.Id == IdValueObject.Factory(categoryId) && c.AccountId == IdValueObject.Factory(accountId), cancellationToken);
+            .Where(c => c.Id == voCategoryId && c.AccountId == voAccountId)
+            .FirstOrDefaultAsync(cancellationToken);
     }
 
     public async Task<Category?> GetByTitleAsync(string title, Guid accountId, CancellationToken cancellationToken)

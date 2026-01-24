@@ -80,37 +80,28 @@ public class Transaction
                 throw new ArgumentException("O valor do destino não pode ultrapassar 50 caracteres");
     }
 
-    public void UpdateTransactionDetails(IdValueObject? categoryId, IdValueObject? installmentId, string? title, string? description, decimal? amount, DateTime? date,
-        TransactionType? transactionType, PaymentMethod? paymentMethod, PaymentStatus? status, string? destination)
+    public void UpdateTransactionDetails(IdValueObject? categoryId, string? title, string? description, decimal? amount, DateTime? date, PaymentStatus? status, 
+        string? destination)
     {
         if (categoryId is not null)
             CategoryId = categoryId;
 
-        if (InstallmentId is null && installmentId is not null)
-            InstallmentId = installmentId;
-
-        if (!string.IsNullOrWhiteSpace(title) && title.Length <= 50)
+        if (!string.IsNullOrWhiteSpace(title))
             Title = title;
 
-        if (!string.IsNullOrWhiteSpace(description) && description.Length <= 300)
+        if (!string.IsNullOrWhiteSpace(description))
             Description = description;
 
-        if (amount.HasValue && amount > 0)
+        if (amount.HasValue)
             Amount = amount.Value;
 
         if (date is not null)
             Date = date.Value;
 
-        if (transactionType.HasValue && Enum.IsDefined(typeof(TransactionType), transactionType))
-            TransactionType = transactionType.Value;
-
-        if (paymentMethod.HasValue && Enum.IsDefined(typeof(PaymentMethod), paymentMethod))
-            PaymentMethod = paymentMethod.Value;
-
-        if (status.HasValue && Enum.IsDefined(typeof(PaymentStatus), status))
+        if (status.HasValue)
             Status = status.Value;
 
-        if (!string.IsNullOrWhiteSpace(destination) && destination!.Length <= 50)
+        if (!string.IsNullOrWhiteSpace(destination))
             Destination = destination;
 
         UpdatedAt = DateTime.UtcNow;

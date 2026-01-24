@@ -20,7 +20,7 @@ public class CreditCardInvoiceRepository : BaseRepository<CreditCardInvoice>, IC
             .FirstOrDefaultAsync(cancellationToken);
     }
 
-    public async Task<CreditCardInvoice?> GetByDate(Guid creditCardId, int year, int month, CancellationToken cancellationToken)
+    public async Task<CreditCardInvoice?> GetByDateAsync(Guid creditCardId, int year, int month, CancellationToken cancellationToken)
     {
         var voCreditCardId = IdValueObject.Factory(creditCardId);
 
