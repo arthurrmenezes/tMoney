@@ -5,6 +5,8 @@ using tMoney.Application.UseCases.Interfaces;
 using tMoney.Application.UseCases.TransactionContext.CreateTransactionUseCase.Inputs;
 using tMoney.Application.UseCases.TransactionContext.CreateTransactionUseCase.Outputs;
 using tMoney.Application.UseCases.TransactionContext.DeleteTransactionUseCase.Inputs;
+using tMoney.Application.UseCases.TransactionContext.GetAllTransactionsByInvoiceIdUseCase.Inputs;
+using tMoney.Application.UseCases.TransactionContext.GetAllTransactionsByInvoiceIdUseCase.Outputs;
 using tMoney.Application.UseCases.TransactionContext.GetAllTransactionsUseCase.Inputs;
 using tMoney.Application.UseCases.TransactionContext.GetAllTransactionsUseCase.Outputs;
 using tMoney.Application.UseCases.TransactionContext.GetTransactionUseCase.Inputs;
@@ -200,5 +202,34 @@ public class TransactionController : ControllerBase
             cancellationToken: cancellationToken);
 
         return Ok(serviceResult);
+    }
+
+    [HttpGet]
+    [Route("{cardId}/{invoiceId}")]
+    [Authorize]
+    public async Task<IActionResult> GetAllTransactionsByInvoiceIdAsync(
+        [FromServices] IUseCase<GetAllTransactionsByInvoiceIdUseCaseInput, GetAllTransactionsByInvoiceIdUseCaseOutput> useCase,
+        [FromRoute] Guid cardId,
+        [FromRoute] Guid invoiceId,
+        CancellationToken cancellationToken,
+        [FromQuery] int? pageNumber = 1,
+        [FromQuery] int? pageSize = 10)
+    {
+        if (pageNumber < 1 || pageNumber is null) pageNumber = 1;
+        if (pageSize < 1 || pageSize is null) pageSize = 10;
+        if (pageSize > 50) pageSize = 50;
+
+        var accountId = User.GetAccountId();
+
+        var useCaseResult = await useCase.ExecuteUseCaseAsync(
+            input: GetAllTransactionsByInvoiceIdUseCaseInput.Factory(
+                accountId: IdValueObject.Factory(accountId),
+                cardId: IdValueObject.Factory(cardId),
+                invoiceId: IdValueObject.Factory(invoiceId),
+                pageNumber: pageNumber.Value,
+                pageSize: pageSize.Value),
+            cancellationToken: cancellationToken);
+
+        return Ok(useCaseResult);
     }
 }

@@ -24,4 +24,8 @@ public interface IInstallmentService
         IdValueObject installmentId,
         IdValueObject accountId,
         CancellationToken cancellationToken);
+
+    public Task<GetAllInstallmentItemsByInvoiceIdServiceOutput[]> GetAllInstallmentItemsByInvoiceIdServiceAsync(
+        IdValueObject invoiceId,
+        CancellationToken cancellationToken);
 }

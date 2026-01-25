@@ -247,4 +247,34 @@ public class TransactionService : ITransactionService
 
         return output;
     }
+
+    public async Task<GetAllTransactionsByInvoiceIdServiceOutput[]> GetAllTransactionsByInvoiceIdServiceAsync(
+        IdValueObject accountId,
+        IdValueObject cardId,
+        IdValueObject invoiceId, 
+        CancellationToken cancellationToken)
+    {
+        var transactions = await _transactionRepository.GetAllByInvoiceId(accountId.Id, cardId.Id, invoiceId.Id, cancellationToken);
+
+        var output = transactions.Select(t => GetAllTransactionsByInvoiceIdServiceOutput.Factory(
+            id: t.Id.ToString(),
+            accountId: t.AccountId.ToString(),
+            cardId: t.CardId.ToString(),
+            categoryId: t.CategoryId.ToString(),
+            installmentId: t.InstallmentId?.ToString(),
+            invoiceId: t.InvoiceId!.ToString(),
+            title: t.Title,
+            description: t.Description,
+            amount: t.Amount,
+            date: t.Date,
+            transactionType: t.TransactionType.ToString(),
+            paymentMethod: t.PaymentMethod.ToString(),
+            status: t.Status.ToString(),
+            destination: t.Destination,
+            updatedAt: t.UpdatedAt,
+            createdAt: t.CreatedAt))
+            .ToArray();
+
+        return output;
+    }
 }

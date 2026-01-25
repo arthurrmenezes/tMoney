@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using tMoney.Domain.BoundedContexts.CardContext.ENUMs;
+using tMoney.Domain.BoundedContexts.CategoryContext.Entities;
 using tMoney.Domain.BoundedContexts.TransactionContext.Entities;
 using tMoney.Domain.BoundedContexts.TransactionContext.ENUMs;
 using tMoney.Domain.ValueObjects;
@@ -247,5 +247,20 @@ public class TransactionRepository : BaseRepository<Transaction>, ITransactionRe
             .ExecuteUpdateAsync(calls =>
                 calls.SetProperty(t => t.Status, PaymentStatus.Overdue)
                     .SetProperty(t => t.UpdatedAt, DateTime.UtcNow), cancellationToken);
+    }
+
+    public async Task<Transaction[]> GetAllByInvoiceId(Guid accountId, Guid cardId, Guid invoiceId, CancellationToken cancellationToken)
+    {
+        var voAccountId = IdValueObject.Factory(accountId);
+        var voCardId = IdValueObject.Factory(cardId);
+        var voInvoiceId = IdValueObject.Factory(invoiceId);
+
+        return await _dataContext.Transactions
+            .AsNoTracking()
+            .Where(t => t.AccountId == voAccountId &&
+                t.CardId == voCardId &&
+                t.InvoiceId! == voInvoiceId)
+            .OrderByDescending(t => t.CreatedAt)
+            .ToArrayAsync(cancellationToken);
     }
 }

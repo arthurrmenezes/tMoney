@@ -140,4 +140,33 @@ public class InstallmentService : IInstallmentService
 
         _installmentRepository.Delete(installment);
     }
+
+    public async Task<GetAllInstallmentItemsByInvoiceIdServiceOutput[]> GetAllInstallmentItemsByInvoiceIdServiceAsync(
+        IdValueObject invoiceId,
+        CancellationToken cancellationToken)
+    {
+        var installmentItems = await _installmentRepository.GetItemsByInvoiceIdAsync(invoiceId.Id, cancellationToken);
+
+        if (!installmentItems.Any())
+            return Array.Empty<GetAllInstallmentItemsByInvoiceIdServiceOutput>();
+
+        var output = installmentItems.Count() == 0 ? Array.Empty<GetAllInstallmentItemsByInvoiceIdServiceOutput>() :
+            installmentItems.Select(i => GetAllInstallmentItemsByInvoiceIdServiceOutput.Factory(
+                id: i.InstallmentItem.Id.ToString(),
+                installmentId: i.InstallmentItem.InstallmentId.ToString(),
+                invoiceId: i.InstallmentItem.InvoiceId!.ToString(),
+                title: i.Title,
+                totalInstallments: i.TotalInstallments,
+                categoryId: i.CategoryId.ToString(),
+                number: i.InstallmentItem.Number,
+                amount: i.InstallmentItem.Amount,
+                dueDate: i.InstallmentItem.DueDate,
+                status: i.InstallmentItem.Status.ToString(),
+                paidAt: i.InstallmentItem.PaidAt,
+                updatedAt: i.InstallmentItem.UpdatedAt,
+                createdAt: i.InstallmentItem.CreatedAt))
+            .ToArray();
+
+        return output;
+    }
 }

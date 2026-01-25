@@ -37,4 +37,10 @@ public interface ITransactionService
         DateTime? startDate,
         DateTime? endDate,
         CancellationToken cancellationToken);
+
+    public Task<GetAllTransactionsByInvoiceIdServiceOutput[]> GetAllTransactionsByInvoiceIdServiceAsync(
+        IdValueObject accountId,
+        IdValueObject cardId,
+        IdValueObject invoiceId,
+        CancellationToken cancellationToken);
 }

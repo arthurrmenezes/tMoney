@@ -2,6 +2,7 @@
 using tMoney.Domain.BoundedContexts.InstallmentContext.Entities;
 using tMoney.Domain.BoundedContexts.TransactionContext.ENUMs;
 using tMoney.Domain.ValueObjects;
+using tMoney.Infrastructure.Data.DTOs;
 using tMoney.Infrastructure.Data.Repositories.Base;
 using tMoney.Infrastructure.Data.Repositories.Interfaces;
 
@@ -54,5 +55,35 @@ public class InstallmentRepository : BaseRepository<Installment>, IInstallmentRe
             .ExecuteUpdateAsync(calls =>
                 calls.SetProperty(i => i.Status, PaymentStatus.Overdue)
                     .SetProperty(i => i.UpdatedAt, DateTime.UtcNow), cancellationToken);
+    }
+
+    public async Task<GetItemsByInvoiceIdDto[]> GetItemsByInvoiceIdAsync(Guid invoiceId, 
+        CancellationToken cancellationToken)
+    {
+        var voInvoiceId = IdValueObject.Factory(invoiceId);
+
+        var query = from item in _dataContext.InstallmentItems.AsNoTracking()
+                    join installment in _dataContext.Installments.AsNoTracking()
+                        on item.InstallmentId equals installment.Id
+                    join transaction in _dataContext.Transactions.AsNoTracking()
+                        on installment.Id equals transaction.InstallmentId
+                    where item.InvoiceId == voInvoiceId
+                    orderby item.DueDate
+                    select new
+                    {
+                        InstallmentItem = item,
+                        Title = transaction.Title,
+                        TotalInstallments = installment.TotalInstallments,
+                        CategoryId = transaction.CategoryId
+                    };
+
+        var result = await query.ToArrayAsync(cancellationToken);
+
+        return result.Select(i => GetItemsByInvoiceIdDto.Factory(
+            installmentItem: i.InstallmentItem,
+            title: i.Title,
+            totalInstallments: i.TotalInstallments,
+            categoryId: i.CategoryId))
+            .ToArray();
     }
 }
