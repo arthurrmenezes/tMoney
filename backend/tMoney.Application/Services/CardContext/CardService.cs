@@ -322,7 +322,7 @@ public class CardService : ICardService
             totalAmount: c.TotalAmount,
             limitTotal: c.LimitTotal,
             amountPaid: c.AmountPaid,
-            status: c.Status,
+            status: c.Status.ToString(),
             updatedAt: c.UpdatedAt,
             createdAt: c.CreatedAt))
             .ToArray();

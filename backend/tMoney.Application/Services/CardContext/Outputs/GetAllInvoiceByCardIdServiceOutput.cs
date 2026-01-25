@@ -36,12 +36,12 @@ public sealed class GetAllInvoiceByCardIdServiceOutputInvoice
     public decimal TotalAmount { get; }
     public decimal LimitTotal { get; }
     public decimal AmountPaid { get; }
-    public InvoiceStatus Status { get; }
+    public string Status { get; }
     public DateTime? UpdatedAt { get; }
     public DateTime CreatedAt { get; }
 
     private GetAllInvoiceByCardIdServiceOutputInvoice(string id, string cardId, int month, int year, DateTime closeDay, DateTime dueDay, decimal totalAmount,
-        decimal limitTotal, decimal amountPaid, InvoiceStatus status, DateTime? updatedAt, DateTime createdAt)
+        decimal limitTotal, decimal amountPaid, string status, DateTime? updatedAt, DateTime createdAt)
     {
         Id = id;
         CardId = cardId;
@@ -58,6 +58,6 @@ public sealed class GetAllInvoiceByCardIdServiceOutputInvoice
     }
 
     public static GetAllInvoiceByCardIdServiceOutputInvoice Factory(string id, string cardId, int month, int year, DateTime closeDay, DateTime dueDay,
-        decimal totalAmount, decimal limitTotal, decimal amountPaid, InvoiceStatus status, DateTime? updatedAt, DateTime createdAt)
+        decimal totalAmount, decimal limitTotal, decimal amountPaid, string status, DateTime? updatedAt, DateTime createdAt)
         => new(id, cardId, month, year, closeDay, dueDay, totalAmount, limitTotal, amountPaid, status, updatedAt, createdAt);
 }

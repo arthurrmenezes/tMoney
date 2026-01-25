@@ -44,7 +44,7 @@ public class CreditCardInvoiceRepository : BaseRepository<CreditCardInvoice>, IC
             .OrderByDescending(c => c.CreatedAt)
             .Skip(skip)
             .Take(pageSize)
-            .Select(i => new CreditCardInvoiceDto(
+            .Select(i => CreditCardInvoiceDto.Factory(
                 i.Id.ToString(),
                 i.CreditCardId.ToString(),
                 i.Month,

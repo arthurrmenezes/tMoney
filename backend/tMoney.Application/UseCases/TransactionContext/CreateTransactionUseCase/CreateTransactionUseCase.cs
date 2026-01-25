@@ -44,8 +44,6 @@ public sealed class CreateTransactionUseCase : IUseCase<CreateTransactionUseCase
                 cardId: input.CardId,
                 accountId: input.AccountId,
                 cancellationToken: cancellationToken);
-            if (card is null)
-                throw new KeyNotFoundException("Cartão não encontrado.");
 
             if (card.Type == CardType.CreditCard.ToString())
             {
