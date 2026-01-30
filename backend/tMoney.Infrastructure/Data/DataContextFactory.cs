@@ -28,7 +28,8 @@ public sealed class DataContextFactory : IDesignTimeDbContextFactory<DataContext
         
         optionsBuilder.UseNpgsql(
             connectionString,
-            npgsql => npgsql.MigrationsAssembly("tMoney.Infrastructure"));
+            npgsql => npgsql.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null)
+                .MigrationsAssembly("tMoney.Infrastructure"));
 
         return new DataContext(optionsBuilder.Options);
     }

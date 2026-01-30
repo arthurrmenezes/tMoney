@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using System.Security.Claims;
 using tMoney.Application.Services.AuthContext.Inputs;
 using tMoney.Application.Services.AuthContext.Interfaces;
@@ -12,6 +13,7 @@ namespace tMoney.WebApi.Controllers.AuthContext;
 
 [ApiController]
 [Route("api/v1/auth")]
+[EnableRateLimiting("auth")]
 public class AuthController : ControllerBase
 {
     private readonly IAuthService _authService;
@@ -24,6 +26,7 @@ public class AuthController : ControllerBase
     [HttpPost]
     [Route("register")]
     [AllowAnonymous]
+    [EnableRateLimiting("email")]
     public async Task<IActionResult> RegisterAccountAsync([FromBody] RegisterAccountPayload input, CancellationToken cancellationToken)
     {
         if (input.Password != input.RePassword)
@@ -112,6 +115,7 @@ public class AuthController : ControllerBase
     [HttpPost]
     [Route("resend-confirmation-email")]
     [AllowAnonymous]
+    [EnableRateLimiting("email")]
     public async Task<IActionResult> ResendConfirmationEmailAsync([FromBody] ResendConfirmationEmailPayload input, CancellationToken cancellationToken)
     {
         if (string.IsNullOrEmpty(input.Email))
@@ -152,6 +156,7 @@ public class AuthController : ControllerBase
     [HttpPost]
     [Route("forgot-password")]
     [AllowAnonymous]
+    [EnableRateLimiting("email")]
     public async Task<IActionResult> ForgotPasswordAsync([FromBody] ForgotPasswordPayload input, CancellationToken cancellationToken)
     {
         if (string.IsNullOrEmpty(input.Email))
@@ -214,6 +219,7 @@ public class AuthController : ControllerBase
     [HttpPost]
     [Route("change-email")]
     [Authorize]
+    [EnableRateLimiting("email")]
     public async Task<IActionResult> ChangeEmailAsync(
         [FromBody] ChangeEmailPayload input, 
         CancellationToken cancellationToken)
@@ -233,7 +239,7 @@ public class AuthController : ControllerBase
     [HttpGet]
     [Route("change-email")]
     [AllowAnonymous]
-    public async Task<IActionResult> ConfirmarEmailChangeAsync(
+    public async Task<IActionResult> ConfirmEmailChangeAsync(
         [FromQuery] string email,
         [FromQuery] string newEmail,
         [FromQuery] string token,

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using tMoney.Application.Services.AccountContext.Inputs;
 using tMoney.Application.Services.AccountContext.Interfaces;
 using tMoney.Domain.ValueObjects;
@@ -21,6 +22,7 @@ public class AccountController : ControllerBase
     [HttpGet]
     [Route("profile")]
     [Authorize]
+    [EnableRateLimiting("default_read")]
     public async Task<IActionResult> GetAccountDetailsAsync(CancellationToken cancellationToken)
     {
         var accountIdString = User.FindFirst("accountId")?.Value;
@@ -42,6 +44,7 @@ public class AccountController : ControllerBase
     [HttpPatch]
     [Route("profile")]
     [Authorize]
+    [EnableRateLimiting("default_write")]
     public async Task<IActionResult> UpdateAccountDetailsAsync([FromBody] UpdateAccountDetailsPayload input, CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(input.FirstName) && string.IsNullOrWhiteSpace(input.LastName))

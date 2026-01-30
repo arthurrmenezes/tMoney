@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Configuration;
 using System.Text;
 using tMoney.Application.Services.AuthContext.Inputs;
 using tMoney.Application.Services.AuthContext.Interfaces;
@@ -27,11 +28,12 @@ public class AuthService : IAuthService
     private readonly IRefreshTokenRepository _refreshTokenRepository;
     private readonly IEmailService _emailService;
     private readonly ICategoryRepository _categoryRepository;
-
-    private readonly string _baseUrl = $"http://localhost:5173";
+    private readonly IConfiguration _configuration;
+    private readonly string _baseUrl;
 
     public AuthService(UserManager<User> userManager, SignInManager<User> signInManager, IUnitOfWork unitOfWork, IAccountRepository accountRepository, 
-        ITokenService tokenService, IRefreshTokenRepository refreshTokenRepository, IEmailService emailService, ICategoryRepository categoryRepository)
+        ITokenService tokenService, IRefreshTokenRepository refreshTokenRepository, IEmailService emailService, ICategoryRepository categoryRepository,
+        IConfiguration configuration)
     {
         _userManager = userManager;
         _signInManager = signInManager;
@@ -41,6 +43,8 @@ public class AuthService : IAuthService
         _refreshTokenRepository = refreshTokenRepository;
         _emailService = emailService;
         _categoryRepository = categoryRepository;
+        _configuration = configuration;
+        _baseUrl = configuration["BaseUrl"]!;
     }
 
     public async Task<RegisterAccountServiceOutput> RegisterAccountServiceAsync(RegisterAccountServiceInput input, CancellationToken cancellationToken)

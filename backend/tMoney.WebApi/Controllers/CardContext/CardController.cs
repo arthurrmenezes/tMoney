@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using tMoney.Application.Services.CardContext.Inputs;
 using tMoney.Application.Services.CardContext.Interfaces;
 using tMoney.Domain.BoundedContexts.CardContext.ENUMs;
@@ -22,6 +23,7 @@ public class CardController : ControllerBase
 
     [HttpPost]
     [Authorize]
+    [EnableRateLimiting("default_write")]
     public async Task<IActionResult> CreateCardAsync(
         [FromBody] CreateCardPayload input,
         CancellationToken cancellationToken)
@@ -48,6 +50,7 @@ public class CardController : ControllerBase
     [HttpGet]
     [Route("{cardId}")]
     [Authorize]
+    [EnableRateLimiting("default_read")]
     public async Task<IActionResult> GetCardByIdAsync(
         [FromRoute] Guid cardId,
         CancellationToken cancellationToken)
@@ -64,6 +67,7 @@ public class CardController : ControllerBase
 
     [HttpGet]
     [Authorize]
+    [EnableRateLimiting("default_read")]
     public async Task<IActionResult> GetAllCardsByAccountIdAsync(
         [FromQuery] int? pageNumber,
         [FromQuery] int? pageSize,
@@ -90,6 +94,7 @@ public class CardController : ControllerBase
     [HttpPatch]
     [Route("{cardId}")]
     [Authorize]
+    [EnableRateLimiting("default_write")]
     public async Task<IActionResult> UpdateCardByIdAsync(
         [FromRoute] Guid cardId,
         [FromBody] UpdateCardByIdPayload input,
@@ -121,6 +126,7 @@ public class CardController : ControllerBase
     [HttpDelete]
     [Route("{cardId}")]
     [Authorize]
+    [EnableRateLimiting("default_write")]
     public async Task<IActionResult> DeleteCardByIdAsync(
         [FromRoute] Guid cardId,
         CancellationToken cancellationToken)
@@ -138,6 +144,7 @@ public class CardController : ControllerBase
     [HttpGet]
     [Route("{cardId}/invoices")]
     [Authorize]
+    [EnableRateLimiting("default_read")]
     public async Task<IActionResult> GetAllInvoicesByCardIdAsync(
         [FromRoute] Guid cardId,
         [FromQuery] int? pageNumber,

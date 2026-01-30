@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using tMoney.Application.Services.CategoryContext.Inputs;
 using tMoney.Application.Services.CategoryContext.Interface;
 using tMoney.Domain.BoundedContexts.CategoryContext.ENUMs;
@@ -22,6 +23,7 @@ public class CategoryController : ControllerBase
 
     [HttpPost]
     [Authorize]
+    [EnableRateLimiting("default_write")]
     public async Task<IActionResult> CreateCategoryAsync(
         [FromBody] CreateCategoryPayload input,
         CancellationToken cancellationToken)
@@ -47,6 +49,7 @@ public class CategoryController : ControllerBase
     [HttpGet]
     [Route("{categoryId}")]
     [Authorize]
+    [EnableRateLimiting("default_read")]
     public async Task<IActionResult> GetCategoryByIdAsync(
         [FromRoute] Guid categoryId,
         CancellationToken cancellationToken)
@@ -63,6 +66,7 @@ public class CategoryController : ControllerBase
 
     [HttpGet]
     [Authorize]
+    [EnableRateLimiting("default_read")]
     public async Task<IActionResult> GetAllCategoriesByAccountIdAsync(
         CancellationToken cancellationToken,
         [FromQuery] GetAllCategoriesByAccountIdPayload input,
@@ -90,6 +94,7 @@ public class CategoryController : ControllerBase
     [HttpPatch]
     [Route("{categoryId}")]
     [Authorize]
+    [EnableRateLimiting("default_write")]
     public async Task<IActionResult> UpdateCategoryDetailsByTitleAsync(
         [FromRoute] Guid categoryId,
         [FromBody] UpdateCategoryDetailsByTitlePayload input,
@@ -120,6 +125,7 @@ public class CategoryController : ControllerBase
     [HttpDelete]
     [Route("{categoryId}")]
     [Authorize]
+    [EnableRateLimiting("default_write")]
     public async Task<IActionResult> DeleteCategoryByIdAsync(
         [FromRoute] Guid categoryId,
         CancellationToken cancellationToken)

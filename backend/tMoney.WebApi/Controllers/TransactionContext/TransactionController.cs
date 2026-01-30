@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using tMoney.Application.Services.TransactionContext.Interfaces;
 using tMoney.Application.UseCases.Interfaces;
 using tMoney.Application.UseCases.TransactionContext.CreateTransactionUseCase.Inputs;
@@ -32,6 +33,7 @@ public class TransactionController : ControllerBase
 
     [HttpPost]
     [Authorize]
+    [EnableRateLimiting("default_write")]
     public async Task<IActionResult> CreateTransactionAsync(
         [FromServices] IUseCase<CreateTransactionUseCaseInput, CreateTransactionUseCaseOutput> useCase,
         [FromBody] CreateTransactionPayload input,
@@ -71,6 +73,7 @@ public class TransactionController : ControllerBase
     [HttpGet]
     [Route("{transactionId}")]
     [Authorize]
+    [EnableRateLimiting("default_read")]
     public async Task<IActionResult> GetTransactionByIdAsync(
         [FromServices] IUseCase<GetTransactionUseCaseInput, GetTransactionUseCaseOutput> useCase,
         [FromRoute] Guid transactionId,
@@ -89,6 +92,7 @@ public class TransactionController : ControllerBase
 
     [HttpGet]
     [Authorize]
+    [EnableRateLimiting("default_read")]
     public async Task<IActionResult> GetAllTransactionsAsync(
         [FromServices] IUseCase<GetAllTransactionsUseCaseInput, GetAllTransactionsUseCaseOutput> useCase,
         CancellationToken cancellationToken,
@@ -129,6 +133,7 @@ public class TransactionController : ControllerBase
     [HttpPatch]
     [Route("{transactionId}")]
     [Authorize]
+    [EnableRateLimiting("default_write")]
     public async Task<IActionResult> UpdateTransactionDetailsAsync(
         [FromServices] IUseCase<UpdateTransactionUseCaseInput, UpdateTransactionUseCaseOutput> useCase,
         [FromRoute] Guid transactionId,
@@ -167,6 +172,7 @@ public class TransactionController : ControllerBase
     [HttpDelete]
     [Route("{transactionId}")]
     [Authorize]
+    [EnableRateLimiting("default_write")]
     public async Task<IActionResult> DeleteTransactionByIdAsync(
         [FromServices] IUseCase<DeleteTransactionUseCaseInput> useCase,
         [FromRoute] Guid transactionId,
@@ -186,6 +192,7 @@ public class TransactionController : ControllerBase
     [HttpGet]
     [Route("financial-summary/{cardId}")]
     [Authorize]
+    [EnableRateLimiting("default_read")]
     public async Task<IActionResult> GetFinancialSummaryAsync(
         [FromRoute] Guid cardId,
         CancellationToken cancellationToken,
@@ -207,6 +214,7 @@ public class TransactionController : ControllerBase
     [HttpGet]
     [Route("{cardId}/{invoiceId}")]
     [Authorize]
+    [EnableRateLimiting("default_read")]
     public async Task<IActionResult> GetAllTransactionsByInvoiceIdAsync(
         [FromServices] IUseCase<GetAllTransactionsByInvoiceIdUseCaseInput, GetAllTransactionsByInvoiceIdUseCaseOutput> useCase,
         [FromRoute] Guid cardId,
